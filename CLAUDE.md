@@ -21,18 +21,19 @@ Claude Code가 이 저장소에서 작업을 시작할 때 자동으로 읽는 �
 | research/industry_food/ | 산업 · 커뮤니티 자산 노트 (치킨 먹거리 중심) | |
 | research/place_tour/ | 자연 · 장소 · 관광 자산 노트 | |
 | research/story/ | 스토리 자산 카드 (크리에이티브 트랙 과제) | 10/28~ |
+| research/data/ | 교차검증 · 출처 정리 (crosscheck.md, sources.md) | |
 | research/data/raw/ | 공공데이터 원본 다운로드 (수정 금지) | 10/28~ |
 | archive/ | 디지털 필드워크 수집물 + metadata.csv | 10/30 |
 | inventory/ | 지역 자산 인벤토리 · 선정 근거표 | 11/2 |
 | brand/ | 페르소나 시트 · 브랜드 스킬 | 11/3 |
 | storyboard/ | 디지털 내러티브 스토리보드 | 11/4 |
-| raw_file/ | 그 밖의 가공 전 원본 (보고서 PDF · 사진 등) | |
 
 - 파일명은 영문 소문자 · 밑줄(_)만 사용
 - research/ 노트: `research/<유형폴더>/<자산명>.md` (예: `research/industry_food/pyeonghwa_chicken_gizzard_alley.md`). 노트 1개 = 자산 1개, 다시 조사하면 같은 파일을 보강하고 날짜는 파일 안 확인일에 적는다
 - 공공데이터 원본: `research/data/raw/<자료원>_<대상>_<연도>.csv` (예: `portal_market_2025.csv`)
 - 그 밖의 폴더: 각 폴더 README.md의 `날짜_주제_작성자.확장자` 규칙을 따른다
-
+- 원본 파일: `research/data/raw/`에 둔다. 공공데이터는 `<자료원>_<대상>_<연도>.csv` (예: `portal_market_2025.csv`), 그 밖의 원본은 `날짜_주제_작성자.확장자`
+- 
 ## 3. 자산 판정 · 분류
 
 - 여섯 유형: 자연 · 역사 · 문화 · 인물 · 산업 · 커뮤니티 (이 중에서만 고른다)
