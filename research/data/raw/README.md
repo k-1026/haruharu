@@ -1,3 +1,3 @@
 - 용도: 가공 전 원본 파일 보관 (다운로드한 데이터, 원본 사진, 보고서 PDF 등)
-- 파일 예시: daegu_visitor_raw_2025.xlsx, policy_report_original.pdf, fieldwork_photo_raw_001.jpg
-- 파일명 규칙: 영문 소문자·밑줄(_)만 사용, 날짜_주제_작성자.확장자 (예: 1027_daegu_visitor_raw_lee.xlsx)
+- 파일 예시: 관광데이터랩_대구광역시_평균체류시간_2022-2025.csv, 한국관광공사_전국_K로컬미식여행33선지도_2024.png
+- 파일명 규칙: <출처기관>_<지역>_<지표>_<기간>.<확장자> (예: 관광데이터랩_대구광역시_야간관광소비비율_2022-2025.csv). 자세한 규칙은 루트 CLAUDE.md 2절, 원래 파일명은 research/data/data_spec.md에 기록
