@@ -27,6 +27,7 @@ Claude Code가 이 저장소에서 작업을 시작할 때 자동으로 읽는 �
 | inventory/ | 지역 자산 인벤토리 · 선정 근거표 | 11/2 |
 | brand/ | 페르소나 시트 · 브랜드 스킬 | 11/3 |
 | storyboard/ | 디지털 내러티브 스토리보드 | 11/4 |
+| research/raw_data/ | 그 밖의 가공 전 원본 (보고서 PDF · 사진 등) | |
 
 - 파일명은 영문 소문자 · 밑줄(_)만 사용
 - research/ 노트: `research/<유형폴더>/<자산명>.md` (예: `research/industry_food/pyeonghwa_chicken_gizzard_alley.md`). 노트 1개 = 자산 1개, 다시 조사하면 같은 파일을 보강하고 날짜는 파일 안 확인일에 적는다
