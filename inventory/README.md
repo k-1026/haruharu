@@ -1,0 +1,3 @@
+- 용도: 11/2 지역 자산 인벤토리와 자산 선정 근거표
+- 파일 예시: asset_inventory.csv, selection_rationale.md
+- 파일명 규칙: 영문 소문자·밑줄(_)만 사용, 날짜_주제_작성자.확장자 (예: 1102_asset_inventory_kim.csv)

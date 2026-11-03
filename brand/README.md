@@ -1,0 +1,3 @@
+- 용도: 11/3 페르소나 시트와 브랜드 스킬 파일
+- 파일 예시: persona_sheet.md, brand_skill.md, tone_and_voice.md
+- 파일명 규칙: 영문 소문자·밑줄(_)만 사용, 날짜_주제_작성자.확장자 (예: 1103_persona_sheet_lee.md)

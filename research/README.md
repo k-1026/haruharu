@@ -1,0 +1,3 @@
+- 용도: 10/27~29 리서치 노트 (여행 수요·대구 관광 데이터·치킨 자산·정책·국내외 벤치마킹·검증), 모든 노트에 출처 URL 포함. keyword_map.md · sources.md · crosscheck.md도 여기에 (data/에는 정리본 CSV·data_spec.md·raw 원본)
+- 하위 폴더: history_culture/ (역사·문화·인물) · industry_food/ (산업·커뮤니티) · place_tour/ (자연·장소·관광) · story/ (스토리 자산 카드) · data/raw/ (공공데이터 원본)
+- 파일명 규칙: 영문 소문자·밑줄(_)만 사용, 노트 1개 = 자산 1개, research/<유형폴더>/<자산명>.md (예: industry_food/pyeonghwa_chicken_gizzard_alley.md). 날짜는 파일 안 확인일에 기록
