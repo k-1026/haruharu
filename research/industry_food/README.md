@@ -1,0 +1,3 @@
+- 용도: 산업·커뮤니티 유형 자산 노트 (평화시장 닭똥집골목, 대구 치킨 프랜차이즈, 상인회 등 치킨 먹거리 중심)
+- 파일 예시: pyeonghwa_chicken_gizzard_alley.md, daegu_chicken_franchise.md
+- 파일명 규칙: 영문 소문자·밑줄(_)만 사용, <자산명>.md. 노트 구성과 출처 규칙은 루트 CLAUDE.md 4·5번
