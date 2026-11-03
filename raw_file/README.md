@@ -1,0 +1,3 @@
+- 용도: 가공 전 원본 파일 보관 (다운로드한 데이터, 원본 사진, 보고서 PDF 등)
+- 파일 예시: daegu_visitor_raw_2025.xlsx, policy_report_original.pdf, fieldwork_photo_raw_001.jpg
+- 파일명 규칙: 영문 소문자·밑줄(_)만 사용, 날짜_주제_작성자.확장자 (예: 1027_daegu_visitor_raw_lee.xlsx)
