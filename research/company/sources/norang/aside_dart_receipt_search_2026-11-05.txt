@@ -1,0 +1,115 @@
+��고서 (2026.03.18)</option>",
+   "<option value='20260318007840'>정관 (2026.03.18)</option>",
+   "<option value='20260318007844'>내부회계관리제도운영보고서 (2026.03.18)</option>",
+   "<option value='20260318007842'>영업보고서 (2026.03.18)</option>",
+   "<option value='20260318007843'>내부감시장치에 대한 감사의 의견서 (2026.03.18)</option>",
+   "<option value='20260318007841'>감사의 감사보고서 (2026.03.18)</option>"
+  ],
+  "dart": [
+   "20260318001693",
+   "20260318001693",
+   "20260318001693",
+   "20260318007839",
+   "20260318007845",
+   "20260318007846",
+   "20260318007840",
+   "20260318007844",
+   "20260318007842",
+   "20260318007843"
+  ]
+ },
+ "20260318007839": {
+  "len": 353,
+  "redirectBlank": true,
+  "title": "창 닫기",
+  "opts": [],
+  "dart": []
+ },
+ "list": [
+  [
+   "2026-03-18 17:00",
+   "20260318001693",
+   "사업보고서(일반법인)"
+  ],
+  [
+   "2026-03-18 16:58",
+   "20260318001238",
+   "감사보고서 제출"
+  ]
+ ]
+}[0m
+[2mThinking: I've got 20260318007839 as the KIND docno for the 사업보고서, and its acptno is 20260318001693. Next I'm checking whether the KIND page links to DART rcpNo 20260318001206, since it didn't show up in the first ten matches. I'll also look at the KIND document content for the 제출일 and company details.
+
+[0m
+
+[32mrepl[0m(title: [32m'Checking KIND doc content for DART link'[39m,
+     code: [32m'const k5 = await page.evaluate(async () => {\n'[39m +
+       [32m"  const r = await fetch('/common/disclsviewer.do?method=search&acptno=20260318001693&docno=&viewerhost=&viewerport=');\n"[39m +
+       [32m'  const t = await r.text();\n'[39m +
+       [32m"  const r2 = await fetch('/common/disclsviewer.do?method=searchContents&docNo=20260318007839');\n"[39m +
+       [32m'  const t2 = await r2.text();\n'[39m +
+       [32m"  return {has1206: t.includes('20260318001206'), all14:[...new Set(t.match(/\\d{14}/g))], c2: t2.replace(/\\s+/g,' ').slice(0,1500)};\n"[39m +
+       [32m'});\n'[39m +
+       [32m'console.log(JSON.stringify(k5,null,1));'[39m)[2m [toolu_01RENaBBS29CUssqt6wGpRPP]
+
+[2m > {
+ "has1206": false,
+ "all14": [
+  "20260318001693",
+  "20260318007839",
+  "20260318007845",
+  "20260318007846",
+  "20260318007840",
+  "20260318007844",
+  "20260318007842",
+  "20260318007843",
+  "20260318007841"
+ ],
+ "c2": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> <html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"ko\" lang=\"ko\"> <head> <title>공시뷰어</title> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"/> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=euc-kr\" /> <script type=\"text/javascript\" src=\"../js/jquery/jquery.js\"></script> <script type=\"text/javascript\" src=\"../js/jquery/jquery-ui.min.js\"></script> <script type=\"text/javascript\" src=\"../js/common.js\"></script> <script type=\"text/javascript\" src=\"../js/JCommon.js\"></script> <script type=\"text/javascript\"> //<![CDATA[ parent.setPath('https://kind.krx.co.kr/external/2026/03/18/001693/20260318007839/11011_toc.htm','https://kind.krx.co.kr/external/2026/03/18/001693/20260318007839/11011.htm','/external/2026/03/18/001693/20260318007839/11011','05','20'); parent.$( \"#dialog-loading\" ).dialog( \"close\" ); //]]> </script> </head> <body> </body> </html>"
+}[0m
+[2mThinking: I'll check the document's 제출일 on the cover, so I'm fetching 11011.htm and looking for 2026년 3월 18일. I'm also closing the extra tabs afterward.
+
+[0m
+
+[32mrepl[0m(title: [32m'Reading KIND document cover and closing tabs'[39m,
+     code: [32m'const k6 = await page.evaluate(async () => {\n'[39m +
+       [32m"  const r = await fetch('/external/2026/03/18/001693/20260318007839/11011.htm');\n"[39m +
+       [32m'  const buf = await r.arrayBuffer();\n'[39m +
+       [32m"  let t; try { t = new TextDecoder('euc-kr').decode(buf); } catch { t = new TextDecoder().decode(buf); }\n"[39m +
+       [32m"  t = t.replace(/<style[\\s\\S]*?<\\/style>/g,'').replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\\s+/g,' ');\n"[39m +
+       [32m'  return t.slice(0,900);\n'[39m +
+       [32m'});\n'[39m +
+       [32m'console.log(k6);\n'[39m +
+       [32m'for (const t of [...tabs]) await closeTab(t);'[39m)[2m [toolu_01QvrB46ncWbPuY1iWkyrA54]
+
+[2m > /*report_xml.css*/ BODY {margin-left:20px; width:600px; font:12pt gulim; word-break:break-all;} .TABLE {table-layout:fixed; font:11pt gulim; border-collapse:collapse; border-style:solid; border-color:black; color:#666666; margin-bottom:6px;} TABLE.nb {border-style:none;} .TH {font:11pt/1.6em gulim; background-color:#dcdcdc; border-color:gray; padding:2px 4px 0px 4px;} THEAD &gt; TR &gt; TD {font:11pt/1.6em gulim; background-color:#dcdcdc; border-color:gray; padding:2px 4px 0px 4px;} .TD {font:11pt/1.6em gulim; border-color:gray; padding:2px 4px 0px 4px;} P {font:12pt/1.6em gulim; color:#000000; margin:0px;} BODY &gt; P {font:12pt/1.6em gulim; text-align:justify; color:#000000; margin:0px;} TH &gt; P {font: 11pt/1.6em gulim;} TD &gt; P {font: 11pt/1.6em gulim;} P.table-group {font:11pt gulim; text-align:center;} P.img-caption {font:12pt gulim; text-align:center; color:#324a58;} P.part {f
+[system] last tab closed. `page` is now null. call openTab(url) to open a new one.
+[system] no current open tabs in this session.[0m
+[2mThinking: I'm skipping the rest of the cover page since I have enough to go on. The KIND document's cover page never got read, so I'll note that in the report.
+
+[0m
+I found it on DART without logging in. KIND's 20260318007839 is the same annual report, but it's not a 접수번호. It's KIND's number for the report body (본문).
+
+**DART (최종보고서 filter on, filings from 2026-01-01 to 2026-11-05)**
+1. **Report name:** 사업보고서 (2025.12), marked 연 (includes consolidated figures). Filer is 노랑풍선, listed on KOSDAQ, DART company code 00632845.
+2. **제출일:** 2026.03.18
+3. **접수번호 (rcpNo):** 20260318001206
+4. **URL:** https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260318001206 (the page title reads "노랑풍선/사업보고서/2026.03.18")
+
+This was the only 사업보고서 for 노랑풍선 in that date range.
+
+**5. KIND 20260318007839: same report, different numbering**
+- The direct KIND link with acptno=20260318007839 doesn't open a document. It sends you to an error page ("해당 서비스를 제공하지 않습니다."). So 20260318007839 isn't a valid KIND acptno.
+- Searching KIND for 노랑풍선 (stock code 104620) shows "[연결포함]사업보고서(일반법인)(2025.12)" posted 2026-03-18 17:00. Its KIND 접수번호 is **20260318001693**.
+- In that filing's viewer, the main document is "사업보고서(일반법인) (2026.03.18)" with document number **20260318007839**. The attachments are numbered 20260318007840 through 007846: 감사보고서, 연결감사보고서, 정관 and others.
+- It's the same filing as DART's: same company, same fiscal year (2025.12), same 제출일 (2026.03.18). But KIND and DART number filings separately. DART's 20260318001206 doesn't appear anywhere on the KIND page, so there's no direct link between the two. I also didn't read the document's cover page.
+
+**URLs I read**
+- https://dart.fss.or.kr/dsab007/main.do (the search page; the list came from a POST to /dsab007/detailSearch.ax)
+- https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260318001206
+- https://kind.krx.co.kr/common/disclsviewer.do?method=search&acptno=20260318007839 (redirects to https://kind.krx.co.kr/common/blank.html)
+- https://kind.krx.co.kr/disclosure/details.do (KIND disclosure search, POST)
+- https://kind.krx.co.kr/common/disclsviewer.do?method=search&acptno=20260318001693&docno=&viewerhost=&viewerport=
+- https://kind.krx.co.kr/common/disclsviewer.do?method=searchContents&docNo=20260318007839, which points to https://kind.krx.co.kr/external/2026/03/18/001693/20260318007839/11011.htm[0m
+
+[exited with code 0]
