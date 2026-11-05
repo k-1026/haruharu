@@ -125,4 +125,4 @@ flowchart LR
 | C3 | 노랑풍선 2025 사업보고서 (DART) | https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260318001206 | Aside 열람 (2026-11-05) |
 | D1 | 이월드 2025 사업보고서 기재정정본 (DART) | https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260319000675 | Aside 열람 (2026-11-05) |
 | D2 | 강원랜드 2025 사업보고서 (DART) | https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323000917 | Aside 열람 (2026-11-05) |
-| L1 | Day 09 K라이프스타일 산업 구조 강의자료, p.8 "산업 간 연결" (`Downloads\Day09_1105_K라이프스타일_산업_구조_v3 (1).pdf의 사본`) | 로컬 파일 | 교재 | pypdf로 텍스트 추출하여 확인 (2026-11-05). 도식 이미지 자체는 미확인 |
+| L1 | Day 09 K라이프스타일 산업 구조 강의자료, p.8 "산업 간 연결" (`Downloads\Day09_1105_K라이프스타일_산업_구조_v3 (1).pdf의 사본`) | 로컬 파일 (교재) | pypdf로 텍스트 추출하여 확인 (2026-11-05). 도식 이미지 자체는 미확인 |
