@@ -2,17 +2,17 @@
 
 - 작성일: 2026-11-05 (깨진 문자 수정: 2026-11-05)
 - 상태: 후보 조사 기록 보존 (심화 분석 기업 아님, 노랑풍선 확정에 따름). 새 자료를 더 채우지 않는다.
-- 공용 ID: research/sources.md 의 S69, S74, S84~S86 과 연결한다. 공용 대장에 등록 완료 (승인 2026-11-05).
+- 기업 내 ID: 공용 대장(`research/sources.md`)에는 등록하지 않는다. 이 폴더의 K-xx 번호로 인용한다.
 - 원칙: 원본 파일은 research/data/raw/에 두고, 이 폴더에는 문서 형태로 옮긴 파일과 출처만 둔다. 중복 원문은 만들지 않았다.
 
-| 공용 ID | 기업 내부 번호 | 자료원 | 제목 | 날짜 | URL | 저장 파일명 | 확인 상태 |
+| 기업 내 ID | 기업 내부 번호 | 자료원 | 제목 | 날짜 | URL | 저장 파일명 | 확인 상태 |
 |---|---|---|---|---|---|---|---|
-| S69 | K-01 | DART 사업보고서 (2025 사업연도, 접수 20260323000917) | 사업보고서 (2025.12), Ⅱ. 사업의 내용 | 제출 2026-03-23 | https://englishdart.fss.or.kr/dsbh001/main.do?rcpNo=20260323000917 | 01_dart_사업의내용.md (원본: research/data/raw/DART_강원특별자치도_강원랜드사업의내용_2025.html) | 본문 확인 (전문 텍스트 변환). 정정 없음 (2026-11-05 확인) |
-| S69 | K-02 | DART 사업보고서 (동일) | 사업보고서 (2025.12), Ⅸ. 계열회사 등에 관한 사항 | 제출 2026-03-23 | 위와 같음 | 02_dart_계열회사.md (원본: research/data/raw/DART_강원특별자치도_강원랜드계열회사_2025.html) | 본문 확인 |
-| S74 | K-03 | 강원랜드 IR자료실 (high1.com) | 2026년도 2분기 실적자료 (연결 기준) | 게시일 미표시 (첨부 파일명 기준 2026-08-04 공시) | https://www.high1.com/kangwonland/selectBbsNttView.do?key=316&bbsNo=11&nttNo=161743 | 03_ir_실적자료.md | 게시글 본문 확인. 첨부 PDF는 열지 않음 |
-| S84 | K-04 | 강원랜드 홍보센터 보도자료 | 강원랜드, 카지노 이용자 보호 위해 직원 교육 실시 | 2026-11-05 (게시판 확인) | https://www.high1.com/kangwonland/selectBbsNttView.do?key=142&bbsNo=17&nttNo=163001 | 04_pr_보도자료.md | 본문 확인 |
-| S85 | K-05 | 강원랜드 홍보센터 보도자료 | "동계시즌 안전 이상 무!" 하이원리조트, 안전 대응태세 강화 | 2026-11-04 (게시판 확인) | https://www.high1.com/kangwonland/selectBbsNttView.do?key=142&bbsNo=17&nttNo=162989 | 05_pr_보도자료.md | 본문 확인 |
-| S86 | K-06 | 강원랜드 홍보센터 보도자료 | 강원랜드 산림힐링재단, 2027년 아동·청소년 과몰입 예방프로그램 참가단체 모집 | 2026-11-04 (게시판 확인) | https://www.high1.com/kangwonland/selectBbsNttView.do?key=142&bbsNo=17&nttNo=162988 | 06_pr_보도자료.md | 본문 확인 |
+| K-01 | K-01 | DART 사업보고서 (2025 사업연도, 접수 20260323000917) | 사업보고서 (2025.12), Ⅱ. 사업의 내용 | 제출 2026-03-23 | https://englishdart.fss.or.kr/dsbh001/main.do?rcpNo=20260323000917 | 01_dart_사업의내용.md (원본: research/data/raw/DART_강원특별자치도_강원랜드사업의내용_2025.html) | 본문 확인 (전문 텍스트 변환). 정정 없음 (2026-11-05 확인) |
+| K-01 | K-02 | DART 사업보고서 (동일) | 사업보고서 (2025.12), Ⅸ. 계열회사 등에 관한 사항 | 제출 2026-03-23 | 위와 같음 | 02_dart_계열회사.md (원본: research/data/raw/DART_강원특별자치도_강원랜드계열회사_2025.html) | 본문 확인 |
+| K-03 | K-03 | 강원랜드 IR자료실 (high1.com) | 2026년도 2분기 실적자료 (연결 기준) | 게시일 미표시 (첨부 파일명 기준 2026-08-04 공시) | https://www.high1.com/kangwonland/selectBbsNttView.do?key=316&bbsNo=11&nttNo=161743 | 03_ir_실적자료.md | 게시글 본문 확인. 첨부 PDF는 열지 않음 |
+| K-04 | K-04 | 강원랜드 홍보센터 보도자료 | 강원랜드, 카지노 이용자 보호 위해 직원 교육 실시 | 2026-11-05 (게시판 확인) | https://www.high1.com/kangwonland/selectBbsNttView.do?key=142&bbsNo=17&nttNo=163001 | 04_pr_보도자료.md | 본문 확인 |
+| K-05 | K-05 | 강원랜드 홍보센터 보도자료 | "동계시즌 안전 이상 무!" 하이원리조트, 안전 대응태세 강화 | 2026-11-04 (게시판 확인) | https://www.high1.com/kangwonland/selectBbsNttView.do?key=142&bbsNo=17&nttNo=162989 | 05_pr_보도자료.md | 본문 확인 |
+| K-06 | K-06 | 강원랜드 홍보센터 보도자료 | 강원랜드 산림힐링재단, 2027년 아동·청소년 과몰입 예방프로그램 참가단체 모집 | 2026-11-04 (게시판 확인) | https://www.high1.com/kangwonland/selectBbsNttView.do?key=142&bbsNo=17&nttNo=162988 | 06_pr_보도자료.md | 본문 확인 |
 
 ## 확인 메모
 - 날짜는 게시판 목록(2026.11.05, 2026.11.04, 2026.11.04)을 직접 조회해 확인했다.

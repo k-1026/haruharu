@@ -3,7 +3,7 @@
 - 작성일: 2026-11-05
 - 비교 기준: DART 사업보고서 "사업의 내용"과 그 안의 영업·매출·판매 경로 항목. 같은 항목끼리만 비교한다.
 - 상태 표기: **확인** = 원문에서 직접 확인 / **부분** = 요약 자료만 있고 원문 절 미확인 / **미확인** = 자료 없음 (예상은 [I] 표시).
-- 출처 ID: 노랑풍선 DART 원문 접수 20260318001206 → 원본 `research/data/raw/DART_서울특별시_노랑풍선사업의내용_2025.html` (공용 ID 미부여, S71은 접수 확인). 노랑풍선 IR S72, 언론 S75~S77. 하나투어 DART 접수 20260319001345 → `research/data/raw/DART_서울특별시_하나투어사업의내용_2025.html`, 기업 파일 `sources/hanatour/01_dart_사업의내용.md` (sources/hanatour/sources.md의 H-01·H-02).
+- 출처 ID: 노랑풍선 DART 원문 접수 20260318001206 → 원본 `research/data/raw/DART_서울특별시_노랑풍선사업의내용_2025.html` (기업 내 ID 미부여, S71은 접수 확인). 노랑풍선 IR N-03, 언론 N-04~N-06. 하나투어 DART 접수 20260319001345 → `research/data/raw/DART_서울특별시_하나투어사업의내용_2025.html`, 기업 파일 `sources/hanatour/01_dart_사업의내용.md` (sources/hanatour/sources.md의 H-01·H-02).
 
 ## 1. 누구에게 — 고객
 
