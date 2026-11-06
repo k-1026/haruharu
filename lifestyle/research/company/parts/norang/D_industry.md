@@ -6,7 +6,7 @@
 
 ## 2. 산업 위치 표
 
-기준: `research/company/industry_connections.md`의 단계 ①~⑤ (`[I]` 해석 틀). 노랑풍선 기준 답이며 하나투어는 비교용이다.
+기준: `lifestyle/research/company/industry_connections.md`의 단계 ①~⑤ (`[I]` 해석 틀). 노랑풍선 기준 답이며 하나투어는 비교용이다.
 
 | 단계 | 노랑풍선이 하는 일 | 인용 | 상태 |
 |---|---|---|---|
@@ -60,6 +60,6 @@
 
 ## 7. 출처
 
-- [N-01] 노랑풍선 2025 사업보고서 II. 사업의 내용 (DART, 접수번호 20260318001206). 파일: `research/company/sources/norang/01_dart_사업의내용.md`
-- [H-01] 하나투어 2025 사업보고서 II. 사업의 내용 (DART, 접수번호 20260319001345). 파일: `research/company/sources/hanatour/01_dart_사업의내용.md`
-- 산업 단계 틀: `research/company/industry_connections.md` (`[I]` 해석 틀로만 사용)
+- [N-01] 노랑풍선 2025 사업보고서 II. 사업의 내용 (DART, 접수번호 20260318001206). 파일: `lifestyle/research/company/sources/norang/01_dart_사업의내용.md`
+- [H-01] 하나투어 2025 사업보고서 II. 사업의 내용 (DART, 접수번호 20260319001345). 파일: `lifestyle/research/company/sources/hanatour/01_dart_사업의내용.md`
+- 산업 단계 틀: `lifestyle/research/company/industry_connections.md` (`[I]` 해석 틀로만 사용)
