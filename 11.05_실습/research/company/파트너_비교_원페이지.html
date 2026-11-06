@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대구 치킨 관광 파트너 비교</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Gothic+A1:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* 배치 아이디어: 관광객이 지나가는 정거장을 가로축으로 두고, 두 기업이 각 정거장에서 무엇을 맡을 수 있는지 노선도처럼 읽는다. */
+:root {
+  color-scheme: light;
+  --paper: #f3f6f7;
+  --panel: #ffffff;
+  --ink: #15242c;
+  --muted: #54656f;
+  --rule: #d5dee2;
+  --kn: #0b6e78;
+  --kn-soft: #dcf0f1;
+  --lt: #9b2a62;
+  --lt-soft: #f7e3ee;
+  --amber: #b26a00;
+  --bar-rest: #b9c6cc;
+  --font-display: "Gothic A1", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --font-body: "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #10191e;
+    --panel: #18242b;
+    --ink: #e8eff2;
+    --muted: #a3b4bc;
+    --rule: #30424b;
+    --kn: #55c4cd;
+    --kn-soft: #143a40;
+    --lt: #ec8fbd;
+    --lt-soft: #47203a;
+    --amber: #f0b45a;
+    --bar-rest: #4b5f69;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #10191e;
+  --panel: #18242b;
+  --ink: #e8eff2;
+  --muted: #a3b4bc;
+  --rule: #30424b;
+  --kn: #55c4cd;
+  --kn-soft: #143a40;
+  --lt: #ec8fbd;
+  --lt-soft: #47203a;
+  --amber: #f0b45a;
+  --bar-rest: #4b5f69;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.wrap { max-width: 1160px; margin: 0 auto; padding: 28px 24px 36px; display: grid; gap: 22px; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; line-height: 1.25; }
+h1 { font-size: 30px; font-weight: 800; }
+h2 { font-size: 18px; font-weight: 800; }
+h3 { font-size: 15px; font-weight: 700; }
+p { margin: 0; }
+.head { display: grid; gap: 6px; }
+.message { color: var(--amber); font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+.verdict { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.verdict > div { background: var(--panel); border: 1px solid var(--rule); border-left-width: 6px; padding: 14px 16px; display: grid; gap: 2px; }
+.verdict .kn { border-left-color: var(--kn); }
+.verdict .lt { border-left-color: var(--lt); }
+.verdict strong { font-family: var(--font-display); font-size: 21px; font-weight: 800; }
+.kn-text { color: var(--kn); }
+.lt-text { color: var(--lt); }
+
+.section { display: grid; gap: 10px; }
+.section-head { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; justify-content: space-between; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 7px; border-radius: 3px; border: 1px solid transparent; white-space: nowrap; }
+.tag.ok { background: var(--ink); color: var(--panel); }
+.tag.other { border-color: var(--ink); color: var(--ink); }
+.tag.unknown { border: 1px dashed var(--muted); color: var(--muted); }
+
+.stages { display: grid; grid-template-columns: 1fr 3fr 1fr; gap: 8px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.stages span { border-bottom: 2px solid var(--rule); padding-bottom: 3px; }
+.route { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: auto auto auto; gap: 0 8px; position: relative; }
+.route::before { content: ""; position: absolute; left: 8px; right: 8px; top: 8px; height: 6px; background: linear-gradient(to bottom, var(--kn) 0 50%, var(--lt) 50% 100%); }
+.stop { display: grid; grid-template-rows: subgrid; grid-row: span 3; gap: 8px 0; position: relative; min-width: 0; }
+.stop-name { padding-top: 36px; position: relative; display: grid; gap: 1px; }
+.stop-name::before { content: ""; position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--panel); border: 4px solid var(--ink); }
+.stop-name small { color: var(--muted); font-size: 12px; font-weight: 400; }
+.who { background: var(--panel); border: 1px solid var(--rule); border-top: 3px solid var(--rule); padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; align-items: flex-start; font-size: 13px; line-height: 1.45; }
+.who.kn { border-top-color: var(--kn); }
+.who.lt { border-top-color: var(--lt); }
+.who.none { background: transparent; border-style: dashed; color: var(--muted); }
+.who.none.kn { border-top: 3px dashed var(--kn); }
+.who.none.lt { border-top: 3px dashed var(--lt); }
+.who b { font-size: 12px; }
+
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; position: relative; }
+.card { background: var(--panel); border: 1px solid var(--rule); padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.card h3 { font-size: 18px; font-weight: 800; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.stats div { display: grid; gap: 0; min-width: 0; }
+.stats dt { font-size: 12px; color: var(--muted); }
+.stats dd { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 19px; font-variant-numeric: tabular-nums; line-height: 1.3; }
+.stats dd small { font-family: var(--font-body); font-size: 12px; font-weight: 500; }
+.bar { display: flex; height: 26px; width: 100%; background: var(--rule); }
+.bar i { display: block; height: 100%; }
+.bar i + i { border-left: 2px solid var(--panel); }
+.bar-legend { display: flex; flex-wrap: wrap; gap: 3px 12px; margin: 0; padding: 0; list-style: none; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.bar-legend li { display: inline-flex; gap: 5px; align-items: center; }
+.swatch { width: 10px; height: 10px; flex: none; display: inline-block; }
+.points { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 14px; }
+
+.link { background: var(--panel); border: 1px solid var(--amber); padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.link strong { font-family: var(--font-display); font-size: 17px; color: var(--amber); font-variant-numeric: tabular-nums; }
+
+.bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.block { background: var(--panel); border: 1px solid var(--rule); padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 5px 8px 5px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 700; color: var(--muted); font-size: 12px; }
+.todo { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 14px; }
+.todo li { display: grid; grid-template-columns: 74px 1fr; gap: 8px; align-items: start; }
+.todo .who-label { font-size: 12px; font-weight: 700; padding-top: 2px; }
+.foot { font-size: 12.5px; color: var(--muted); display: grid; gap: 2px; border-top: 1px solid var(--rule); padding-top: 10px; }
+
+@media (max-width: 860px) {
+  .wrap { padding: 20px 16px 28px; gap: 18px; }
+  h1 { font-size: 25px; }
+  .verdict, .cards, .bottom { grid-template-columns: minmax(0, 1fr); }
+  .stages { display: none; }
+  .route { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; gap: 14px; padding-left: 30px; }
+  .route::before { left: 8px; right: auto; top: 6px; bottom: 6px; width: 6px; height: auto; background: linear-gradient(to right, var(--kn) 0 50%, var(--lt) 50% 100%); }
+  .stop { grid-template-rows: none; grid-row: auto; }
+  .stop-name { padding-top: 0; }
+  .stop-name::before { left: -30px; top: 1px; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <header class="head">
+    <p class="message">"낮은 대구 여행, 저녁은 치킨이 붙잡는다"</p>
+    <h1>대구 치킨 관광 파트너 비교</h1>
+    <p class="muted">코레일네트웍스와 롯데관광개발이 수도권·외국인 관광객의 대구 여정 어디에 들어올 수 있는지 정리했습니다.</p>
+  </header>
+
+  <section class="verdict" aria-label="한 줄 판단">
+    <div class="kn">
+      <span class="small muted">코레일네트웍스 (팀 해석)</span>
+      <strong class="kn-text">상품을 운영할 파트너</strong>
+      <span>춘천에서 닭 요리와 열차를 묶어 운영한 사례가 있습니다.</span>
+    </div>
+    <div class="lt">
+      <span class="small muted">롯데관광개발 (팀 해석)</span>
+      <strong class="lt-text">상품을 팔아 줄 파트너</strong>
+      <span>대구에 판매망이 있지만 매출의 중심은 제주 카지노입니다.</span>
+    </div>
+  </section>
+
+  <section class="section" aria-label="관광객 여정">
+    <div class="section-head">
+      <h2>관광객 여정별로 두 회사가 맡을 수 있는 일</h2>
+      <div class="legend">
+        <span class="tag ok">공개 자료 확인</span>
+        <span class="tag other">다른 지역 사례</span>
+        <span class="tag unknown">미확인</span>
+      </div>
+    </div>
+    <div class="stages" aria-hidden="true">
+      <span>관심</span><span>방문과 체류</span><span>재방문</span>
+    </div>
+    <ol class="route">
+      <li class="stop">
+        <div class="stop-name"><h3>알게 되기</h3><small>수도권·외국인 관광객</small></div>
+        <div class="who kn"><span class="tag other">춘천</span><span><b class="kn-text">코레일</b> 음식점 지도를 4개 언어로 제작</span></div>
+        <div class="who lt"><span class="tag ok">확인</span><span><b class="lt-text">롯데</b> 대리점 32곳, 중소 여행사, 홈페이지</span></div>
+      </li>
+      <li class="stop">
+        <div class="stop-name"><h3>대구로 이동</h3><small>KTX, 동대구역</small></div>
+        <div class="who kn"><span class="tag other">춘천</span><span><b class="kn-text">코레일</b> 특별열차 232명, 숙박형 58명 유치</span></div>
+        <div class="who lt"><span class="tag ok">확인</span><span><b class="lt-text">롯데</b> 철도권 판매, 직영 전세버스</span></div>
+      </li>
+      <li class="stop">
+        <div class="stop-name"><h3>낮 관광</h3><small>근대골목, 서문시장</small></div>
+        <div class="who kn"><span class="tag other">춘천</span><span><b class="kn-text">코레일</b> 이동·관광·식사·체험을 묶은 코스 6개</span></div>
+        <div class="who lt"><span class="tag ok">확인</span><span><b class="lt-text">롯데</b> 지자체 협업 상품으로 재래시장 활성화 참여 기재. 구체 사례는 미확인</span></div>
+      </li>
+      <li class="stop">
+        <div class="stop-name"><h3>저녁 치킨</h3><small>평화시장 닭똥집골목, 치맥페스티벌</small></div>
+        <div class="who kn"><span class="tag other">춘천</span><span><b class="kn-text">코레일</b> 닭갈비 음식점 175곳 참여, 축제 부스 약 2만 명 방문</span></div>
+        <div class="who none lt"><span class="tag unknown">미확인</span><span><b class="lt-text">롯데</b> 대구 음식·축제 상품</span></div>
+      </li>
+      <li class="stop">
+        <div class="stop-name"><h3>다시 오기</h3><small>비수기, 재방문</small></div>
+        <div class="who none kn"><span class="tag unknown">미확인</span><span><b class="kn-text">코레일</b> 재방문·멤버십 전략</span></div>
+        <div class="who none lt"><span class="tag unknown">미확인</span><span><b class="lt-text">롯데</b> 재방문·멤버십 전략</span></div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="section" aria-label="기업 비교">
+    <h2>두 회사의 체격 (2025년)</h2>
+    <div class="cards">
+      <article class="card">
+        <div>
+          <h3 class="kn-text">코레일네트웍스(주)</h3>
+          <p class="small muted">비상장 기타공공기관, 한국철도공사 지분 89.47%. 가칭 코레일관광네트웍스</p>
+        </div>
+        <dl class="stats">
+          <div><dt>매출</dt><dd>128,285<small> 백만원</small></dd></div>
+          <div><dt>영업이익</dt><dd>5,952<small> 백만원</small></dd></div>
+          <div><dt>당기순이익</dt><dd>5,619<small> 백만원</small></dd></div>
+        </dl>
+        <div class="bar" role="img" aria-label="매출 중 한국철도공사 약 62.70퍼센트, 그 외 약 37.30퍼센트"><i style="width:62.7%;background:var(--kn)"></i><i style="width:37.3%;background:var(--bar-rest)"></i></div>
+        <ul class="bar-legend">
+          <li><span class="swatch" style="background:var(--kn)"></span>한국철도공사 약 62.70%</li>
+          <li><span class="swatch" style="background:var(--bar-rest)"></span>그 외 약 37.30%</li>
+        </ul>
+        <ul class="points">
+          <li>모두 2026년 9월 코레일관광개발 합병 전 수치입니다.</li>
+          <li>합병으로 들어온 관광 사업의 실적은 포함되지 않았습니다.</li>
+          <li>거래처 비중은 팀이 계산한 값입니다.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <div>
+          <h3 class="lt-text">롯데관광개발(주)</h3>
+          <p class="small muted">코스피 상장사, 롯데그룹 계열 아님(보도 기준). 제주 드림타워 운영</p>
+        </div>
+        <dl class="stats">
+          <div><dt>매출</dt><dd>653,448<small> 백만원</small></dd></div>
+          <div><dt>영업이익</dt><dd>1,433<small> 억 원</small></dd></div>
+          <div><dt>당기순이익</dt><dd>276<small> 억 원</small></dd></div>
+        </dl>
+        <div class="bar" role="img" aria-label="매출 중 카지노 72.94퍼센트, 여행업 13.64퍼센트, 호텔업 12.53퍼센트, 기타 0.88퍼센트"><i style="width:72.94%;background:var(--lt)"></i><i style="width:13.64%;background:var(--amber)"></i><i style="width:12.53%;background:var(--kn)"></i><i style="width:0.89%;background:var(--bar-rest)"></i></div>
+        <ul class="bar-legend">
+          <li><span class="swatch" style="background:var(--lt)"></span>카지노 72.94%</li>
+          <li><span class="swatch" style="background:var(--amber)"></span>여행업 13.64%</li>
+          <li><span class="swatch" style="background:var(--kn)"></span>호텔업 12.53%</li>
+          <li><span class="swatch" style="background:var(--bar-rest)"></span>기타 0.88%</li>
+        </ul>
+        <ul class="points">
+          <li>대구지점과 대구 대리점 2곳(수성점, 중구점)이 있습니다.</li>
+          <li>2026년 1분기 호텔 외국인 투숙 비중은 73.5%입니다.</li>
+          <li>호텔 매출은 자료 간 기준 차이가 커서 추세로 쓰면 안 됩니다.</li>
+        </ul>
+      </article>
+    </div>
+    <p class="link"><strong>지분 39.20%</strong><span>롯데관광개발이 2025년 말 기준 코레일관광개발 지분을 보유했습니다. 코레일네트웍스가 이 회사를 합병한 뒤 지분이 어떻게 됐는지는 미확인입니다.</span></p>
+  </section>
+
+  <section class="bottom" aria-label="경쟁사와 남은 확인">
+    <div class="block">
+      <h2>같은 유형 경쟁사</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>비교 대상</th><th>2025년 매출</th><th>영업이익</th><th>비교 포인트</th></tr></thead>
+          <tbody>
+            <tr><td><b class="kn-text">하나투어</b><br><span class="small muted">코레일 비교</span></td><td>5,869억 원</td><td>576억 원</td><td>인바운드 자회사, 대구지사 보유. 재무 범위가 달라 우열 비교 불가</td></tr>
+            <tr><td><b class="lt-text">파라다이스</b><br><span class="small muted">롯데 비교</span></td><td>1,149,867백만원</td><td>155,816백만원</td><td>카지노 4곳으로 지역 분산. 여행업 부문은 없음</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">파라다이스 수치는 웹 조사 결과이며 공시 원문과 대조하지 못했습니다.</p>
+    </div>
+    <div class="block">
+      <h2>아직 답이 없는 것</h2>
+      <ul class="todo">
+        <li><span class="who-label kn-text">코레일</span><span>비수기 전략, 예약 경로, 저녁 체류, 재방문</span></li>
+        <li><span class="who-label lt-text">롯데</span><span>예약 경로, 재방문, 기항일 저녁 체류</span></li>
+        <li><span class="who-label">공통</span><span>대구 체류 상품과 치맥페스티벌 연계 상품 유무</span></li>
+        <li><span class="who-label">공통</span><span>외국인 대상 대구 상품 판매 경로</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>근거: DART 감사보고서·사업보고서, ALIO 재무공시, 회사 보도자료와 공식 사이트, 공개 웹 자료. 확인일 2026-11-05.</p>
+    <p>춘천 수치는 회사 발표값이며 대구 사업이 아닙니다. 파트너 역할 구분은 팀의 해석이고, 두 회사와 협의된 내용은 없습니다.</p>
+  </footer>
+
+</main>
+</body>
+</html>
