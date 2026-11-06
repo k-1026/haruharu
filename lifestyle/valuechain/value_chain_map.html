@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; padding: 0; background: #ffffff; }
+  body { width: 1600px; height: 900px; overflow: hidden; }
+  svg { display: block; font-family: "Malgun Gothic", "맑은 고딕", sans-serif; }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <marker id="mo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#E8A23A"/>
+    </marker>
+    <marker id="mb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3B6FD8"/>
+    </marker>
+    <marker id="mg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6B7780"/>
+    </marker>
+  </defs>
+
+  <!-- 제목 -->
+  <rect x="60" y="40" width="48" height="4" fill="#2BA58A"/>
+  <text x="60" y="92" font-size="30" font-weight="700" fill="#1E2B2F">노랑풍선 밸류체인 맵 — <tspan fill="#2BA58A">활동 · 이해관계자 · 돈 · 데이터</tspan> 네 층</text>
+  <text x="60" y="122" font-size="15" fill="#4A5860">한 기업이 아니라 산업 한 줄을 그리기 위해 단계마다 '누가 하는가', '돈이 어디로 가는가', '데이터가 어디서 생기는가'를 쌓은 맵 (노랑풍선 기준 예시)</text>
+  <rect x="1392" y="60" width="148" height="28" rx="14" fill="#EEF2F4"/>
+  <text x="1466" y="79" font-size="12" fill="#4A5860" text-anchor="middle">원페이지 · 계열회사 표 기준</text>
+
+  <!-- 행 라벨 -->
+  <text x="60" y="214" font-size="14" font-weight="700" fill="#1E2B2F">활동 (단계)</text>
+  <text x="60" y="330" font-size="14" font-weight="700" fill="#1E2B2F">이해관계자</text>
+  <text x="60" y="430" font-size="14" font-weight="700" fill="#1E2B2F">돈 흐름</text>
+  <text x="60" y="530" font-size="14" font-weight="700" fill="#1E2B2F">데이터 흐름</text>
+
+  <!-- 1행: 단계 상자 (x = 270 + i*268, w = 228) -->
+  <rect x="270" y="170" width="228" height="80" rx="6" fill="#E7F5F1" stroke="#9FD4C6" stroke-width="1.5"/>
+  <text x="284" y="198" font-size="16" font-weight="700" fill="#1E2B2F">1 관광자원 발굴·확보</text>
+  <text x="284" y="222" font-size="12" fill="#4A5860">핵심 자원·파트너 (원페이지 §4)</text>
+
+  <rect x="538" y="170" width="228" height="80" rx="6" fill="#E7F5F1" stroke="#9FD4C6" stroke-width="1.5"/>
+  <text x="552" y="198" font-size="16" font-weight="700" fill="#1E2B2F">2 여행상품 기획·구성</text>
+  <text x="552" y="222" font-size="12" fill="#4A5860">수익원·직판 상품 (§2 · §7)</text>
+
+  <rect x="806" y="170" width="228" height="80" rx="6" fill="#E7F5F1" stroke="#9FD4C6" stroke-width="1.5"/>
+  <text x="820" y="198" font-size="16" font-weight="700" fill="#1E2B2F">3 상품 채널·홍보</text>
+  <text x="820" y="222" font-size="12" fill="#4A5860">직판 · 제휴 채널 (§3 · §6)</text>
+
+  <rect x="1074" y="170" width="228" height="80" rx="6" fill="#E7F5F1" stroke="#9FD4C6" stroke-width="1.5"/>
+  <text x="1088" y="198" font-size="16" font-weight="700" fill="#1E2B2F">4 예약·판매·결제</text>
+  <text x="1088" y="222" font-size="12" fill="#4A5860">직판 · 제휴 판매 경로 (§1 · §3)</text>
+
+  <rect x="1342" y="170" width="228" height="80" rx="6" fill="#1E2B2F"/>
+  <text x="1356" y="198" font-size="16" font-weight="700" fill="#FFFFFF">5 여행 운영·사후관리</text>
+  <text x="1356" y="222" font-size="12" fill="#C9D6DC">해외 법인 · 설비 · 우수고객 (§4~6)</text>
+
+  <!-- 단계 화살표 -->
+  <path d="M500 210 L534 210" stroke="#9FD4C6" stroke-width="2" fill="none" marker-end="url(#mg)"/>
+  <path d="M768 210 L802 210" stroke="#9FD4C6" stroke-width="2" fill="none" marker-end="url(#mg)"/>
+  <path d="M1036 210 L1070 210" stroke="#9FD4C6" stroke-width="2" fill="none" marker-end="url(#mg)"/>
+  <path d="M1304 210 L1338 210" stroke="#9FD4C6" stroke-width="2" fill="none" marker-end="url(#mg)"/>
+
+  <!-- 2행: 이해관계자 (굵은 글씨 = 하는 사람, 괄호 = 영향 주는 사람) -->
+  <g font-size="12.5" fill="#1E2B2F">
+    <text x="284" y="304"><tspan font-weight="700">노랑풍선시티버스 · 위시빈</tspan></text>
+    <text x="284" y="324" fill="#6B7780">(항공·숙박 공급처 [U])</text>
+    <text x="284" y="344" fill="#6B7780">(관광 운영 인허가 [U])</text>
+
+    <text x="552" y="304"><tspan font-weight="700">노랑풍선</tspan> 상품 기획</text>
+    <text x="552" y="324"><tspan font-weight="700">YELLOW BALLOON JAPAN</tspan></text>
+    <text x="552" y="344" fill="#6B7780">(일본 상품 구성 [U])</text>
+    <text x="552" y="364" fill="#6B7780">(여행업 규제 [U])</text>
+
+    <text x="820" y="304"><tspan font-weight="700">노랑풍선</tspan> 직판 · 홍보</text>
+    <text x="820" y="324"><tspan font-weight="700">홈쇼핑 · 온라인 제휴 · 대리점</tspan></text>
+    <text x="820" y="344" fill="#6B7780">(하나투어 경쟁 [H-01])</text>
+    <text x="820" y="364" fill="#6B7780">(고객 데이터 기반 마케팅 [N-01])</text>
+
+    <text x="1088" y="304"><tspan font-weight="700">노랑풍선</tspan> 예약 · 발권</text>
+    <text x="1088" y="324"><tspan font-weight="700">고객</tspan> 결제</text>
+    <text x="1088" y="344" fill="#6B7780">(결제 수단·대행 [U])</text>
+    <text x="1088" y="364" fill="#6B7780">(여행업 판매 규제 [U])</text>
+
+    <text x="1356" y="304"><tspan font-weight="700">노랑풍선시티버스</tspan> 운영</text>
+    <text x="1356" y="324"><tspan font-weight="700">YELLOW BALLOON JAPAN</tspan></text>
+    <text x="1356" y="344" fill="#6B7780">(우수고객 재구매 [N-05])</text>
+    <text x="1356" y="364" fill="#6B7780">(현지 운영 · 인허가 [U])</text>
+  </g>
+
+  <!-- 3행: 돈 흐름 (소비자 → 원천 방향, 주황) -->
+  <rect x="260" y="390" width="1320" height="66" rx="8" fill="#FFF5DE"/>
+  <!-- 4→3 -->
+  <text x="1048" y="410" font-size="11.5" fill="#8A5A12" text-anchor="middle">여행알선 수수료</text>
+  <text x="1048" y="426" font-size="11" fill="#8A5A12" text-anchor="middle">매출 55.4% (§2)</text>
+  <path d="M1070 446 L1044 446" stroke="#E8A23A" stroke-width="3" fill="none" marker-end="url(#mo)"/>
+  <!-- 5→4 -->
+  <text x="1316" y="410" font-size="11.5" fill="#8A5A12" text-anchor="middle">여행 대금 정산</text>
+  <text x="1316" y="426" font-size="11" fill="#8A5A12" text-anchor="middle">[I] 결제 → 정산 흐름</text>
+  <path d="M1338 446 L1312 446" stroke="#E8A23A" stroke-width="3" fill="none" marker-end="url(#mo)"/>
+  <!-- 3→2 -->
+  <text x="780" y="410" font-size="11.5" fill="#8A5A12" text-anchor="middle">제휴 채널 배분</text>
+  <text x="780" y="426" font-size="11" fill="#8A5A12" text-anchor="middle">[U] 수수료율 미확인</text>
+  <path d="M802 446 L776 446" stroke="#E8A23A" stroke-width="3" fill="none" marker-end="url(#mo)"/>
+  <!-- 2→1 -->
+  <text x="512" y="410" font-size="11.5" fill="#8A5A12" text-anchor="middle">공급 대금 · 총액 거래</text>
+  <text x="512" y="426" font-size="11" fill="#8A5A12" text-anchor="middle">항공·숙박 (§2)</text>
+  <path d="M534 446 L508 446" stroke="#E8A23A" stroke-width="3" fill="none" marker-end="url(#mo)"/>
+
+  <!-- 4행: 데이터 흐름 (앞 → 뒤, 파랑 점선) -->
+  <rect x="260" y="490" width="1320" height="54" rx="8" fill="#E9F0FB"/>
+  <path d="M504 524 L532 524" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#mb)"/>
+  <path d="M772 524 L800 524" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#mb)"/>
+  <path d="M1040 524 L1068 524" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#mb)"/>
+  <path d="M1308 524 L1336 524" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#mb)"/>
+  <text x="518" y="508" font-size="11" fill="#2A4F9E" text-anchor="middle">공급 조건 · 자원 정보 [I]</text>
+  <text x="786" y="508" font-size="11" fill="#2A4F9E" text-anchor="middle">상품 정보 · 가격</text>
+  <text x="1054" y="508" font-size="11" fill="#2A4F9E" text-anchor="middle">예약 · 고객 접점</text>
+  <text x="1322" y="508" font-size="11" fill="#2A4F9E" text-anchor="middle">명단 · 출발 정보 [I]</text>
+
+  <!-- 피드백 곡선: 5 → 1 (고객 데이터 재사용) -->
+  <path d="M1456 546 C 1456 604, 384 604, 384 546" stroke="#3B6FD8" stroke-width="1.8" stroke-dasharray="5 4" fill="none" marker-end="url(#mb)"/>
+  <text x="920" y="614" font-size="12" fill="#2A4F9E" text-anchor="middle">고객 데이터 · CRM → 다음 기획에 재사용 (원페이지 §4 주장, 규모 [U])</text>
+
+  <!-- 규칙 박스 -->
+  <rect x="60" y="640" width="470" height="150" rx="8" fill="#E7F5F1"/>
+  <rect x="60" y="640" width="5" height="150" fill="#2BA58A"/>
+  <text x="84" y="670" font-size="15" font-weight="700" fill="#1E2B2F">규칙 1 — 활동</text>
+  <text x="84" y="698" font-size="13" fill="#2F3B42">단계 이름은 팀이 정한 5단계로 두고,</text>
+  <text x="84" y="720" font-size="13" fill="#2F3B42">원페이지 판매 경로 용어를 병기한다.</text>
+  <text x="84" y="742" font-size="13" fill="#2F3B42"><tspan font-weight="700">굵게</tspan> = 하는 사람, (괄호) = 영향 주는 사람.</text>
+  <text x="84" y="764" font-size="13" fill="#2F3B42">이 표가 이해관계자 6유형 표의 기준이다.</text>
+
+  <rect x="565" y="640" width="470" height="150" rx="8" fill="#FFF5DE"/>
+  <rect x="565" y="640" width="5" height="150" fill="#E8A23A"/>
+  <text x="589" y="670" font-size="15" font-weight="700" fill="#1E2B2F">규칙 2 — 돈</text>
+  <text x="589" y="698" font-size="13" fill="#2F3B42">돈은 소비자에서 원천 방향으로 거꾸로 흐른다.</text>
+  <text x="589" y="720" font-size="13" fill="#2F3B42">노랑풍선은 단계 사이에서 수수료를 떼는</text>
+  <text x="589" y="742" font-size="13" fill="#2F3B42">지점(매출 55.4%)에 자리한다. 수치는 원페이지 §2.</text>
+
+  <rect x="1070" y="640" width="470" height="150" rx="8" fill="#E9F0FB"/>
+  <rect x="1070" y="640" width="5" height="150" fill="#3B6FD8"/>
+  <text x="1094" y="670" font-size="15" font-weight="700" fill="#1E2B2F">규칙 3 — 데이터</text>
+  <text x="1094" y="698" font-size="13" fill="#2F3B42">단계마다 생기는 데이터와 보유 주체를 적는다.</text>
+  <text x="1094" y="720" font-size="13" fill="#2F3B42">앞 단계로 되돌아가는 피드백만 점선 곡선으로 표시.</text>
+  <text x="1094" y="742" font-size="13" fill="#2F3B42">고객 데이터 규모는 미확인이라 [U]로 둔다.</text>
+
+  <!-- 바닥글 -->
+  <text x="60" y="834" font-size="11.5" fill="#6B7780">※ 개념도 · 실제 데이터 아님. 단계·이해관계자는 원페이지(2026-11-05)와 계열회사 표 기준. [U] = 미확인 · [I] = 해석 · [N-xx]·§n = 원페이지 출처·절 번호.</text>
+</svg>
+</body>
+</html>
