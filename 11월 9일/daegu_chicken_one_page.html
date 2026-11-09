@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>원거리 관광객 치킨 한 장 요약</title>
+<style>
+/* Layout: one-page summary. Header band, four usage-type columns, a bottom row for data status and next steps. Stacks on phones. */
+:root{
+  --bg:#f6f5f2; --card:#ffffff; --line:#e6e4df; --text:#1f1f1f; --sub:#6b6b6b;
+  --accent:#c9641a; --accent-soft:#fdf1e4; --pain:#a33b2e; --opp:#2e6b4a; --mint:#eef4f2;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17161a; --card:#211f24; --line:#363239; --text:#f0eee9; --sub:#a9a4ad;
+    --accent:#f0a461; --accent-soft:#33261a; --pain:#e88d7f; --opp:#8cc9a4; --mint:#1d2a24;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17161a; --card:#211f24; --line:#363239; --text:#f0eee9; --sub:#a9a4ad;
+  --accent:#f0a461; --accent-soft:#33261a; --pain:#e88d7f; --opp:#8cc9a4; --mint:#1d2a24;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:20px 40px;
+}
+.page{max-width:1240px;margin:0 auto;container-type:inline-size;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:2.2cqi 2.6cqi;display:flex;flex-direction:column;gap:1.8cqi}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:1.4cqi}
+.tag{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:max(10px,1cqi);padding:.3em .9em;border-radius:99px;display:inline-block;margin-bottom:.6cqi}
+h1{font-size:max(20px,3.2cqi);font-weight:900;line-height:1.25}
+.meta{font-size:max(10px,1cqi);color:var(--sub)}
+
+.why{font-size:max(12px,1.35cqi);line-height:1.6}
+.why b{color:var(--accent)}
+
+.types{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.2cqi}
+.type{border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:10px;padding:1.2cqi;background:var(--bg);display:flex;flex-direction:column;gap:.6cqi;min-width:0}
+.type .k{font-size:max(9.5px,.9cqi);color:var(--sub)}
+.type h2{font-size:max(14px,1.6cqi);line-height:1.3}
+.type p{font-size:max(11px,1.1cqi);line-height:1.5}
+.type .label{font-size:max(9.5px,.9cqi);color:var(--sub);border-top:1px dashed var(--line);padding-top:.5cqi;margin-top:auto}
+.type .flow{font-size:max(10.5px,1cqi);line-height:1.5}
+.type .flow span{color:var(--pain)}
+.type .flow em{font-style:normal;color:var(--opp)}
+
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:1.2cqi}
+.box{border:1px solid var(--line);border-radius:10px;padding:1.2cqi 1.4cqi;min-width:0}
+.box h3{font-size:max(12px,1.3cqi);margin-bottom:.4cqi;color:var(--accent)}
+.box ul{padding-left:1.1em;font-size:max(11px,1.1cqi);line-height:1.6}
+.box li{margin-bottom:.2cqi}
+
+@media (max-width:860px){
+  .page{padding:18px 16px}
+  .types,.bottom{grid-template-columns:1fr}
+  h1{font-size:22px}
+  .why,.type p,.type .flow,.box ul{font-size:14px}
+  .type h2{font-size:17px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="top">
+    <div>
+      <span class="tag">원거리 관광객 · DT 기반 유형</span>
+      <h1>대구 치킨 관광상품, 원거리 관광객 4가지 유형 요약</h1>
+    </div>
+    <div class="meta">데이터 없음: 유형은 가설 기반이며 리뷰 크롤링과 설문으로 검증 예정</div>
+  </header>
+
+  <p class="why"><b>문제:</b> 원거리 관광객은 대구까지 오는 시간이 길어, 체류 방식과 목적에 따라 필요한 정보가 크게 다릅니다. 숙박 여부와 여행 목적으로 나누면 상품 설계 기준이 분명해집니다.</p>
+
+  <section class="types" aria-label="유형 4가지">
+    <article class="type">
+      <span class="k">A · 원거리 · 숙박형</span>
+      <h2>치맥 여행러</h2>
+      <p>친구·연인과 1박 이상 머물며 야간 시간을 즐김</p>
+      <div class="flow"><span>대중교통·영업시간 정보가 흩어짐</span><br><em>야간 코스 한 장 요약, 대기 알림</em></div>
+      <div class="label">가설: 저녁 체류 의향 검증 필요</div>
+    </article>
+    <article class="type">
+      <span class="k">B · 원거리 · 숙박형</span>
+      <h2>치킨 덕후 순례자</h2>
+      <p>브랜드와 역사에 관심이 많아 여러 매장을 비교함</p>
+      <div class="flow"><span>지역 간 이동이 불편하고 메뉴 양이 많음</span><br><em>스탬프 투어, 소분 메뉴 연결</em></div>
+      <div class="label">가설: 구미 발상지 참고 사례 기반</div>
+    </article>
+    <article class="type">
+      <span class="k">C · 원거리 · 당일치기형</span>
+      <h2>KTX 압축 여행자</h2>
+      <p>핵심 맛집 1곳과 관광지 1곳만 고르는 직장인·중장년</p>
+      <div class="flow"><span>시간표가 없고 점심 웨이팅이 길어 일정이 밀림</span><br><em>30분 단위 시간표, 사전 예약 연계</em></div>
+      <div class="label">가설: 압축 코스 수요 검증 필요</div>
+    </article>
+    <article class="type">
+      <span class="k">D · 원거리 · 당일치기형</span>
+      <h2>가족 체험형</h2>
+      <p>자녀와 체험 프로그램을 즐기고 식사까지 해결하는 가족</p>
+      <div class="flow"><span>체험 예약 정보가 사이트마다 달라 흩어짐</span><br><em>체험 예약 통합 조회, 키즈 메뉴 정보</em></div>
+      <div class="label">가설: 정량 데이터 없음</div>
+    </article>
+  </section>
+
+  <section class="bottom">
+    <div class="box">
+      <h3>도출 방법</h3>
+      <ul>
+        <li>공감 단계를 가설 인터뷰로 대체하고, 숙박 여부와 여행 목적으로 유형을 묶음</li>
+        <li>유형별 고객 여정 지도(계획 → 이동 → 현장 → 식사 → 귀가·공유)에서 페인포인트와 서비스 기회를 도출</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>다음 단계 · 검증</h3>
+      <ul>
+        <li>장소 리뷰 크롤링에서 "1박", "KTX", "원거리", "체험" 키워드 빈도 확인</li>
+        <li>관광객 설문으로 방문 목적, 숙박 여부, 이동 수단 확인</li>
+        <li>유형별 인터뷰 3~5명으로 여정과 감정 곡선 수정</li>
+      </ul>
+    </div>
+  </section>
+</main>
+</body>
+</html>

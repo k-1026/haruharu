@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>원거리 관광객 치킨 여정 지도</title>
+<style>
+/* Layout: 16:9 deck. Overview slide, then one journey slide per usage type. Stacks on phones. */
+:root{
+  --bg:#f6f5f2; --card:#ffffff; --line:#e6e4df; --text:#1f1f1f; --sub:#6b6b6b;
+  --accent:#c9641a; --accent-soft:#fdf1e4; --pain:#a33b2e; --opp:#2e6b4a; --mint:#eef4f2;
+  --bar:#ece9e3;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17161a; --card:#211f24; --line:#363239; --text:#f0eee9; --sub:#a9a4ad;
+    --accent:#f0a461; --accent-soft:#33261a; --pain:#e88d7f; --opp:#8cc9a4; --mint:#1d2a24;
+    --bar:#2e2b31; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17161a; --card:#211f24; --line:#363239; --text:#f0eee9; --sub:#a9a4ad;
+  --accent:#f0a461; --accent-soft:#33261a; --pain:#e88d7f; --opp:#8cc9a4; --mint:#1d2a24;
+  --bar:#2e2b31; color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:20px 90px;
+}
+.deck{max-width:1240px;margin:0 auto;display:grid;gap:28px}
+.slide{
+  container-type:inline-size;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  aspect-ratio:16/9;padding:2.4cqi 2.8cqi;display:flex;flex-direction:column;gap:1.6cqi;overflow:hidden;
+}
+.tag{align-self:flex-start;background:var(--accent-soft);color:var(--accent);font-weight:700;
+  font-size:max(10px,1.05cqi);padding:.3em .9em;border-radius:99px}
+h1{font-size:max(26px,4.6cqi);font-weight:900;line-height:1.25;text-wrap:balance}
+h2{font-size:max(17px,2.5cqi);font-weight:900;line-height:1.3;text-wrap:balance}
+.lead{font-size:max(12px,1.5cqi);color:var(--sub)}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.4cqi;flex:1;min-height:0}
+.card{border:1px solid var(--line);border-radius:12px;padding:1.6cqi;display:flex;flex-direction:column;gap:.8cqi;min-width:0;background:var(--bg)}
+.card b{font-size:max(13px,1.7cqi);line-height:1.35}
+.card .k{font-size:max(10px,1cqi);color:var(--sub)}
+.card p{font-size:max(11px,1.15cqi);line-height:1.5}
+.card .hyp{font-size:max(10px,.95cqi);color:var(--sub);margin-top:auto;border-top:1px dashed var(--line);padding-top:.8cqi}
+
+/* journey table */
+.jmap{flex:1;min-height:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1.2cqi}
+.jstage{border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:10px;padding:1.1cqi;display:flex;flex-direction:column;gap:.7cqi;min-width:0;background:var(--bg)}
+.jstage h3{font-size:max(12px,1.4cqi);line-height:1.3}
+.jstage dl{display:grid;gap:.5cqi}
+.jstage dt{font-size:max(9.5px,.85cqi);color:var(--sub)}
+.jstage dd{font-size:max(10.5px,1.05cqi);line-height:1.45;margin:0 0 .4cqi}
+.jstage .pain{color:var(--pain)}
+.jstage .opp{color:var(--opp)}
+.emo{margin-top:auto;display:flex;align-items:center;gap:.6cqi}
+.emo i{flex:1;height:.8cqi;min-height:5px;border-radius:99px;background:var(--bar);position:relative;overflow:hidden}
+.emo i::after{content:"";position:absolute;inset:0;width:var(--v);background:var(--accent);border-radius:99px}
+.emo span{font-size:max(10px,.95cqi);color:var(--sub);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.foot{font-size:max(10px,1cqi);color:var(--sub)}
+.nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
+.nav button{background:#444;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer}
+.nav button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.nav .pos{color:#fff;align-self:center;font-size:13px;min-width:60px;text-align:center}
+
+@media (max-width:860px){
+  .slide{aspect-ratio:auto;overflow:visible;padding:18px 16px}
+  .grid4,.jmap{grid-template-columns:1fr}
+  .card b{font-size:16px} .card p{font-size:14px}
+  .jstage dd{font-size:14px} .jstage dt{font-size:12px} .jstage h3{font-size:16px}
+  .emo span{font-size:13px}
+  .foot{font-size:12px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="deck" id="deck">
+
+  <!-- 1. 개요 -->
+  <section class="slide">
+    <span class="tag">원거리 관광객 · DT 기반 유형 도출</span>
+    <h1>원거리 관광객의 치킨 관광 이용 유형 4가지</h1>
+    <p class="lead">대구 치킨 관광상품을 찾는 원거리 관광객을 숙박 여부와 여행 목적으로 나눈 가설 유형입니다. 현재 프로젝트에는 방문객 설문이나 리뷰 데이터가 없어, 아래 유형은 공감 단계를 가설로 대신해 도출했습니다.</p>
+    <div class="grid4" style="margin-top:auto">
+      <div class="card"><span class="k">A · 원거리 · 숙박형</span><b>치맥 여행러</b><p>친구·연인과 1박 이상 머물며 야간 시간을 즐기려는 사람</p><div class="hyp">가설 근거: 저녁 체류 의향 검증 목표 (에이전트 구조 ⑧)</div></div>
+      <div class="card"><span class="k">B · 원거리 · 숙박형</span><b>치킨 덕후 순례자</b><p>치킨 브랜드와 역사에 관심이 많아 여러 매장을 비교하려는 사람</p><div class="hyp">가설 근거: 구미 치킨 발상지 참고 사례 (2번 슬라이드)</div></div>
+      <div class="card"><span class="k">C · 원거리 · 당일치기형</span><b>KTX 압축 여행자</b><p>시간이 짧아 핵심 맛집 1곳과 관광지 1곳만 고르려는 직장인·중장년</p><div class="hyp">가설 근거: 압축 코스 설계 필요 (3번 슬라이드)</div></div>
+      <div class="card"><span class="k">D · 원거리 · 당일치기형</span><b>가족 체험형</b><p>자녀와 함께 체험 프로그램을 즐기고 식사까지 해결하려는 가족</p><div class="hyp">가설 근거: 체험형 상품 수요 (정량 데이터 없음, 검증 필요)</div></div>
+    </div>
+    <div class="foot">유형 구분 기준: 숙박 여부(세로), 여행 목적(가로). 근거 데이터가 없는 항목은 카드 하단에 가설로 표시했습니다.</div>
+  </section>
+
+  <!-- 2. DT 도출 방법 -->
+  <section class="slide">
+    <span class="tag">도출 방법 · 공감 → 정의 → 아이디어</span>
+    <h2>데이터가 없어 공감 단계를 가설로 대체하고, 검증 방법을 함께 정의</h2>
+    <div class="grid4" style="margin-top:auto">
+      <div class="card"><span class="k">1 · 공감</span><b>가설 인터뷰 설계</b><p>원거리 관광객 대상 인터뷰 질문을 만들고, 아직 실행하지 않음</p><div class="hyp">데이터 상태: 수집 전</div></div>
+      <div class="card"><span class="k">2 · 정의</span><b>유형 4가지로 묶기</b><p>숙박 여부와 여행 목적으로 나눠 상황을 정의함</p><div class="hyp">데이터 상태: 가설</div></div>
+      <div class="card"><span class="k">3 · 아이디어</span><b>단계별 기회 도출</b><p>각 유형의 CJ에서 페인포인트를 찾고 서비스 기회를 연결함</p><div class="hyp">데이터 상태: 가설</div></div>
+      <div class="card"><span class="k">4 · 검증</span><b>리뷰·설문으로 확인</b><p>장소 리뷰 크롤링 키워드(1박, KTX, 치맥, 원거리)로 유형 빈도를 확인</p><div class="hyp">데이터 상태: 리뷰 크롤링 예정 (5번 슬라이드 진행 현황)</div></div>
+    </div>
+  </section>
+
+  <!-- 3~6. CJ per type -->
+  <section class="slide" data-type="A">
+    <div class="tag">유형 A · 치맥 여행러 (원거리 · 숙박형)</div>
+    <h2>야간 체류를 원하지만 대중교통과 영업시간 정보가 흩어져 있음</h2>
+    <div class="jmap" data-jmap></div>
+    <div class="foot">감정 온도 0 (매우 부정) ~ 10 (매우 긍정), 예시 가설 값입니다.</div>
+  </section>
+
+  <section class="slide" data-type="B">
+    <div class="tag">유형 B · 치킨 덕후 순례자 (원거리 · 숙박형)</div>
+    <h2>브랜드를 여러 곳 비교하고 싶지만 지역 간 이동과 메뉴 양이 걸림돌</h2>
+    <div class="jmap" data-jmap></div>
+    <div class="foot">감정 온도 0 (매우 부정) ~ 10 (매우 긍정), 예시 가설 값입니다.</div>
+  </section>
+
+  <section class="slide" data-type="C">
+    <div class="tag">유형 C · KTX 압축 여행자 (원거리 · 당일치기형)</div>
+    <h2>짧은 시간에 맞춘 시간표와 기차 시간 안내가 있어야 이탈이 적음</h2>
+    <div class="jmap" data-jmap></div>
+    <div class="foot">감정 온도 0 (매우 부정) ~ 10 (매우 긍정), 예시 가설 값입니다.</div>
+  </section>
+
+  <section class="slide" data-type="D">
+    <div class="tag">유형 D · 가족 체험형 (원거리 · 당일치기형)</div>
+    <h2>체험 예약과 아이 동선 정보가 한 곳에 모이면 방문 결정이 쉬워짐</h2>
+    <div class="jmap" data-jmap></div>
+    <div class="foot">감정 온도 0 (매우 부정) ~ 10 (매우 긍정), 예시 가설 값입니다.</div>
+  </section>
+
+  <!-- 7. 검증 계획 -->
+  <section class="slide">
+    <span class="tag">다음 단계 · 검증 계획</span>
+    <h2>수집 데이터로 4가지 유형의 빈도와 페인포인트를 확인</h2>
+    <div class="grid4" style="margin-top:auto">
+      <div class="card"><span class="k">데이터 1</span><b>장소 리뷰 크롤링</b><p>리뷰 텍스트에서 "1박", "KTX", "원거리", "체험" 키워드 빈도를 셈</p></div>
+      <div class="card"><span class="k">데이터 2</span><b>관광객 설문</b><p>대구 방문 목적, 숙박 여부, 이동 수단을 묻는 짧은 설문</p></div>
+      <div class="card"><span class="k">데이터 3</span><b>인터뷰 3~5명</b><p>유형별 1명씩 실제 여정을 듣고 CJ의 감정 곡선을 수정</p></div>
+      <div class="card"><span class="k">판단 기준</span><b>유형 유지 여부</b><p>빈도가 낮은 유형은 합치고, 페인포인트가 큰 단계부터 상품 설계에 반영</p></div>
+    </div>
+  </section>
+
+</main>
+
+<nav class="nav" aria-label="슬라이드 이동">
+  <button type="button" id="prev">◀ 이전</button>
+  <span class="pos" id="pos"></span>
+  <button type="button" id="next">다음 ▶</button>
+</nav>
+
+<script>
+const JOURNEYS = {
+  A: { stages: [
+    { name:"영감·계획", act:"SNS 야경 사진을 보고 숙소 근처 치킨집과 야간 코스를 검색", touch:"SNS, 지도 앱, 숙박 앱", emo:6, pain:"야간 코스 정보가 여러 곳에 흩어져 있음", opp:"야간 코스 한 장 요약" },
+    { name:"이동·도착", act:"고속버스나 KTX로 도착해 짐을 보관하고 숙소로 이동", touch:"역 안내, 교통 앱", emo:5, pain:"역에서 숙소와 맛집까지 연계 교통이 안 보임", opp:"역-숙소-맛집 동선 안내" },
+    { name:"낮 관광", act:"낮에는 관광지를 보고 저녁 시간에 맞춰 이동", touch:"관광지 안내 키오스크, 지도", emo:7, pain:"영업시간이 달라 방문 순서를 다시 짜야 함", opp:"운영시간 실시간 확인" },
+    { name:"야간 치맥", act:"야장이나 야시장에서 치킨과 맥주를 즐김", touch:"야장 매장, 웨이팅 목록", emo:9, pain:"웨이팅이 길고 혼자 가기 어려움", opp:"대기 알림과 1인 좌석 정보" },
+    { name:"귀가·공유", act:"야경과 치맥 사진을 올리고 숙소에서 후기를 남김", touch:"SNS, 리뷰 플랫폼", emo:8, pain:"후기를 남길 곳이 여행 중에 없음", opp:"인증 스탬프 공유 기능" }
+  ]},
+  B: { stages: [
+    { name:"영감·계획", act:"브랜드 역사 콘텐츠를 보고 방문할 매장 목록을 만듦", touch:"브랜드 공식 채널, 커뮤니티", emo:7, pain:"브랜드별 매장 위치와 메뉴가 한 곳에 없음", opp:"브랜드별 매장 지도" },
+    { name:"이동", act:"대구 밖 지역(구미 등)까지 연결해 이동 경로를 짬", touch:"시외버스, 자가용, 지역 간 교통 앱", emo:4, pain:"지역 간 교통 연계가 없어 하루 일정이 빠듯함", opp:"지역 간 이동 시간 계산" },
+    { name:"매장 순례", act:"발상지와 브랜드 매장을 돌며 메뉴를 비교함", touch:"매장, 스탬프 투어 부스", emo:8, pain:"매장마다 메뉴가 달라 비교 기준이 없음", opp:"스탬프 투어와 비교표" },
+    { name:"시식·식사", act:"여러 메뉴를 조금씩 맛보고 마음에 드는 곳을 고름", touch:"매장 메뉴판, 소분 메뉴", emo:7, pain:"한 곳에서 양이 많아 여러 곳을 가기 힘듦", opp:"소분 메뉴 매장 연결" },
+    { name:"기록·재방문", act:"방문 인증을 올리고 기념품을 산 뒤 다음 방문을 계획함", touch:"SNS, 굿즈 매장, 멤버십", emo:9, pain:"재방문을 알려 주는 연결 고리가 없음", opp:"방문 이력 기반 재방문 알림" }
+  ]},
+  C: { stages: [
+    { name:"계획", act:"주말 여행지를 찾고 소요 시간이 짧은 코스를 고름", touch:"검색, 지인 추천", emo:5, pain:"정보가 많아 시간 계산이 어려움", opp:"당일 코스 시간 자동 계산" },
+    { name:"이동", act:"아침 KTX를 타고 역에서 맛집까지 도보로 이동", touch:"KTX 앱, 역 안내", emo:4, pain:"역에서 맛집까지 거리 감이 없음", opp:"역 기준 도보 시간 표시" },
+    { name:"핵심 관광", act:"관광지 1곳을 30분 단위 시간표로 돌아봄", touch:"관광지, 안내 앱", emo:6, pain:"시간표가 없어 중간에 시간을 잘못 씀", opp:"30분 단위 시간표 제공" },
+    { name:"점심 치킨", act:"대표 치킨집에서 점심을 먹음", touch:"매장, 예약 앱", emo:8, pain:"점심시간 웨이팅이 길어 일정이 밀림", opp:"사전 예약 연계" },
+    { name:"귀가", act:"기차 시간에 맞춰 역으로 돌아감", touch:"KTX 앱, 알림", emo:5, pain:"귀가 시간이 촉박하고 관광 시간이 아쉬움", opp:"귀가 출발 알림과 역 근처 추천" }
+  ]},
+  D: { stages: [
+    { name:"계획", act:"아이와 함께할 체험 프로그램을 찾고 예약 가능 여부를 확인", touch:"체험 예약 사이트, 블로그", emo:6, pain:"체험 예약 정보가 사이트마다 다름", opp:"체험 예약 통합 조회" },
+    { name:"이동", act:"자가용으로 이동하고 주차 공간을 찾음", touch:"내비게이션, 주차 앱", emo:5, pain:"주차 정보와 체험장 위치가 떨어져 있음", opp:"체험장 주차 안내" },
+    { name:"체험", act:"치킨 만들기 등 체험 프로그램에 참여함", touch:"체험장, 강사", emo:9, pain:"대기 시간과 안전 안내가 부족함", opp:"시간대별 예약과 안전 안내" },
+    { name:"식사", act:"체험 후 가족이 함께 식사를 함", touch:"식당, 키즈 메뉴", emo:7, pain:"아이 메뉴와 좌석 정보가 부족함", opp:"키즈 메뉴와 좌석 정보 표시" },
+    { name:"공유", act:"체험 결과 사진을 공유하고 다음 체험을 고민함", touch:"SNS, 체험장 게시판", emo:8, pain:"체험 기념품 구매처를 찾기 어려움", opp:"체험 기념 굿즈 연결" }
+  ]}
+};
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+document.querySelectorAll(".slide[data-type]").forEach(sec => {
+  const j = JOURNEYS[sec.dataset.type];
+  sec.querySelector("[data-jmap]").innerHTML = j.stages.map((s, i) => `
+    <article class="jstage">
+      <h3>0${i + 1} · ${esc(s.name)}</h3>
+      <dl>
+        <dt>행동</dt><dd>${esc(s.act)}</dd>
+        <dt>접점</dt><dd>${esc(s.touch)}</dd>
+        <dt>페인포인트</dt><dd class="pain">${esc(s.pain)}</dd>
+        <dt>서비스 기회</dt><dd class="opp">${esc(s.opp)}</dd>
+      </dl>
+      <div class="emo"><i style="--v:${s.emo*10}%"></i><span>${s.emo}/10</span></div>
+    </article>`).join("");
+});
+
+const slides = [...document.querySelectorAll(".slide")];
+let cur = 0;
+function show(n){
+  cur = Math.max(0, Math.min(slides.length - 1, n));
+  slides.forEach((s, i) => s.hidden = i !== cur);
+  document.getElementById("pos").textContent = (cur + 1) + " / " + slides.length;
+  document.getElementById("prev").disabled = cur === 0;
+  document.getElementById("next").disabled = cur === slides.length - 1;
+  slides[cur].scrollIntoView({block:"nearest"});
+}
+document.getElementById("prev").onclick = () => show(cur - 1);
+document.getElementById("next").onclick = () => show(cur + 1);
+document.addEventListener("keydown", e => {
+  if (["ArrowRight","PageDown"," "].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  if (["ArrowLeft","PageUp"].includes(e.key)) show(cur - 1);
+});
+show(0);
+</script>
+</body>
+</html>

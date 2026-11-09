@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>원거리 숙박형 치킨 여정 지도</title>
+<style>
+/* Layout: one 16:9 journey map. Five stage columns, rows for action, touchpoint, emotion, pain, opportunity, and a persona strip. Stacks on phones. */
+:root{
+  --bg:#f6f5f2; --card:#ffffff; --line:#e6e4df; --text:#1f1f1f; --sub:#6b6b6b;
+  --accent:#c9641a; --accent-soft:#fdf1e4; --pain:#a33b2e; --opp:#2e6b4a; --bar:#ece9e3;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17161a; --card:#211f24; --line:#363239; --text:#f0eee9; --sub:#a9a4ad;
+    --accent:#f0a461; --accent-soft:#33261a; --pain:#e88d7f; --opp:#8cc9a4; --bar:#2e2b31;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17161a; --card:#211f24; --line:#363239; --text:#f0eee9; --sub:#a9a4ad;
+  --accent:#f0a461; --accent-soft:#33261a; --pain:#e88d7f; --opp:#8cc9a4; --bar:#2e2b31;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:20px 40px;
+}
+.slide{max-width:1240px;margin:0 auto;container-type:inline-size;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  aspect-ratio:16/9;padding:2.2cqi 2.6cqi;display:flex;flex-direction:column;gap:1.5cqi;overflow:hidden}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.tag{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:max(10px,1cqi);padding:.3em .9em;border-radius:99px;display:inline-block;margin-bottom:.6cqi}
+h1{font-size:max(18px,2.9cqi);font-weight:900;line-height:1.25;text-wrap:balance}
+.persona{font-size:max(10px,1cqi);color:var(--sub);text-align:right;line-height:1.5}
+.persona b{color:var(--text)}
+
+.map{flex:1;min-height:0;display:grid;grid-template-columns:auto repeat(5,minmax(0,1fr));gap:1cqi 1cqi;align-content:stretch}
+.lab{font-size:max(10px,.95cqi);color:var(--sub);display:flex;align-items:center;padding-right:.4cqi}
+.stage{background:var(--bg);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:10px;padding:1cqi;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.stage b{font-size:max(12px,1.35cqi);line-height:1.3}
+.stage small{font-size:max(9.5px,.85cqi);color:var(--sub)}
+.cell{border:1px solid var(--line);border-radius:8px;padding:.8cqi 1cqi;font-size:max(10.5px,1.02cqi);line-height:1.45;min-width:0;display:flex;align-items:center}
+.cell.pain{color:var(--pain)}
+.cell.opp{color:var(--opp)}
+.emo{display:flex;align-items:center;gap:.5cqi}
+.emo i{flex:1;height:.8cqi;min-height:5px;border-radius:99px;background:var(--bar);position:relative;overflow:hidden}
+.emo i::after{content:"";position:absolute;inset:0;width:var(--v);background:var(--accent);border-radius:99px}
+.emo span{font-size:max(10px,.9cqi);color:var(--sub);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.foot{font-size:max(10px,.95cqi);color:var(--sub);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+@media (max-width:860px){
+  .slide{aspect-ratio:auto;overflow:visible;padding:18px 16px}
+  .map{grid-template-columns:1fr;gap:10px}
+  .lab{display:none}
+  .stage b{font-size:17px}
+  .cell{font-size:14px}
+  .emo span{font-size:13px}
+  .persona{text-align:left}
+  .foot{font-size:12px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="slide">
+  <header class="head">
+    <div>
+      <span class="tag">원거리 · 숙박형 (유형 A·B)</span>
+      <h1>1박 이상 머무는 원거리 관광객의 치킨 여정</h1>
+    </div>
+    <div class="persona"><b>대상:</b> 수도권·타 지역에서 대구로 이동해 1박 이상 머무는 사람<br>치맥 여행러(A)와 치킨 덕후 순례자(B)를 함께 다룸</div>
+  </header>
+
+  <div class="map" role="table" aria-label="원거리 숙박형 고객 여정">
+    <div class="lab"></div>
+    <div class="stage"><small>1</small><b>영감·계획</b></div>
+    <div class="stage"><small>2</small><b>이동·도착</b></div>
+    <div class="stage"><small>3</small><b>낮 관광·탐방</b></div>
+    <div class="stage"><small>4</small><b>저녁 치킨 식사</b></div>
+    <div class="stage"><small>5</small><b>숙박·귀가·공유</b></div>
+
+    <div class="lab">행동</div>
+    <div class="cell">SNS와 지도로 숙소 근처 치킨집, 야간 코스, 브랜드 매장을 찾음</div>
+    <div class="cell">고속버스나 KTX로 도착해 짐을 맡기고 숙소로 이동</div>
+    <div class="cell">낮에는 관광지와 브랜드 매장을 돌며 저녁 일정에 맞춤</div>
+    <div class="cell">야장이나 치킨집에서 치맥을 즐기고 메뉴를 비교함</div>
+    <div class="cell">야경과 치킨 사진을 올리고 숙소에서 다음 날 일정을 짬</div>
+
+    <div class="lab">접점</div>
+    <div class="cell">SNS, 지도 앱, 숙박 앱, 브랜드 공식 채널</div>
+    <div class="cell">역·터미널 안내, 교통 앱</div>
+    <div class="cell">관광지 안내, 매장, 스탬프 투어 부스</div>
+    <div class="cell">야장 매장, 치킨집 웨이팅 목록, 메뉴판</div>
+    <div class="cell">SNS, 숙박 리뷰, 매장 멤버십</div>
+
+    <div class="lab">감정</div>
+    <div class="stage" style="border-top-color:var(--line);padding:.8cqi 1cqi"><div class="emo"><i style="--v:65%"></i><span>6/10</span></div></div>
+    <div class="stage" style="border-top-color:var(--line);padding:.8cqi 1cqi"><div class="emo"><i style="--v:50%"></i><span>5/10</span></div></div>
+    <div class="stage" style="border-top-color:var(--line);padding:.8cqi 1cqi"><div class="emo"><i style="--v:75%"></i><span>7/10</span></div></div>
+    <div class="stage" style="border-top-color:var(--line);padding:.8cqi 1cqi"><div class="emo"><i style="--v:90%"></i><span>9/10</span></div></div>
+    <div class="stage" style="border-top-color:var(--line);padding:.8cqi 1cqi"><div class="emo"><i style="--v:80%"></i><span>8/10</span></div></div>
+
+    <div class="lab">페인포인트</div>
+    <div class="cell pain">대중교통, 영업시간, 숙소 위치 정보가 여러 곳에 흩어져 있음</div>
+    <div class="cell pain">역에서 숙소와 맛집까지 연계 교통이 안 보임</div>
+    <div class="cell pain">영업시간이 달라 방문 순서를 다시 짜야 함. 지역 간 이동도 불편함</div>
+    <div class="cell pain">웨이팅이 길고 1인 좌석이 적음. 브랜드마다 메뉴 비교 기준이 없음</div>
+    <div class="cell pain">여행 중 후기를 남길 곳이 없고 재방문을 알려 주는 연결이 없음</div>
+
+    <div class="lab">서비스 기회</div>
+    <div class="cell opp">숙소 기준 야간 코스와 치킨집 지도 한 장 요약</div>
+    <div class="cell opp">역-숙소-맛집 동선과 도보 시간 안내</div>
+    <div class="cell opp">운영시간 실시간 확인, 브랜드별 매장 지도와 스탬프 투어</div>
+    <div class="cell opp">대기 알림, 1인 좌석 정보, 소분 메뉴 매장 연결</div>
+    <div class="cell opp">인증 스탬프 공유와 방문 이력 기반 재방문 알림</div>
+  </div>
+
+  <footer class="foot">
+    <span>감정 온도는 0 (매우 부정) ~ 10 (매우 긍정)의 가설 값입니다. 데이터가 없어 유형 A·B의 가설을 합쳐 그렸습니다.</span>
+  </footer>
+</main>
+</body>
+</html>
