@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOC 분류 관제</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1d2330; --muted: #6b7385; --line: #e2e5ec;
+    --ok: #1f8a4c; --ok-bg: #e6f5ec; --warn: #b26a00; --warn-bg: #fff3dc; --bad: #c0392b; --bad-bg: #fbe7e4;
+    --bar: #4b6bfb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151c; --card: #1b2029; --ink: #e8ebf2; --muted: #9aa3b5; --line: #2a303c;
+      --ok: #4cc27f; --ok-bg: #173325; --warn: #f0b04a; --warn-bg: #3a2d14; --bad: #ff7b6b; --bad-bg: #3d1f1b;
+      --bar: #7d95ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151c; --card: #1b2029; --ink: #e8ebf2; --muted: #9aa3b5; --line: #2a303c;
+    --ok: #4cc27f; --ok-bg: #173325; --warn: #f0b04a; --warn-bg: #3a2d14; --bad: #ff7b6b; --bad-bg: #3d1f1b;
+    --bar: #7d95ff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.5 "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--line); background: var(--card); }
+  h1 { font-size: 18px; margin: 0; }
+  .meta { color: var(--muted); font-size: 12px; }
+  button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--bar); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  button.go { background: #1f8a4c; }
+  button.halt { background: var(--bad); }
+  main { padding: 16px 20px; display: grid; gap: 16px; max-width: 1200px; margin: 0 auto; }
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .card h2 { font-size: 13px; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+  .big { font-size: 26px; font-weight: 700; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-weight: 700; font-size: 13px; }
+  .pill.pass { background: var(--ok-bg); color: var(--ok); }
+  .pill.fail { background: var(--bad-bg); color: var(--bad); }
+  .pill.none { background: var(--warn-bg); color: var(--warn); }
+  .bar { height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; margin: 6px 0; }
+  .bar > span { display: block; height: 100%; background: var(--bar); }
+  .bar.review > span { background: var(--warn); }
+  .bar.review.over > span { background: var(--bad); }
+  .row-line { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .row-line .label { width: 90px; color: var(--muted); }
+  .row-line .track { flex: 1; height: 10px; background: var(--line); border-radius: 6px; overflow: hidden; }
+  .row-line .track > span { display: block; height: 100%; background: var(--bar); }
+  .row-line .num { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+  select, input { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink); }
+  .scroll { max-height: 420px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; }
+  .scroll table { margin: 0; }
+  .scroll th { position: sticky; top: 0; background: var(--card); }
+  .bad-text { color: var(--bad); }
+  .issues { margin: 0; padding-left: 18px; max-height: 200px; overflow: auto; font-size: 13px; }
+  .notice { padding: 12px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); }
+  .act-log { background: #0b0e13; color: #c9d1e0; font: 12px/1.6 Consolas, "Malgun Gothic", monospace;
+    padding: 10px 12px; border-radius: 8px; height: 240px; overflow: auto; white-space: pre-wrap; word-break: break-all; margin: 0; }
+  button.agree-btn { background: #1f8a4c; padding: 4px 10px; font-size: 12px; }
+  button.dis-btn { background: var(--bad); padding: 4px 10px; font-size: 12px; }
+  button.sel { opacity: .35; }
+  button.sel.on { opacity: 1; box-shadow: 0 0 0 2px var(--ink) inset; }
+  .two { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+  /* 진행 단계 램프: 진행 중인 단계만 형광색으로 깜빡인다 */
+  .lamp-panel { background: #0b0e13; border-radius: 12px; padding: 14px; }
+  .lamps { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+  .lamp { background: #151a22; border: 1px solid #262d39; border-radius: 10px; padding: 12px 8px;
+    text-align: center; color: #5b6578; transition: color .3s, border-color .3s; }
+  .lamp .no { font-size: 11px; opacity: .8; }
+  .lamp .nm { font-weight: 700; margin-top: 2px; }
+  .lamp .st { display: block; font-size: 11px; margin-top: 6px; min-height: 14px; }
+  .lamp.done { color: #8fd3a8; border-color: #2e6b48; }
+  .lamp.done .st::before { content: "완료"; }
+  .lamp.active { color: #39ff14; border-color: #39ff14; animation: neon-blink .8s ease-in-out infinite; }
+  .lamp.active .st::before { content: "진행 중"; }
+  @keyframes neon-blink {
+    0%, 100% { box-shadow: 0 0 4px #39ff14, 0 0 14px rgba(57,255,20,.6); text-shadow: 0 0 6px #39ff14; opacity: 1; }
+    50% { box-shadow: 0 0 0 rgba(57,255,20,0); text-shadow: none; opacity: .3; }
+  }
+  @media (prefers-reduced-motion: reduce) { .lamp.active { animation: none; box-shadow: 0 0 10px #39ff14; } }
+  @media (max-width: 560px) { main, header { padding-left: 16px; padding-right: 16px; } .big { font-size: 22px; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>VOC 분류 관제</h1>
+    <div class="meta" id="updated">불러오는 중…</div>
+  </div>
+  <div class="controls">
+    <span id="verdict" class="pill none">-</span>
+    <button id="startBtn" class="go">실행</button>
+    <button id="stopBtn" class="halt" disabled>중지</button>
+    <button id="runBtn">재집계 실행</button>
+  </div>
+  <div class="meta" id="runMsg" style="width:100%;text-align:right"></div>
+</header>
+
+<main>
+  <div id="notice" class="notice" hidden></div>
+
+  <section class="card lamp-panel">
+    <h2 style="color:#9aa3b5">진행 단계</h2>
+    <div class="lamps" id="lamps"></div>
+    <div class="meta" id="batchInfo" style="color:#9aa3b5;margin-top:10px"></div>
+  </section>
+
+  <section class="grid">
+    <div class="card"><h2>전체 행</h2><div class="big" id="kTotal">-</div><div class="meta" id="kTotalSub"></div></div>
+    <div class="card"><h2>검토 건수</h2><div class="big" id="kReview">-</div><div class="meta" id="kReviewSub"></div>
+      <div class="bar review" id="reviewBar"><span style="width:0%"></span></div></div>
+    <div class="card"><h2>근거 확인</h2><div class="big" id="kEvidence">-</div><div class="meta">원문 인용 일치 행</div></div>
+    <div class="card"><h2>문제 건수</h2><div class="big" id="kIssues">-</div><div class="meta">채점 중 발견</div></div>
+  </section>
+
+  <section class="two">
+    <div class="card">
+      <h2>에이전트 활동 로그</h2>
+      <pre class="act-log" id="actLog">아직 실행 기록이 없습니다.</pre>
+    </div>
+    <div class="card">
+      <h2>사람 대조 · 승인</h2>
+      <div class="controls">
+        <input id="idList" placeholder="voc_id 10개 (쉼표 구분, 비우면 자동 선택)" style="flex:1;min-width:200px">
+        <button id="makeList">목록 만들기</button>
+      </div>
+      <div class="scroll" style="max-height:300px">
+        <table>
+          <thead><tr><th>voc_id</th><th>AI 태그</th><th>근거</th><th>판정</th></tr></thead>
+          <tbody id="reviewRows"><tr><td colspan="4">목록이 없습니다.</td></tr></tbody>
+        </table>
+      </div>
+      <div class="controls" style="margin-top:10px">
+        <span class="meta" id="reviewCount"></span>
+        <button id="approveBtn" disabled>승인</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>채점 패널 (묶음별 80점 이상 통과)</h2>
+    <div class="grid" id="scorePanel"></div>
+  </section>
+
+  <section class="grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="card">
+      <h2>태그 분포</h2>
+      <div id="tagBars"></div>
+    </div>
+    <div class="card">
+      <h2>part 파일 상태</h2>
+      <table>
+        <thead><tr><th>파일</th><th>존재</th><th>헤더</th><th>행 수</th></tr></thead>
+        <tbody id="partRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>문제 목록</h2>
+    <ul class="issues" id="issues"></ul>
+  </section>
+
+  <section class="card">
+    <h2>행 목록</h2>
+    <div class="controls">
+      <select id="tagFilter"><option value="">전체 태그</option></select>
+      <input id="search" placeholder="voc_id 또는 근거 검색">
+      <span class="meta" id="rowCount"></span>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>voc_id</th><th>파일</th><th>태그</th><th>근거</th><th>근거 확인</th><th>note</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+const LABELS = { range: "① 범위 점수", evidence: "② 근거 점수", format: "③ 형식 점수" };
+let STATUS = null;
+const STEP_NAMES = ["준비", "분류", "저장 검사", "채점", "집계", "사람 대조·승인"];
+let OVERRIDE_STEP = 0; // 재집계 버튼을 누르는 동안 채점(4단계)을 강제로 켠다
+
+const RUN_LABELS = { idle: "대기", running: "실행 중", done: "완료", stopped: "중지됨", error: "오류" };
+
+function renderRun(run) {
+  const msg = document.getElementById("runMsg");
+  const start = document.getElementById("startBtn");
+  const stop = document.getElementById("stopBtn");
+  const state = run ? run.state : "idle";
+  msg.textContent = run ? `[${RUN_LABELS[state] || state}] ${run.message || ""}` : "";
+  start.disabled = state === "running";
+  stop.disabled = state !== "running";
+}
+
+async function post(path) {
+  try {
+    const res = await fetch(path, { method: "POST" });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok && body.message) notice(true, body.message);
+  } catch (e) {
+    notice(true, "서버 요청 실패: " + e.message);
+  }
+  await load();
+}
+
+let REVIEW_DRAFT = null;   // [{voc_id, tag, evidence, human}] 사람이 고르는 대조 목록
+let REVIEW_SERVER_OK = false;
+
+function renderLog(lines) {
+  const el = document.getElementById("actLog");
+  if (!lines || !lines.length) return;
+  const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 30;
+  el.textContent = lines.join("\n");
+  if (nearBottom) el.scrollTop = el.scrollHeight;
+}
+
+function sampleRows() {
+  // 입력이 없을 때 전체에서 고르게 10건을 뽑는다
+  const rows = STATUS.rows;
+  const step = Math.floor(rows.length / REVIEW_SIZE) || 1;
+  return Array.from({ length: REVIEW_SIZE }, (_, i) => rows[Math.min(i * step, rows.length - 1)]);
+}
+
+function renderReview(review) {
+  if (!REVIEW_SERVER_OK && review && review.items && review.items.length && !REVIEW_DRAFT) {
+    REVIEW_DRAFT = review.items.map((i) => ({ voc_id: i.voc_id, tag: i.ai_tag, evidence: i.ai_evidence, human: i.human }));
+    REVIEW_SERVER_OK = true;
+  }
+  if (!REVIEW_DRAFT && STATUS && STATUS.rows && STATUS.rows.length >= REVIEW_SIZE) {
+    // 처음 열었을 때 대조 목록을 자동으로 만든다 (아직 저장하지 않고 판정 대기)
+    REVIEW_DRAFT = sampleRows().map((r) => ({ voc_id: r.voc_id, tag: r.tag, evidence: r.evidence, human: null }));
+  }
+  const rows = REVIEW_DRAFT || [];
+  const tbody = document.getElementById("reviewRows");
+  tbody.innerHTML = rows.length ? rows.map((r) => `
+    <tr>
+      <td>${esc(r.voc_id)}</td>
+      <td>${esc(r.tag)}</td>
+      <td>${esc(r.evidence)}</td>
+      <td>
+        <button class="agree-btn sel ${r.human === "agree" ? "on" : ""}" data-id="${esc(r.voc_id)}" data-v="agree">동의</button>
+        <button class="dis-btn sel ${r.human === "disagree" ? "on" : ""}" data-id="${esc(r.voc_id)}" data-v="disagree">다름</button>
+      </td>
+    </tr>`).join("") : '<tr><td colspan="4">목록이 없습니다. "목록 만들기"를 누르세요.</td></tr>';
+  const decided = rows.filter((r) => r.human).length;
+  const agree = rows.filter((r) => r.human === "agree").length;
+  const approved = !!(review && review.approved);
+  document.getElementById("reviewCount").textContent = approved
+    ? `승인 완료 · 동의 ${review.agree}/${review.items.length}`
+    : `판정 ${decided}/${REVIEW_SIZE} · 동의 ${agree}건 (승인 기준 ${REVIEW_PASS_AGREE}건 이상)`;
+  document.getElementById("approveBtn").disabled = approved || rows.length !== REVIEW_SIZE || decided !== REVIEW_SIZE || agree < REVIEW_PASS_AGREE;
+}
+
+const REVIEW_SIZE = 10;
+const REVIEW_PASS_AGREE = 9;
+
+async function saveReview(approve) {
+  const body = { items: REVIEW_DRAFT.map((r) => ({ voc_id: r.voc_id, human: r.human })), approve };
+  try {
+    const res = await fetch("/api/review/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const data = await res.json();
+    notice(!res.ok, res.ok ? "" : data.message);
+  } catch (e) {
+    notice(true, "저장 실패: " + e.message);
+  }
+  await load();
+}
+
+document.getElementById("makeList").addEventListener("click", () => {
+  if (!STATUS || !STATUS.rows || !STATUS.rows.length) { notice(true, "먼저 집계를 끝내 주세요."); return; }
+  const typed = document.getElementById("idList").value.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean);
+  let picked;
+  if (typed.length) {
+    const byId = Object.fromEntries(STATUS.rows.map((r) => [r.voc_id, r]));
+    picked = typed.map((id) => byId[id]).filter(Boolean);
+    if (picked.length !== typed.length || picked.length !== REVIEW_SIZE) {
+      notice(true, `${REVIEW_SIZE}개의 voc_id를 정확히 입력해 주세요 (찾은 건수 ${picked.length}).`);
+      return;
+    }
+  } else {
+    const step = Math.floor(STATUS.rows.length / REVIEW_SIZE) || 1;
+    picked = Array.from({ length: REVIEW_SIZE }, (_, i) => STATUS.rows[Math.min(i * step, STATUS.rows.length - 1)]);
+  }
+  REVIEW_DRAFT = picked.map((r) => ({ voc_id: r.voc_id, tag: r.tag, evidence: r.evidence, human: null }));
+  REVIEW_SERVER_OK = true;
+  saveReview(false);
+});
+
+document.getElementById("reviewRows").addEventListener("click", (ev) => {
+  const btn = ev.target.closest("button[data-v]");
+  if (!btn || !REVIEW_DRAFT) return;
+  const row = REVIEW_DRAFT.find((r) => r.voc_id === btn.dataset.id);
+  if (!row) return;
+  row.human = row.human === btn.dataset.v ? null : btn.dataset.v;
+  saveReview(false);
+});
+
+document.getElementById("approveBtn").addEventListener("click", () => {
+  if (confirm("10건 대조 결과로 승인합니다. 승인은 되돌리지 않는 기록입니다. 진행할까요?")) saveReview(true);
+});
+
+document.getElementById("startBtn").addEventListener("click", () => post("/api/run/start"));
+document.getElementById("stopBtn").addEventListener("click", () => post("/api/run/stop"));
+
+function renderProgress(p) {
+  const steps = (p && p.steps) || STEP_NAMES.map((name, i) => ({ no: i + 1, name, state: "pending" }));
+  const lamps = steps.map((s) => {
+    const forced = OVERRIDE_STEP === s.no;
+    const state = forced ? "active" : s.state;
+    return `<div class="lamp ${state}"><span class="no">${s.no}단계</span>
+      <div class="nm">${esc(s.name)}</div><span class="st"></span></div>`;
+  }).join("");
+  document.getElementById("lamps").innerHTML = lamps;
+  const info = document.getElementById("batchInfo");
+  if (p && p.state === "running" && p.step === 2) {
+    info.textContent = `분류 진행: ${p.batch}/${p.batch_total} 묶음`;
+  } else {
+    info.textContent = p && p.state && p.state !== "idle" ? `현재 단계: ${p.step}단계 (${p.state === "done" ? "완료" : "진행 중"})` : "진행 중인 단계가 없습니다.";
+  }
+}
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function fmtTime(sec) {
+  if (!sec) return "";
+  const d = new Date(sec * 1000);
+  return d.toLocaleString("ko-KR");
+}
+
+async function load() {
+  try {
+    const res = await fetch("/api/status", { cache: "no-store" });
+    STATUS = await res.json();
+    notice(false);
+    renderProgress(STATUS.progress);
+    renderRun(STATUS.run);
+    renderLog(STATUS.log);
+    renderReview(STATUS.review);
+    render();
+  } catch (e) {
+    notice(true, "관제 서버에 연결할 수 없습니다. 터미널에서 python board/control.py serve 로 실행한 뒤 이 주소로 접속하세요.");
+  }
+}
+
+function notice(show, text) {
+  const el = document.getElementById("notice");
+  el.hidden = !show;
+  el.textContent = text || "";
+}
+
+function render() {
+  const s = STATUS;
+  if (!s || !s.scores) {
+    document.getElementById("updated").textContent = s?.message || "채점 결과가 없습니다.";
+    return;
+  }
+  document.getElementById("updated").textContent = "마지막 집계: " + fmtTime(s.generated_at);
+
+  const v = document.getElementById("verdict");
+  v.textContent = s.verdict;
+  v.className = "pill " + (s.verdict === "통과" ? "pass" : "fail");
+
+  document.getElementById("kTotal").textContent = s.review.total;
+  document.getElementById("kTotalSub").textContent = "목표 100건 (r_001~r_100)";
+  document.getElementById("kReview").textContent = s.review.count;
+  const pct = (s.review.ratio * 100).toFixed(1);
+  document.getElementById("kReviewSub").textContent = `${pct}% · 기준 ${s.review.limit * 100}% 이하 ${s.review.within_limit ? "충족" : "초과"}`;
+  const rb = document.getElementById("reviewBar");
+  rb.className = "bar review" + (s.review.within_limit ? "" : " over");
+  rb.firstElementChild.style.width = Math.min(100, (s.review.ratio / Math.max(s.review.limit, 0.0001)) * 100) + "%";
+
+  document.getElementById("kEvidence").textContent = `${s.evidence.valid}/${s.evidence.total}`;
+  document.getElementById("kIssues").textContent = s.issue_count;
+
+  const panel = document.getElementById("scorePanel");
+  panel.innerHTML = Object.entries(s.scores).map(([k, sc]) => `
+    <div class="card">
+      <h2>${LABELS[k] || k}</h2>
+      <div class="big">${sc.score}<span class="meta"> / 100</span></div>
+      <div class="bar"><span style="width:${sc.score}%"></span></div>
+      <span class="pill ${sc.pass ? "pass" : "fail"}">${sc.pass ? "통과" : "미달"}</span>
+    </div>`).join("");
+
+  const max = Math.max(1, ...Object.values(s.tag_counts));
+  document.getElementById("tagBars").innerHTML = Object.entries(s.tag_counts).map(([t, n]) => `
+    <div class="row-line">
+      <span class="label">${esc(t)}</span>
+      <span class="track"><span style="width:${(n / max) * 100}%"></span></span>
+      <span class="num">${n}</span>
+    </div>`).join("");
+
+  document.getElementById("partRows").innerHTML = s.parts.map((p) => `
+    <tr>
+      <td>${esc(p.file)}</td>
+      <td>${p.exists ? "예" : '<span class="bad-text">없음</span>'}</td>
+      <td>${p.exists ? (p.header_ok ? "정상" : '<span class="bad-text">오류</span>') : "-"}</td>
+      <td>${p.rows}</td>
+    </tr>`).join("");
+
+  const issues = s.issues || [];
+  document.getElementById("issues").innerHTML = issues.length
+    ? issues.map((i) => `<li>${esc(i)}</li>`).join("") + (s.issue_count > issues.length ? `<li>… 외 ${s.issue_count - issues.length}건</li>` : "")
+    : "<li>문제 없음</li>";
+
+  const tagSel = document.getElementById("tagFilter");
+  if (tagSel.options.length === 1) {
+    tagSel.insertAdjacentHTML("beforeend", Object.keys(s.tag_counts).map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join(""));
+  }
+  renderRows();
+}
+
+function renderRows() {
+  if (!STATUS || !STATUS.rows) return;
+  const tag = document.getElementById("tagFilter").value;
+  const q = document.getElementById("search").value.trim();
+  const filtered = STATUS.rows.filter((r) =>
+    (!tag || r.tag === tag) && (!q || r.voc_id.includes(q) || (r.evidence || "").includes(q)));
+  document.getElementById("rows").innerHTML = filtered.map((r) => `
+    <tr>
+      <td>${esc(r.voc_id)}</td>
+      <td>${esc(r.file)}</td>
+      <td>${esc(r.tag)}</td>
+      <td>${esc(r.evidence)}</td>
+      <td>${r.evidence_ok ? "✔" : '<span class="bad-text">✘</span>'}</td>
+      <td>${esc(r.note)}</td>
+    </tr>`).join("") || '<tr><td colspan="6">표시할 행이 없습니다.</td></tr>';
+  document.getElementById("rowCount").textContent = `${filtered.length}건 / 전체 ${STATUS.rows.length}건`;
+}
+
+document.getElementById("tagFilter").addEventListener("change", renderRows);
+document.getElementById("search").addEventListener("input", renderRows);
+
+document.getElementById("runBtn").addEventListener("click", async (ev) => {
+  const btn = ev.currentTarget;
+  btn.disabled = true;
+  btn.textContent = "집계 중…";
+  OVERRIDE_STEP = 4; // 채점 단계 표시
+  renderProgress(STATUS && STATUS.progress);
+  try {
+    const res = await fetch("/api/actions/grade", { method: "POST" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    await load();
+  } catch (e) {
+    notice(true, "재집계에 실패했습니다: " + e.message);
+  } finally {
+    OVERRIDE_STEP = 0;
+    btn.disabled = false;
+    btn.textContent = "재집계 실행";
+    renderProgress(STATUS && STATUS.progress);
+  }
+});
+
+load();
+setInterval(load, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,909 @@
+{
+  "generated_at": 1794281702,
+  "verdict": "통과",
+  "scores": {
+    "range": {
+      "score": 100,
+      "pass": true
+    },
+    "evidence": {
+      "score": 96,
+      "pass": true
+    },
+    "format": {
+      "score": 100,
+      "pass": true
+    }
+  },
+  "review": {
+    "count": 3,
+    "total": 100,
+    "ratio": 0.03,
+    "limit": 0.05,
+    "within_limit": true
+  },
+  "tag_counts": {
+    "P1": 23,
+    "P2": 16,
+    "P3": 21,
+    "H1": 5,
+    "H2": 6,
+    "해당없음": 26,
+    "검토": 3
+  },
+  "parts": [
+    {
+      "file": "part_1.csv",
+      "exists": true,
+      "header_ok": true,
+      "rows": 10
+    },
+    {
+      "file": "part_2.csv",
+      "exists": true,
+      "header_ok": true,
+      "rows": 10
+    },
+    {
+      "file": "part_3.csv",
+      "exists": true,
+      "header_ok": true,
+      "rows": 10
+    },
+    {
+      "file": "part_4.csv",
+      "exists": true,
+      "header_ok": true,
+      "rows": 10
+    },
+    {
+      "file": "part_5.csv",
+      "exists": true,
+      "header_ok": true,
+      "rows": 10
+    },
+    {
+      "file": "part_6.csv",
+      "exists": true,
+      "header_ok": true,
+      "rows": 10
+    },
+    {
+      "file": "part_7.csv",
+      "exists": true,
+      "header_ok": true,
+      "rows": 10
+    },
+    {
+      "file": "part_8.csv",
+      "exists": true,
+      "header_ok": true,
+      "rows": 10
+    },
+    {
+      "file": "part_9.csv",
+      "exists": true,
+      "header_ok": true,
+      "rows": 10
+    },
+    {
+      "file": "part_10.csv",
+      "exists": true,
+      "header_ok": true,
+      "rows": 10
+    }
+  ],
+  "evidence": {
+    "valid": 96,
+    "total": 100
+  },
+  "issues": [
+    "근거 확인 실패: r_014 (결제 수단 안내가 하나도 없어요)",
+    "근거 확인 실패: r_033 (얼마나 기다릴지 아무도 몰라요)",
+    "근거 확인 실패: r_049 (마감 시간이 적힌 곳마다 달라요)",
+    "근거 확인 실패: r_058 (얼마나 기다릴지 아무도 몰라요)"
+  ],
+  "issue_count": 4,
+  "rows": [
+    {
+      "voc_id": "r_001",
+      "tag": "P1",
+      "evidence": "현금 5천 원 들고 갔다가",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_1.csv"
+    },
+    {
+      "voc_id": "r_002",
+      "tag": "해당없음",
+      "evidence": "다들 만족",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_1.csv"
+    },
+    {
+      "voc_id": "r_003",
+      "tag": "P1",
+      "evidence": "현금만 받는다고 해서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_1.csv"
+    },
+    {
+      "voc_id": "r_004",
+      "tag": "해당없음",
+      "evidence": "한 번은 들를 만합니다",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_1.csv"
+    },
+    {
+      "voc_id": "r_005",
+      "tag": "P2",
+      "evidence": "현장은 임시 휴장",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_1.csv"
+    },
+    {
+      "voc_id": "r_006",
+      "tag": "해당없음",
+      "evidence": "영상 잘 봤어요!",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_1.csv"
+    },
+    {
+      "voc_id": "r_007",
+      "tag": "H2",
+      "evidence": "출구 안내가 헷갈려서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_1.csv"
+    },
+    {
+      "voc_id": "r_008",
+      "tag": "P1",
+      "evidence": "단말기가 안 된다고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_1.csv"
+    },
+    {
+      "voc_id": "r_009",
+      "tag": "H2",
+      "evidence": "주차 자리 없어서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_1.csv"
+    },
+    {
+      "voc_id": "r_010",
+      "tag": "해당없음",
+      "evidence": "여기 어디예요?",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_1.csv"
+    },
+    {
+      "voc_id": "r_011",
+      "tag": "P3",
+      "evidence": "번호표 같은 게 없으니",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_2.csv"
+    },
+    {
+      "voc_id": "r_012",
+      "tag": "해당없음",
+      "evidence": "떡볶이 진짜 맛있어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_2.csv"
+    },
+    {
+      "voc_id": "r_013",
+      "tag": "P3",
+      "evidence": "망고 컵 이미 다 팔렸대요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_2.csv"
+    },
+    {
+      "voc_id": "r_014",
+      "tag": "P1",
+      "evidence": "결제 수단 안내가 하나도 없어요",
+      "note": "",
+      "evidence_ok": false,
+      "file": "part_2.csv"
+    },
+    {
+      "voc_id": "r_015",
+      "tag": "P1",
+      "evidence": "지갑을 세 번 꺼냈습니다",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_2.csv"
+    },
+    {
+      "voc_id": "r_016",
+      "tag": "P3",
+      "evidence": "어묵 이미 다 팔렸대요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_2.csv"
+    },
+    {
+      "voc_id": "r_017",
+      "tag": "해당없음",
+      "evidence": "분위기 최고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_2.csv"
+    },
+    {
+      "voc_id": "r_018",
+      "tag": "H2",
+      "evidence": "주차 자리 없어서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_2.csv"
+    },
+    {
+      "voc_id": "r_019",
+      "tag": "P2",
+      "evidence": "현장은 임시 휴장",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_2.csv"
+    },
+    {
+      "voc_id": "r_020",
+      "tag": "검토",
+      "evidence": "지도에 8시까지라고",
+      "note": "운영시간(P2)과 품절(P3) 두 원인이 섞임",
+      "evidence_ok": true,
+      "file": "part_2.csv"
+    },
+    {
+      "voc_id": "r_021",
+      "tag": "해당없음",
+      "evidence": "맛있네요. 추천.",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_3.csv"
+    },
+    {
+      "voc_id": "r_022",
+      "tag": "해당없음",
+      "evidence": "가격이 작년보다 올랐네요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_3.csv"
+    },
+    {
+      "voc_id": "r_023",
+      "tag": "H1",
+      "evidence": "자리 찾아 10분 헤맸어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_3.csv"
+    },
+    {
+      "voc_id": "r_024",
+      "tag": "해당없음",
+      "evidence": "고르는 재미가 있어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_3.csv"
+    },
+    {
+      "voc_id": "r_025",
+      "tag": "해당없음",
+      "evidence": "고르는 재미가 있어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_3.csv"
+    },
+    {
+      "voc_id": "r_026",
+      "tag": "P3",
+      "evidence": "어디가 줄이 길고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_3.csv"
+    },
+    {
+      "voc_id": "r_027",
+      "tag": "해당없음",
+      "evidence": "다들 만족",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_3.csv"
+    },
+    {
+      "voc_id": "r_028",
+      "tag": "P1",
+      "evidence": "계좌이체만 된다고 해서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_3.csv"
+    },
+    {
+      "voc_id": "r_029",
+      "tag": "해당없음",
+      "evidence": "가격이 작년보다 올랐네요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_3.csv"
+    },
+    {
+      "voc_id": "r_030",
+      "tag": "P1",
+      "evidence": "그 매대는 아니었어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_3.csv"
+    },
+    {
+      "voc_id": "r_031",
+      "tag": "P3",
+      "evidence": "대기 안내는 없고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_4.csv"
+    },
+    {
+      "voc_id": "r_032",
+      "tag": "P2",
+      "evidence": "현장은 임시 휴장",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_4.csv"
+    },
+    {
+      "voc_id": "r_033",
+      "tag": "P3",
+      "evidence": "얼마나 기다릴지 아무도 몰라요",
+      "note": "",
+      "evidence_ok": false,
+      "file": "part_4.csv"
+    },
+    {
+      "voc_id": "r_034",
+      "tag": "P1",
+      "evidence": "지갑을 세 번 꺼냈습니다",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_4.csv"
+    },
+    {
+      "voc_id": "r_035",
+      "tag": "P2",
+      "evidence": "공지도 없이",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_4.csv"
+    },
+    {
+      "voc_id": "r_036",
+      "tag": "검토",
+      "evidence": "큐브 스테이크는 포기하고",
+      "note": "포기했다고만 하고 원인이 적혀 있지 않음",
+      "evidence_ok": true,
+      "file": "part_4.csv"
+    },
+    {
+      "voc_id": "r_037",
+      "tag": "P3",
+      "evidence": "또 품절",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_4.csv"
+    },
+    {
+      "voc_id": "r_038",
+      "tag": "해당없음",
+      "evidence": "닭강정 진짜 맛있어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_4.csv"
+    },
+    {
+      "voc_id": "r_039",
+      "tag": "P2",
+      "evidence": "작년 글이랑 달라요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_4.csv"
+    },
+    {
+      "voc_id": "r_040",
+      "tag": "P1",
+      "evidence": "카드 안 돼서 돌아가고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_4.csv"
+    },
+    {
+      "voc_id": "r_041",
+      "tag": "P2",
+      "evidence": "매일 운영이라고 돼 있는데",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_5.csv"
+    },
+    {
+      "voc_id": "r_042",
+      "tag": "H1",
+      "evidence": "계단에 앉아 먹었습니다",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_5.csv"
+    },
+    {
+      "voc_id": "r_043",
+      "tag": "P2",
+      "evidence": "어디에도 안 적혀 있었어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_5.csv"
+    },
+    {
+      "voc_id": "r_044",
+      "tag": "P1",
+      "evidence": "그 매대는 아니었어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_5.csv"
+    },
+    {
+      "voc_id": "r_045",
+      "tag": "H1",
+      "evidence": "앉을 데가 없는 게",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_5.csv"
+    },
+    {
+      "voc_id": "r_046",
+      "tag": "H1",
+      "evidence": "앉을 공간이 없어서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_5.csv"
+    },
+    {
+      "voc_id": "r_047",
+      "tag": "해당없음",
+      "evidence": "맛있네요. 추천.",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_5.csv"
+    },
+    {
+      "voc_id": "r_048",
+      "tag": "검토",
+      "evidence": "No card payment",
+      "note": "결제 불가(P1)와 품절(P3) 두 원인이 섞임",
+      "evidence_ok": true,
+      "file": "part_5.csv"
+    },
+    {
+      "voc_id": "r_049",
+      "tag": "P2",
+      "evidence": "마감 시간이 적힌 곳마다 달라요",
+      "note": "",
+      "evidence_ok": false,
+      "file": "part_5.csv"
+    },
+    {
+      "voc_id": "r_050",
+      "tag": "P1",
+      "evidence": "현금 없이 갔다가",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_5.csv"
+    },
+    {
+      "voc_id": "r_051",
+      "tag": "P1",
+      "evidence": "카드 안 돼서 돌아가고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_6.csv"
+    },
+    {
+      "voc_id": "r_052",
+      "tag": "P3",
+      "evidence": "줄이 한 시간",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_6.csv"
+    },
+    {
+      "voc_id": "r_053",
+      "tag": "P3",
+      "evidence": "제 앞에서 품절",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_6.csv"
+    },
+    {
+      "voc_id": "r_054",
+      "tag": "P1",
+      "evidence": "카드 안 돼서 돌아가고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_6.csv"
+    },
+    {
+      "voc_id": "r_055",
+      "tag": "P1",
+      "evidence": "계좌이체 하려는데",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_6.csv"
+    },
+    {
+      "voc_id": "r_056",
+      "tag": "해당없음",
+      "evidence": "활기차서 좋았어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_6.csv"
+    },
+    {
+      "voc_id": "r_057",
+      "tag": "해당없음",
+      "evidence": "여기 어디예요?",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_6.csv"
+    },
+    {
+      "voc_id": "r_058",
+      "tag": "P3",
+      "evidence": "얼마나 기다릴지 아무도 몰라요",
+      "note": "",
+      "evidence_ok": false,
+      "file": "part_6.csv"
+    },
+    {
+      "voc_id": "r_059",
+      "tag": "H2",
+      "evidence": "출구 안내가 헷갈려서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_6.csv"
+    },
+    {
+      "voc_id": "r_060",
+      "tag": "H2",
+      "evidence": "주차장 찾느라 30분",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_6.csv"
+    },
+    {
+      "voc_id": "r_061",
+      "tag": "P1",
+      "evidence": "카드 안 돼서 돌아가고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_7.csv"
+    },
+    {
+      "voc_id": "r_062",
+      "tag": "해당없음",
+      "evidence": "다들 만족",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_7.csv"
+    },
+    {
+      "voc_id": "r_063",
+      "tag": "P2",
+      "evidence": "어디에도 안 적혀 있었어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_7.csv"
+    },
+    {
+      "voc_id": "r_064",
+      "tag": "해당없음",
+      "evidence": "맛있네요. 추천.",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_7.csv"
+    },
+    {
+      "voc_id": "r_065",
+      "tag": "P3",
+      "evidence": "이미 다 팔렸대요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_7.csv"
+    },
+    {
+      "voc_id": "r_066",
+      "tag": "P2",
+      "evidence": "현장은 임시 휴장",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_7.csv"
+    },
+    {
+      "voc_id": "r_067",
+      "tag": "P2",
+      "evidence": "7시 오픈인 줄 알고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_7.csv"
+    },
+    {
+      "voc_id": "r_068",
+      "tag": "P1",
+      "evidence": "단말기가 안 된다고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_7.csv"
+    },
+    {
+      "voc_id": "r_069",
+      "tag": "해당없음",
+      "evidence": "진짜 맛있어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_7.csv"
+    },
+    {
+      "voc_id": "r_070",
+      "tag": "P3",
+      "evidence": "'오늘 분량 끝' 팻말",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_7.csv"
+    },
+    {
+      "voc_id": "r_071",
+      "tag": "P3",
+      "evidence": "대기 안내는 없고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_8.csv"
+    },
+    {
+      "voc_id": "r_072",
+      "tag": "P2",
+      "evidence": "작년 글이랑 달라요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_8.csv"
+    },
+    {
+      "voc_id": "r_073",
+      "tag": "P2",
+      "evidence": "어디에도 안 적혀 있었어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_8.csv"
+    },
+    {
+      "voc_id": "r_074",
+      "tag": "P3",
+      "evidence": "어디가 줄이 길고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_8.csv"
+    },
+    {
+      "voc_id": "r_075",
+      "tag": "P1",
+      "evidence": "현금만 받는다고 해서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_8.csv"
+    },
+    {
+      "voc_id": "r_076",
+      "tag": "P1",
+      "evidence": "현금 5천 원 들고 갔다가",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_8.csv"
+    },
+    {
+      "voc_id": "r_077",
+      "tag": "P1",
+      "evidence": "단말기가 안 된다고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_8.csv"
+    },
+    {
+      "voc_id": "r_078",
+      "tag": "H1",
+      "evidence": "앉을 공간이 없어서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_8.csv"
+    },
+    {
+      "voc_id": "r_079",
+      "tag": "해당없음",
+      "evidence": "양념이 좀 짰어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_8.csv"
+    },
+    {
+      "voc_id": "r_080",
+      "tag": "P3",
+      "evidence": "또 품절",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_8.csv"
+    },
+    {
+      "voc_id": "r_081",
+      "tag": "P1",
+      "evidence": "지갑을 세 번 꺼냈습니다",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_9.csv"
+    },
+    {
+      "voc_id": "r_082",
+      "tag": "P2",
+      "evidence": "운영 요일이 가게마다 달라서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_9.csv"
+    },
+    {
+      "voc_id": "r_083",
+      "tag": "해당없음",
+      "evidence": "매대가 많이 바뀌었네요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_9.csv"
+    },
+    {
+      "voc_id": "r_084",
+      "tag": "P3",
+      "evidence": "줄이 한 시간",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_9.csv"
+    },
+    {
+      "voc_id": "r_085",
+      "tag": "P3",
+      "evidence": "대기 시간이라도 알면",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_9.csv"
+    },
+    {
+      "voc_id": "r_086",
+      "tag": "해당없음",
+      "evidence": "맛있네요. 추천.",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_9.csv"
+    },
+    {
+      "voc_id": "r_087",
+      "tag": "P2",
+      "evidence": "개장 시간이 6시",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_9.csv"
+    },
+    {
+      "voc_id": "r_088",
+      "tag": "P1",
+      "evidence": "결제 방법이 달라서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_9.csv"
+    },
+    {
+      "voc_id": "r_089",
+      "tag": "P3",
+      "evidence": "번호표 같은 게 없으니",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_9.csv"
+    },
+    {
+      "voc_id": "r_090",
+      "tag": "P3",
+      "evidence": "실시간 대기줄만 알려",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_9.csv"
+    },
+    {
+      "voc_id": "r_091",
+      "tag": "해당없음",
+      "evidence": "바삭하고 양도 많아요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_10.csv"
+    },
+    {
+      "voc_id": "r_092",
+      "tag": "P1",
+      "evidence": "현금 없이 갔다가",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_10.csv"
+    },
+    {
+      "voc_id": "r_093",
+      "tag": "해당없음",
+      "evidence": "바삭하고 양도 많아요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_10.csv"
+    },
+    {
+      "voc_id": "r_094",
+      "tag": "해당없음",
+      "evidence": "고르는 재미가 있어요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_10.csv"
+    },
+    {
+      "voc_id": "r_095",
+      "tag": "P3",
+      "evidence": "대기 안내는 없고",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_10.csv"
+    },
+    {
+      "voc_id": "r_096",
+      "tag": "P3",
+      "evidence": "번호표 같은 게 없으니",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_10.csv"
+    },
+    {
+      "voc_id": "r_097",
+      "tag": "P2",
+      "evidence": "운영 요일이 가게마다 달라서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_10.csv"
+    },
+    {
+      "voc_id": "r_098",
+      "tag": "해당없음",
+      "evidence": "가격이 작년보다 올랐네요",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_10.csv"
+    },
+    {
+      "voc_id": "r_099",
+      "tag": "H2",
+      "evidence": "주차 자리 없어서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_10.csv"
+    },
+    {
+      "voc_id": "r_100",
+      "tag": "P1",
+      "evidence": "현금만 받는다고 해서",
+      "note": "",
+      "evidence_ok": true,
+      "file": "part_10.csv"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "env": {
+    "LOG_EVENT_PROJECT_ROOT": "C:\\Users\\Green\\Desktop\\cj_mj\\haruharu\\lifestyle\\D12 페인포인트 실습\\ax\\demo"
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Write(painpoint/**)",
+      "Edit(painpoint/**)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ],
+    "deny": [
+      "Write(archive/**)",
+      "Edit(archive/**)",
+      "Bash(rm:*)",
+      "Bash(git push:*)",
+      "Bash(git push --force:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "\"C:/Users/Green/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/Green/Desktop/cj_mj/haruharu/lifestyle/D12 페인포인트 실습/ax/demo/.claude/hooks/log_event.py\"" } ] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "\"C:/Users/Green/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/Green/Desktop/cj_mj/haruharu/lifestyle/D12 페인포인트 실습/ax/demo/.claude/hooks/log_event.py\"" } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "*", "hooks": [ { "type": "command", "command": "\"C:/Users/Green/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/Green/Desktop/cj_mj/haruharu/lifestyle/D12 페인포인트 실습/ax/demo/.claude/hooks/log_event.py\"" } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "*", "hooks": [ { "type": "command", "command": "\"C:/Users/Green/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/Green/Desktop/cj_mj/haruharu/lifestyle/D12 페인포인트 실습/ax/demo/.claude/hooks/log_event.py\"" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "\"C:/Users/Green/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/Green/Desktop/cj_mj/haruharu/lifestyle/D12 페인포인트 실습/ax/demo/.claude/hooks/log_event.py\"" } ] }
+    ],
+    "SubagentStop": [
+      { "hooks": [ { "type": "command", "command": "\"C:/Users/Green/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/Green/Desktop/cj_mj/haruharu/lifestyle/D12 페인포인트 실습/ax/demo/.claude/hooks/log_event.py\"" } ] }
+    ],
+    "SessionEnd": [
+      { "hooks": [ { "type": "command", "command": "\"C:/Users/Green/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/Green/Desktop/cj_mj/haruharu/lifestyle/D12 페인포인트 실습/ax/demo/.claude/hooks/log_event.py\"" } ] }
+    ]
+  }
+}

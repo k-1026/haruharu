@@ -1,0 +1,68 @@
+{
+  "items": [
+    {
+      "voc_id": "r_001",
+      "ai_tag": "P1",
+      "ai_evidence": "현금 5천 원 들고 갔다가",
+      "human": "agree"
+    },
+    {
+      "voc_id": "r_011",
+      "ai_tag": "P3",
+      "ai_evidence": "번호표 같은 게 없으니",
+      "human": "agree"
+    },
+    {
+      "voc_id": "r_021",
+      "ai_tag": "해당없음",
+      "ai_evidence": "맛있네요. 추천.",
+      "human": "agree"
+    },
+    {
+      "voc_id": "r_031",
+      "ai_tag": "P3",
+      "ai_evidence": "대기 안내는 없고",
+      "human": "agree"
+    },
+    {
+      "voc_id": "r_041",
+      "ai_tag": "P2",
+      "ai_evidence": "매일 운영이라고 돼 있는데",
+      "human": "agree"
+    },
+    {
+      "voc_id": "r_051",
+      "ai_tag": "P1",
+      "ai_evidence": "카드 안 돼서 돌아가고",
+      "human": "agree"
+    },
+    {
+      "voc_id": "r_061",
+      "ai_tag": "P1",
+      "ai_evidence": "카드 안 돼서 돌아가고",
+      "human": "agree"
+    },
+    {
+      "voc_id": "r_071",
+      "ai_tag": "P3",
+      "ai_evidence": "대기 안내는 없고",
+      "human": "agree"
+    },
+    {
+      "voc_id": "r_081",
+      "ai_tag": "P1",
+      "ai_evidence": "지갑을 세 번 꺼냈습니다",
+      "human": "agree"
+    },
+    {
+      "voc_id": "r_091",
+      "ai_tag": "해당없음",
+      "ai_evidence": "바삭하고 양도 많아요",
+      "human": "agree"
+    }
+  ],
+  "decided": 10,
+  "agree": 10,
+  "approved": true,
+  "approved_at": 1794282065
+}
