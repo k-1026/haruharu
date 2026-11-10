@@ -1,4 +1,4 @@
-year,unique_visitors_persons,overnight_visitor_ratio_pct,source_id,raw_file
+﻿year,unique_visitors_persons,overnight_visitor_ratio_pct,source_id,raw_file
 2022,72147330,17.9,S14,raw/관광데이터랩_지역미확인_외지인순방문자수숙박비율_2022-2025.csv
 2023,76653228,17.2,S14,raw/관광데이터랩_지역미확인_외지인순방문자수숙박비율_2022-2025.csv
 2024,79784215,16.2,S14,raw/관광데이터랩_지역미확인_외지인순방문자수숙박비율_2022-2025.csv

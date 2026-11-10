@@ -1,4 +1,4 @@
-industry_major_ko,industry_minor_ko,major_share_pct,minor_share_within_major_pct,source_id,raw_file
+﻿industry_major_ko,industry_minor_ko,major_share_pct,minor_share_within_major_pct,source_id,raw_file
 쇼핑업,대형쇼핑몰,48.4,68.0,S17,raw/관광데이터랩_지역미확인_관광소비업종비율_기간미확인.csv
 쇼핑업,레저용품쇼핑,48.4,2.9,S17,raw/관광데이터랩_지역미확인_관광소비업종비율_기간미확인.csv
 쇼핑업,기타관광쇼핑,48.4,29.1,S17,raw/관광데이터랩_지역미확인_관광소비업종비율_기간미확인.csv

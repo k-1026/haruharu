@@ -1,4 +1,4 @@
-file_label,region_code,year_month,visitor_type,visitor_type_ko,night_ratio_pct,source_id,raw_file
+﻿file_label,region_code,year_month,visitor_type,visitor_type_ko,night_ratio_pct,source_id,raw_file
 a,,2025-10,local,현지인,26.26,S13,raw/관광데이터랩_지역미확인_야간관광소비비율_202510-202609.csv
 a,,2025-11,local,현지인,24.97,S13,raw/관광데이터랩_지역미확인_야간관광소비비율_202510-202609.csv
 a,,2025-12,local,현지인,26.35,S13,raw/관광데이터랩_지역미확인_야간관광소비비율_202510-202609.csv

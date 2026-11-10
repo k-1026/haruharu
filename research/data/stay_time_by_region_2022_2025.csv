@@ -1,4 +1,4 @@
-region_code,region_name_ko,year,avg_stay_min,pct_change_vs_2022_calc,source_id,raw_file
+﻿region_code,region_name_ko,year,avg_stay_min,pct_change_vs_2022_calc,source_id,raw_file
 national_avg,전국 광역지자체별 평균,2022,2754,0.0,S11,all 3 files (identical)
 national_avg,전국 광역지자체별 평균,2023,2534,-8.0,S11,all 3 files (identical)
 national_avg,전국 광역지자체별 평균,2024,2374,-13.8,S11,all 3 files (identical)

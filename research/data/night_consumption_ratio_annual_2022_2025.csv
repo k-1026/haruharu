@@ -1,4 +1,4 @@
-region_code,year,visitor_type,visitor_type_ko,night_ratio_pct,region_identified_by,source_id,raw_file
+﻿region_code,year,visitor_type,visitor_type_ko,night_ratio_pct,region_identified_by,source_id,raw_file
 daegu,2022,local,현지인,22.04,original_filename,S12,raw/관광데이터랩_대구광역시_야간관광소비비율_2022-2025.csv
 daegu,2023,local,현지인,22.3,original_filename,S12,raw/관광데이터랩_대구광역시_야간관광소비비율_2022-2025.csv
 daegu,2024,local,현지인,21.77,original_filename,S12,raw/관광데이터랩_대구광역시_야간관광소비비율_2022-2025.csv
