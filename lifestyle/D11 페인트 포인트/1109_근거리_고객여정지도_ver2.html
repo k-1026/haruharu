@@ -1,0 +1,460 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>근거리 고객 여정 지도 ver2</title>
+<style>
+:root {
+  /* 레이아웃: 16:9 아트보드. 데스크톱은 화면 폭에 맞춰 축소, 좁은 화면은 아트보드 안에서만 가로 스크롤 */
+  --bg: #F4F3EF;
+  --surface: #FFFFFF;
+  --ink: #1B2230;
+  --muted: #5C6575;
+  --line: #D8D5CB;
+  --gen: #6B7689;
+  --gen-soft: #E6E9EF;
+  --ours: #B8462A;
+  --ours-soft: #F7E4DC;
+  --chip: #FFFFFF;
+  --display: "Noto Serif KR", "Noto Serif KR Fallback", Georgia, serif;
+  --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181F;
+    --surface: #1C222C;
+    --ink: #EEF0F3;
+    --muted: #A3ACBA;
+    --line: #343C4A;
+    --gen: #9AA5B8;
+    --gen-soft: #262D39;
+    --ours: #E88A6E;
+    --ours-soft: #3A2822;
+    --chip: #1C222C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14181F;
+  --surface: #1C222C;
+  --ink: #EEF0F3;
+  --muted: #A3ACBA;
+  --line: #343C4A;
+  --gen: #9AA5B8;
+  --gen-soft: #262D39;
+  --ours: #E88A6E;
+  --ours-soft: #3A2822;
+  --chip: #1C222C;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 14px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+.page { max-width: 1320px; margin: 0 auto; display: grid; gap: 40px; }
+.page > * { min-width: 0; }
+.intro h1 {
+  font-family: var(--display);
+  font-size: 28px;
+  line-height: 1.25;
+  margin: 0 0 8px;
+  text-wrap: balance;
+}
+.intro p { margin: 0; color: var(--muted); max-width: 72ch; }
+.intro .basis { margin-top: 10px; font-size: 12.5px; }
+
+.frame { width: 100%; position: relative; overflow-x: auto; }
+.board {
+  width: 1280px;
+  height: 720px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 28px 36px;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top left;
+}
+.board-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 12px; }
+.board-head h2 { margin: 0; font-family: var(--display); font-size: 24px; line-height: 1.2; }
+.board-head .kicker { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.legend { font-size: 11.5px; color: var(--muted); display: flex; gap: 14px; align-items: center; white-space: nowrap; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: 120px repeat(8, 1fr);
+  grid-template-rows: 46px 40px 84px 72px 100px 92px 72px;
+  flex: 1;
+  min-height: 0;
+}
+.rl {
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 8px 0 0;
+  border-top: 1px solid var(--line);
+}
+.sh {
+  margin: 0 3px;
+  padding: 0 16px 0 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.25;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 10px 50%);
+}
+.sh small { font-weight: 400; font-size: 10.5px; opacity: .8; letter-spacing: .04em; }
+.sh.gen { background: var(--gen-soft); color: var(--gen); }
+.sh.ours { background: var(--ours-soft); color: var(--ours); }
+.c {
+  border-top: 1px solid var(--line);
+  padding: 9px 8px 6px 9px;
+  font-size: 12px;
+  line-height: 1.45;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.c.pain::before { content: "▲ "; color: var(--ours); font-size: 10px; }
+.c.gen.pain::before { color: var(--gen); }
+.c.pain { color: var(--ink); }
+.chip {
+  display: inline-block;
+  font-size: 10.5px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--ours);
+  color: var(--ours);
+  background: var(--chip);
+  margin: 4px 4px 0 0;
+  white-space: nowrap;
+}
+.chip.off { border-color: var(--line); color: var(--muted); }
+.tag {
+  display: inline-block;
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px dashed var(--muted);
+  color: var(--muted);
+  margin-top: 4px;
+}
+.curve { grid-column: 2 / 10; border-top: 1px solid var(--line); position: relative; }
+.curve svg { width: 100%; height: 100%; display: block; }
+.curve text { font-family: var(--body); font-size: 11px; fill: var(--muted); }
+.note { margin-top: 8px; font-size: 11px; color: var(--muted); }
+
+.flow-band {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+}
+.flow-band b { color: var(--ink); font-weight: 600; }
+.flow-band i { font-style: normal; color: var(--ours); }
+
+.compare { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 26px 28px; }
+.compare h2 { font-family: var(--display); font-size: 22px; margin: 0 0 6px; }
+.compare > p { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 13px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 10px; border-top: 1px solid var(--line); }
+th { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .02em; }
+td.stage { font-weight: 700; white-space: nowrap; width: 110px; }
+th.gen-h { color: var(--gen); }
+th.ours-h { color: var(--ours); }
+.kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 18px; }
+.kpi div { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.kpi b { display: block; font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.kpi span { font-size: 13px; }
+.src { margin-top: 16px; font-size: 11.5px; color: var(--muted); }
+.decide { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 6px; font-size: 13px; }
+.decide b { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .02em; }
+@media (max-width: 899px) {
+  .board { height: auto; }
+}
+</style>
+
+<main class="page">
+  <header class="intro">
+    <h1>근거리 고객 여정 지도 ver2</h1>
+    <p>당일권을 사서 쓰는 흐름을 여정의 축으로 넣었습니다. 구매 → 활성화 → 스탬프 → 저녁 시식권 → 완성 보상 → 재구매가 한 줄로 이어집니다.</p>
+    <p class="basis">근거: 「근거리 관광객 유형과 CJ」와 CLAUDE.md(근거리 = 추천 루트 + 스탬프·시식권 패스). 가격, 보상, 판매 채널, 운영 주체는 아직 정해지지 않아 [미정]으로 표시했습니다. 감정 곡선은 팀이 가정한 값(0~5)입니다.</p>
+  </header>
+
+  <!-- 보드 1: 당일권 적용 고객 여정 -->
+  <section class="frame" aria-label="당일권 적용 고객 여정 지도">
+    <div class="board" data-board>
+      <div class="board-head">
+        <div>
+          <div class="kicker">Board 1 · 당일권 적용 (ver2)</div>
+          <h2>근거리 당일권 고객의 여정 (유형 A)</h2>
+        </div>
+        <div class="legend">
+          <span><i class="swatch" style="background:var(--ours)"></i>당일권 서비스 흐름</span>
+          <span><i class="swatch" style="background:var(--ours-soft);border:1px solid var(--ours)"></i>해결 대상 페인 포인트</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="rl" style="border:0;padding-top:12px">단계</div>
+        <div class="sh ours">1 구매<small>당일권 구매</small></div>
+        <div class="sh ours">2 활성·계획<small>패스 활성화</small></div>
+        <div class="sh ours">3 이동·도착<small>첫 스탬프 장소</small></div>
+        <div class="sh ours">4 낮 관광<small>스탬프 적립</small></div>
+        <div class="sh ours">5 저녁 결정<small>시식권 사용 판단</small></div>
+        <div class="sh ours">6 저녁 식사<small>시식권 사용</small></div>
+        <div class="sh ours">7 완성·귀가<small>보상 수령</small></div>
+        <div class="sh ours">8 사후<small>재구매 · 1박 전환</small></div>
+
+        <div class="rl">패스 상태</div>
+        <div class="c"><span class="chip off">미구매</span></div>
+        <div class="c"><span class="chip">구매 · 활성</span></div>
+        <div class="c"><span class="chip">스탬프 0/[N]</span></div>
+        <div class="c"><span class="chip">스탬프 [N]/[N]</span></div>
+        <div class="c"><span class="chip">시식권 보유</span></div>
+        <div class="c"><span class="chip">시식권 사용</span></div>
+        <div class="c"><span class="chip">완성</span></div>
+        <div class="c"><span class="chip off">재구매 [미정]</span></div>
+
+        <div class="rl">고객 행동</div>
+        <div class="c">SNS 코스를 보고 당일권 구매</div>
+        <div class="c">패스 활성화, 귀가 시간 기준 시간표 확인</div>
+        <div class="c">추천 동선의 첫 장소에서 첫 스탬프</div>
+        <div class="c">관광지를 돌며 스탬프 적립</div>
+        <div class="c">시식권으로 저녁 먹을지 결정</div>
+        <div class="c">닭똥집골목에서 시식권 사용 후 치맥</div>
+        <div class="c">스탬프 완성 후 보상 받고 귀가</div>
+        <div class="c">후기 공유, 다음 패스나 1박 고려</div>
+
+        <div class="rl">생각·질문</div>
+        <div class="c">"이 패스로 저녁까지 되나?"</div>
+        <div class="c">"스탬프는 어디서 찍지?"</div>
+        <div class="c">"어디부터 가지?"</div>
+        <div class="c">"사진 찍을 곳 있나?"</div>
+        <div class="c">"시식권 쓰고 치킨 먹고 갈까?"</div>
+        <div class="c">"웨이팅 있나? 어떻게 쓰지?"</div>
+        <div class="c">"패스 다 썼다, 뿌듯하다"</div>
+        <div class="c">"다음엔 1박 해볼까?"</div>
+
+        <div class="rl">감정 (가정)</div>
+        <div class="curve">
+          <svg viewBox="0 0 1088 100" preserveAspectRatio="none" role="img" aria-label="당일권 적용 감정 곡선">
+            <g stroke="var(--line)" stroke-width="1">
+              <line x1="0" y1="20" x2="1088" y2="20" stroke-dasharray="3 4"/>
+              <line x1="0" y1="52" x2="1088" y2="52" stroke-dasharray="3 4"/>
+              <line x1="0" y1="84" x2="1088" y2="84" stroke-dasharray="3 4"/>
+            </g>
+            <!-- y = 100 - value*16 (1~5). 3.5→44, 4→36, 4.5→28 -->
+            <polyline fill="none" stroke="var(--ours)" stroke-width="2.5" stroke-linejoin="round"
+              points="68,44 204,36 340,44 476,36 612,44 748,28 884,36 1020,28"/>
+            <g fill="var(--ours)">
+              <circle cx="68" cy="44" r="4"/><circle cx="204" cy="36" r="4"/><circle cx="340" cy="44" r="4"/><circle cx="476" cy="36" r="4"/>
+              <circle cx="612" cy="44" r="4"/><circle cx="748" cy="28" r="4"/><circle cx="884" cy="36" r="4"/><circle cx="1020" cy="28" r="4"/>
+            </g>
+            <text x="4" y="24">5</text><text x="4" y="56">3</text><text x="4" y="88">1</text>
+          </svg>
+        </div>
+
+        <div class="rl">서비스 접점</div>
+        <div class="c">판매 페이지 [채널 미정], 저녁 포함 코스 소개</div>
+        <div class="c">패스 활성화, 스탬프 지도, 귀가 시간 시간표</div>
+        <div class="c">도착 후 첫 동선과 첫 스탬프 장소</div>
+        <div class="c">관광지 스탬프 체크포인트</div>
+        <div class="c">시식권 사용처, 마감·귀가 시간 표시</div>
+        <div class="c">영업·웨이팅 정보, 시식권 사용 안내</div>
+        <div class="c">완성 보상 <span class="tag">보상 내용 [미정]</span></div>
+        <div class="c">공유 카드, 재구매·1박 전환 혜택 <span class="tag">[미정]</span></div>
+
+        <div class="rl" style="border-bottom:0">해결 대상</div>
+        <div class="c pain" style="border-bottom:0">패스 혜택이 한눈에 안 보임</div>
+        <div class="c pain" style="border-bottom:0">스탬프 장소가 흩어져 있음</div>
+        <div class="c pain" style="border-bottom:0">동선이 불확실함</div>
+        <div class="c pain" style="border-bottom:0">스탬프 찍을 곳을 놓침</div>
+        <div class="c pain" style="border-bottom:0">시식권이 저녁에 쓸모 있는지 모름</div>
+        <div class="c pain" style="border-bottom:0">사용처·사용법 혼란, 웨이팅</div>
+        <div class="c pain" style="border-bottom:0">완성 보상 기대와 어긋남</div>
+        <div class="c pain" style="border-bottom:0">재구매 동기가 약함</div>
+      </div>
+      <div class="flow-band">
+        <span><b>연결 고리:</b></span>
+        <span>구매 → 활성 → 스탬프(낮) → <i>시식권(저녁)</i> → 완성 보상 → 재구매·1박 전환</span>
+      </div>
+      <div class="note">운영 주체 후보: 평화시장 닭똥집골목 상인, 대구관광재단(미정, 사용자 섭외 필요). 땅땅치킨랜드 체험은 휴무·마감 확인 후에만 넣습니다.</div>
+    </div>
+  </section>
+
+  <!-- 보드 2: 일반 당일 관광객 여정 (기준선) -->
+  <section class="frame" aria-label="일반 당일 관광객 고객 여정 지도">
+    <div class="board" data-board>
+      <div class="board-head">
+        <div>
+          <div class="kicker">Board 2 · 기준선 (패스 없음)</div>
+          <h2>일반 당일 관광객의 여정</h2>
+        </div>
+        <div class="legend">
+          <span><i class="swatch" style="background:var(--gen)"></i>현재 일반 여정</span>
+          <span><i class="swatch" style="background:var(--gen-soft);border:1px solid var(--gen)"></i>페인 포인트</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="rl" style="border:0;padding-top:12px">단계</div>
+        <div class="sh gen">1 인지·검색<small>관광지 위주</small></div>
+        <div class="sh gen">2 계획<small>교통편 위주</small></div>
+        <div class="sh gen">3 이동·도착<small>KTX · 자가용</small></div>
+        <div class="sh gen">4 낮 관광<small>자연 · 쇼핑</small></div>
+        <div class="sh gen">5 저녁 결정<small>귀가 우선</small></div>
+        <div class="sh gen">6 저녁 식사<small>개별 검색</small></div>
+        <div class="sh gen">7 귀가<small>교통편</small></div>
+        <div class="sh gen">8 사후<small>개인 공유</small></div>
+
+        <div class="rl">패스 상태</div>
+        <div class="c"><span class="chip off">없음</span></div>
+        <div class="c"><span class="chip off">없음</span></div>
+        <div class="c"><span class="chip off">없음</span></div>
+        <div class="c"><span class="chip off">없음</span></div>
+        <div class="c"><span class="chip off">없음</span></div>
+        <div class="c"><span class="chip off">없음</span></div>
+        <div class="c"><span class="chip off">없음</span></div>
+        <div class="c"><span class="chip off">없음</span></div>
+
+        <div class="rl">고객 행동</div>
+        <div class="c">관광지 검색 · 리뷰 확인</div>
+        <div class="c">교통 시간표 위주로 계획</div>
+        <div class="c">도착 후 지도 앱 검색</div>
+        <div class="c">관광지와 상점을 개별로 방문</div>
+        <div class="c">저녁 전 귀가 결정</div>
+        <div class="c">저녁 맛집을 따로 검색</div>
+        <div class="c">교통편으로 귀가</div>
+        <div class="c">사진을 개인 SNS에 올림</div>
+
+        <div class="rl">생각·질문</div>
+        <div class="c">"오늘 볼 곳 다 볼 수 있나?"</div>
+        <div class="c">"몇 시 기차지?"</div>
+        <div class="c">"여기 어디지?"</div>
+        <div class="c">"쇼핑 더 할까?"</div>
+        <div class="c">"저녁은 그냥 집 가서?"</div>
+        <div class="c">"이 근처 맛집 뭐 있지?"</div>
+        <div class="c">"피곤하다"</div>
+        <div class="c">"다음엔 어떻게 하지?"</div>
+
+        <div class="rl">감정 (가정)</div>
+        <div class="curve">
+          <svg viewBox="0 0 1088 100" preserveAspectRatio="none" role="img" aria-label="일반 당일 관광객 감정 곡선">
+            <g stroke="var(--line)" stroke-width="1">
+              <line x1="0" y1="20" x2="1088" y2="20" stroke-dasharray="3 4"/>
+              <line x1="0" y1="52" x2="1088" y2="52" stroke-dasharray="3 4"/>
+              <line x1="0" y1="84" x2="1088" y2="84" stroke-dasharray="3 4"/>
+            </g>
+            <!-- 3→52, 4→36, 2.5→60, 2→68 -->
+            <polyline fill="none" stroke="var(--gen)" stroke-width="2.5" stroke-linejoin="round"
+              points="68,52 204,52 340,52 476,36 612,60 748,68 884,60 1020,52"/>
+            <g fill="var(--gen)">
+              <circle cx="68" cy="52" r="4"/><circle cx="204" cy="52" r="4"/><circle cx="340" cy="52" r="4"/><circle cx="476" cy="36" r="4"/>
+              <circle cx="612" cy="60" r="4"/><circle cx="748" cy="68" r="4"/><circle cx="884" cy="60" r="4"/><circle cx="1020" cy="52" r="4"/>
+            </g>
+            <text x="4" y="24">5</text><text x="4" y="56">3</text><text x="4" y="88">1</text>
+          </svg>
+        </div>
+
+        <div class="rl">접점</div>
+        <div class="c">관광지 검색 결과</div>
+        <div class="c">교통 시간표 앱</div>
+        <div class="c">지도 앱</div>
+        <div class="c">관광지·상점 개별 정보</div>
+        <div class="c">없음 (저녁 선택지 미제공)</div>
+        <div class="c">개별 맛집 검색 (연결 없음)</div>
+        <div class="c">교통편</div>
+        <div class="c">개인 SNS</div>
+
+        <div class="rl" style="border-bottom:0">페인 포인트</div>
+        <div class="c pain gen" style="border-bottom:0">저녁 정보가 없음</div>
+        <div class="c pain gen" style="border-bottom:0">계획 단위가 낮 중심</div>
+        <div class="c pain gen" style="border-bottom:0">동선이 불확실함</div>
+        <div class="c pain gen" style="border-bottom:0">쇼핑 외 체험이 적음</div>
+        <div class="c pain gen" style="border-bottom:0">저녁 결정 근거 부족</div>
+        <div class="c pain gen" style="border-bottom:0">음식이 목적이 아님 (선택 이유 1순위 7.9%)</div>
+        <div class="c pain gen" style="border-bottom:0">귀가 후 여정이 끝남</div>
+        <div class="c pain gen" style="border-bottom:0">공유가 흩어짐</div>
+      </div>
+      <div class="note">데이터 근거: 대구 평균 체류시간 2022→2025 −17.2%(관광데이터랩, S11). 전국 당일 여행 비중 58.8%, 음식 때문에 여행지를 고른 비율 7.9%(국민여행조사 2025, S04). 자연·풍경 감상 77.4%(KOSIS 2025, S02).</div>
+    </div>
+  </section>
+
+  <!-- 비교 -->
+  <section class="compare" aria-label="일반 고객과 당일권 고객 비교">
+    <h2>일반 고객과 당일권 고객의 차이</h2>
+    <p>같은 근거리 당일 여행객이라도, 당일권이 있으면 구매부터 재구매까지 여정이 하나로 묶입니다.</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>단계</th>
+            <th class="gen-h">일반 당일 관광객</th>
+            <th class="ours-h">당일권 고객 (유형 A)</th>
+            <th>무엇이 달라지나</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="stage">1 구매·인지</td><td>구매 없음, 관광지 위주 검색</td><td>당일권 구매 (가격 [미정])</td><td>구매 행위가 여정의 시작점이 됨</td></tr>
+          <tr><td class="stage">2 활성·계획</td><td>교통 시간 위주</td><td>패스 활성화, 귀가 시간 기준 시간표</td><td>계획의 끝점이 저녁 이후로 늘어남</td></tr>
+          <tr><td class="stage">3 이동·도착</td><td>지도 앱으로 개별 검색</td><td>첫 스탬프 장소로 안내</td><td>도착 후 동선 고민이 줄어듦</td></tr>
+          <tr><td class="stage">4 낮 관광</td><td>관광지·상점 개별 방문</td><td>스탬프 적립하며 동선을 따라감</td><td>낮 일정이 저녁과 이어지도록 짜임</td></tr>
+          <tr><td class="stage">5 저녁 결정</td><td>정보 없이 귀가를 택함</td><td>시식권 보유, 사용 여부 결정</td><td>가장 큰 차이. 귀가 전 선택지가 생김</td></tr>
+          <tr><td class="stage">6 저녁 식사</td><td>맛집을 따로 검색</td><td>닭똥집골목에서 시식권 사용</td><td>저녁 식사가 패스 안의 한 단계가 됨</td></tr>
+          <tr><td class="stage">7 완성·귀가</td><td>교통편으로 귀가, 여정 종료</td><td>스탬프 완성 후 보상 수령 [보상 미정]</td><td>귀가 후에도 완성 경험이 남음</td></tr>
+          <tr><td class="stage">8 사후·재구매</td><td>개인 SNS에 흩어짐</td><td>공유 카드, 재구매·1박 전환 [미정]</td><td>다음 구매와 1박 전환으로 이어짐</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="kpi">
+      <div><b>검증 지표 · 저녁까지 남을 의향</b><span>A/B 설문: 낮 관광만 vs 낮 관광 + 시식권 저녁</span></div>
+      <div><b>운영 지표 · 패스 완성률과 시식권 사용률</b><span>스탬프 완성과 저녁 시식권 사용을 분리해서 집계</span></div>
+      <div><b>기준 데이터 · 체류시간</b><span>대구 평균 체류시간 −17.2%(2022→2025). 추세 참고용</span></div>
+    </div>
+    <div class="decide">
+      <b>아직 정해야 할 것 (사용자 결정)</b>
+      <span>· 당일권 가격, 판매 채널, 운영 주체</span>
+      <span>· 스탬프 개수(N), 시식권 사용처와 구성, 완성 보상 내용</span>
+      <span>· 재구매·1박 전환 혜택, 땅땅치킨랜드 운영 여부</span>
+    </div>
+    <div class="src">근거리 전용 데이터는 없습니다. 근거리 수치는 전국 자료를 참고값으로만 씁니다. 감정 곡선과 "무엇이 달라지나"는 팀의 해석이며 설문으로 검증해야 합니다.</div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var boards = document.querySelectorAll('[data-board]');
+  function fit() {
+    boards.forEach(function (b) {
+      var frame = b.parentElement;
+      var avail = frame.clientWidth;
+      if (window.innerWidth >= 900 && avail < 1280) {
+        var s = avail / 1280;
+        b.style.transform = 'scale(' + s + ')';
+        frame.style.height = (720 * s) + 'px';
+        frame.style.overflow = 'hidden';
+      } else {
+        b.style.transform = '';
+        frame.style.height = '';
+        frame.style.overflow = '';
+      }
+    });
+  }
+  fit();
+  window.addEventListener('resize', fit);
+})();
+</script>
