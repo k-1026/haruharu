@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BM 캔버스 — 야시장 오늘의 매대판</title>
+<style>
+  :root {
+    --bg: #f5f3ee;
+    --card: #ffffff;
+    --ink: #1f2328;
+    --muted: #5b6470;
+    --line: #d9d4c7;
+    --accent: #b5532b;
+    --auto: #2e7d4f;
+    --assist: #1f6fb2;
+    --human: #8a5a00;
+    --unknown: #8a2b2b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161a1f;
+      --card: #20262d;
+      --ink: #e8ecf1;
+      --muted: #9aa5b1;
+      --line: #35404c;
+      --accent: #e0875a;
+      --auto: #5cc38a;
+      --assist: #6aaee8;
+      --human: #e0b45a;
+      --unknown: #e07a7a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161a1f;
+    --card: #20262d;
+    --ink: #e8ecf1;
+    --muted: #9aa5b1;
+    --line: #35404c;
+    --accent: #e0875a;
+    --auto: #5cc38a;
+    --assist: #6aaee8;
+    --human: #e0b45a;
+    --unknown: #e07a7a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .canvas {
+    width: min(100%, calc((100vh - 32px) * 16 / 9), 1600px);
+    aspect-ratio: 16 / 9;
+    background: var(--bg);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  header {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 2px 4px;
+  }
+  header h1 { margin: 0; font-size: clamp(14px, 1.9vw, 22px); }
+  header .meta { font-size: clamp(9px, 0.9vw, 12px); color: var(--muted); text-align: right; }
+  .grid {
+    flex: 1; min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.25fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 0.95fr;
+    grid-template-areas:
+      "kp ka vp cr cs"
+      "kp kr vp ch cs"
+      "cost cost rev rev rev";
+    gap: 6px;
+  }
+  .box {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 8px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    min-height: 0;
+  }
+  .box h2 {
+    margin: 0 0 4px;
+    font-size: clamp(10px, 1.1vw, 13px);
+    color: var(--accent);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .box h2 .num { color: var(--muted); font-weight: 600; font-size: 0.85em; }
+  .box ul {
+    margin: 0; padding-left: 14px;
+    font-size: clamp(8.5px, 0.95vw, 12px); line-height: 1.45;
+    overflow: auto; min-height: 0;
+  }
+  .box li { margin-bottom: 2px; }
+  .tag {
+    display: inline-block; font-size: 0.78em; font-weight: 700;
+    padding: 0 4px; margin-left: 2px; border-radius: 3px;
+    border: 1px solid currentColor; vertical-align: 1px;
+  }
+  .t-auto { color: var(--auto); }
+  .t-assist { color: var(--assist); }
+  .t-human { color: var(--human); }
+  .t-unknown { color: var(--unknown); }
+  .muted { color: var(--muted); }
+  .kp { grid-area: kp; }
+  .ka { grid-area: ka; }
+  .kr { grid-area: kr; }
+  .vp { grid-area: vp; }
+  .cr { grid-area: cr; }
+  .ch { grid-area: ch; }
+  .cs { grid-area: cs; }
+  .cost { grid-area: cost; }
+  .rev { grid-area: rev; }
+  .ax-wrap {
+    flex: 0 0 26%;
+    flex-shrink: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 8px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .ax-wrap h2 {
+    margin: 0;
+    font-size: clamp(10px, 1.1vw, 13px);
+    color: var(--accent);
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  }
+  .ax-wrap h2 .num { color: var(--muted); font-weight: 600; font-size: 0.85em; }
+  .flow {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+    align-items: stretch;
+    gap: 4px;
+  }
+  .step {
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: clamp(8.5px, 0.95vw, 12px);
+    line-height: 1.4;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .step b { color: var(--accent); }
+  .arrow {
+    align-self: center;
+    color: var(--muted);
+    font-size: clamp(12px, 1.4vw, 18px);
+  }
+  footer {
+    font-size: clamp(8px, 0.8vw, 11px); color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: 4px 14px;
+    padding: 0 4px;
+  }
+  @media (max-width: 720px) {
+    .canvas { aspect-ratio: auto; height: auto; }
+    .grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: none;
+      grid-template-areas: "kp ka" "kr vp" "cr cs" "ch cs" "cost rev";
+    }
+    .vp { grid-area: vp; }
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <header>
+    <h1>BM 캔버스 — 야시장 오늘의 매대판</h1>
+    <div class="meta">상태: 초안 · 결정 일부 위임 · 레드팀 검증 전<br>표기: <span class="t-auto">AI 자동</span> · <span class="t-assist">AI 보조</span> · <span class="t-human">사람 필수</span> · <span class="t-unknown">미확인</span></div>
+  </header>
+
+  <div class="grid">
+    <section class="box kp">
+      <h2>핵심 파트너 <span class="num">7</span></h2>
+      <ul>
+        <li>야시장 상인회 (사무국 포함)</li>
+        <li>상인회가 매대 80곳을 묶어 운영일 · 자릿세 관리</li>
+        <li class="muted">결제 대행사 등 추가 파트너: 미정</li>
+      </ul>
+    </section>
+
+    <section class="box ka">
+      <h2>핵심 활동 <span class="num">5</span></h2>
+      <ul>
+        <li>상인 입력 안내 <span class="tag t-assist">AI 보조</span></li>
+        <li>사진 · 한마디 → 카드 정리 <span class="tag t-auto">AI 자동</span></li>
+        <li>개인정보 가리기 <span class="tag t-auto">AI 자동</span></li>
+        <li>사무국 게시 전 확인 <span class="tag t-human">사람 필수</span></li>
+        <li>신고 접수 · 분류 <span class="tag t-auto">AI 자동</span> · 수정 적용 <span class="tag t-human">사람 필수</span></li>
+      </ul>
+    </section>
+
+    <section class="box vp">
+      <h2>가치 제안 <span class="num">2</span></h2>
+      <ul>
+        <li><b>매대 카드 한 화면</b>에서 확인</li>
+        <li>① 결제 수단 (P1 직접)</li>
+        <li>② 오늘 영업 여부 (P2 부분)</li>
+        <li>③ 품절 메뉴 (P3 부분)</li>
+        <li class="muted">대기 시간: 제외 (D-7 위임) · 품절은 상인 버튼으로만 확정</li>
+      </ul>
+    </section>
+
+    <section class="box cr">
+      <h2>고객 관계 <span class="num">4</span></h2>
+      <ul>
+        <li>틀린 정보를 신고하면 사무국이 고쳐 줌</li>
+        <li class="muted">확인 · 수정 주체: 사무국 (D-10 위임)</li>
+      </ul>
+    </section>
+
+    <section class="box cs">
+      <h2>고객 세그먼트 <span class="num">1</span></h2>
+      <ul>
+        <li>현금 없이 온 야시장 방문객</li>
+        <li class="muted">방문객은 무료 이용 (과금 안 함)</li>
+      </ul>
+    </section>
+
+    <section class="box kr">
+      <h2>핵심 자원 <span class="num">6</span></h2>
+      <ul>
+        <li><b>매대 정보 카드 자동 정리 기능</b> (AI 처리)</li>
+        <li>매대 정보 입력 데이터 (D5) <span class="tag t-unknown">미확인 · 운영 후 생김</span></li>
+        <li>상인회 운영 공지 (D2)</li>
+      </ul>
+    </section>
+
+    <section class="box ch">
+      <h2>채널 <span class="num">3</span></h2>
+      <ul>
+        <li>야시장 입구 QR 안내판</li>
+        <li>매대 앞 QR 안내판 → 매대 카드 화면</li>
+      </ul>
+    </section>
+
+    <section class="box cost">
+      <h2>비용 구조 <span class="num">8</span></h2>
+      <ul>
+        <li>상인 입력 안내 비용</li>
+        <li>사무국 게시 전 확인 인건비</li>
+        <li>신고 처리 비용</li>
+        <li>AI 처리 비용 (카드 정리에서 발생)</li>
+        <li class="muted">금액 전부 <span class="tag t-unknown">미확인</span> · 수익과 비교 미확인</li>
+      </ul>
+    </section>
+
+    <section class="box rev">
+      <h2>수익원 <span class="num">9</span></h2>
+      <ul>
+        <li><b>상인회 월 정액</b> (지불자: 야시장 상인회)</li>
+        <li>매대당 월 <b>5천~1만 원</b> — 상인회 설문 결과 <span class="tag t-unknown">확인값 · 원자료 파일 확보 필요</span></li>
+        <li>매대 80곳 <span class="tag t-unknown">가정값</span> → 월 <b>40만~80만 원</b> (계산값)</li>
+      </ul>
+    </section>
+  </div>
+
+  <section class="ax-wrap">
+    <h2>AX · 학습 루프 데이터 흐름 <span class="num">데이터 원천 → 개선 → 결과</span></h2>
+    <div class="flow">
+      <div class="step"><b>① 이용</b><br>방문객 카드 조회 · QR 스캔 · 신고 접수<br><span class="muted">원천: 칸 ③ · ④ · 누가: 방문객 · 사무국</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><b>② 데이터</b><br>상인 원본 입력 · AI 정리값 · 사무국 수정값을 쌍으로 저장 (얼굴 · 계좌 가린 후만)<br><span class="muted">원천: 칸 ⑤ 1 · ⑥ · 품절 버튼 · 상태 <span class="tag t-unknown">미확인 · 운영 후 생김</span></span></div>
+      <div class="arrow">→</div>
+      <div class="step"><b>③ 개선</b><br>주 1회 오류 유형 집계 → 추출 규칙 · 가림 기준 · 안내 문구 수정안<br><span class="muted">AI 초안 → <span class="tag t-human">사무국 승인</span></span></div>
+      <div class="arrow">→</div>
+      <div class="step"><b>④ 결과</b><br>신고 건수 · 수정 소요 · 결제 실패 언급 (S5 P1 신호)<br><span class="muted">목표치 <span class="tag t-unknown">미정</span> · 다시 ① 이용으로 되돌아감</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>근거: S1 ideas_top3 · S3 opportunity_matrix · S5 painpoint_def · S6 valuechain_v1 · S7 사용자 입력 · S8 상인회 설문</span>
+    <span>상세: bm/bm_canvas.md</span>
+  </footer>
+</div>
+</body>
+</html>

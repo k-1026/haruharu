@@ -1,0 +1,14 @@
+D13 BM설계/
+├── ax/
+│   ├── ideas_top3.md
+│   ├── jtbd.md
+│   ├── opportunity_matrix.csv
+│   └── risk_check.md
+├── painpoint/
+│   └── painpoint_def.md
+├── research/
+│   ├── .DS_Store
+│   └── data/
+│       └── sources.md
+└── valuechain/
+    └── valuechain_v1.md
