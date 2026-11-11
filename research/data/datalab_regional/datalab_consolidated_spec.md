@@ -110,3 +110,25 @@
 - 방문자 수는 날짜별 중복 집계, 숙박·체류는 월 1명 집계. 총량 대신 추세 분석용
 - 기초지자체 기준 값 중심. 광역 값은 합산이라 참고용
 - 중구 세대별 인기관광지·핫플레이스 원본은 현재 작업 폴더에서 삭제된 상태이며, 정리본 생성은 커밋된 파일(HEAD)에서 읽음
+
+## 추가 반영 (2026-11-11): 달서구 · 대구광역시
+
+- 추가 지역: `달서구`(시군구), `대구광역시`(시도 전체, 기준선). 같은 열 구조로 기존 파일에 행을 덧붙였다. 중구·동구 행은 그대로다.
+- 원본: Aside로 받은 데이터랩 zip(Downloads)을 풀어 `research/data/raw/`에 `관광데이터랩_<지역>_<지표>_<기간>.csv` 이름으로 복사했다. 86개. 원래 zip 파일명·sha256·크기는 `raw_ledger_dalseo_daegu.csv`에 기록했다.
+- 합친 지표 (기존 파일과 같은 열):
+  - 방문자 거주지 분포 → datalab_visitor_residence.csv (월간 6블록 + 연간)
+  - 업종별 관광소비 추이(외지인) → datalab_spending_industry_outsider.csv (월간 + 연간)
+  - 내비게이션 목적지 유형별 검색량 → datalab_navigation_search.csv (월간 + 연간)
+  - 주요 유료관광지 입장객 수(전체 · 외국인) → datalab_paid_spot_visitors.csv (월간 + 연간)
+  - 인기관광지(외지인) → datalab_spot_rankings.csv `popular_outsider` (월간 + 연간)
+  - 중심 관광지 · 지역 맛집(외지인) → datalab_spot_rankings.csv `center`, `restaurant_outsider` (연간만)
+  - 외국인 관심 관광지 4개 언어 → datalab_foreign_interest_spots.csv (연간만)
+  - 숙박 목적지 유입 지역 분포 → datalab_stay_destination_inflow.csv (연간만)
+- 합치지 않은 것:
+  - 연관 관광지: 연간 2022~2025 원본이 없어 이번 추가에서 0행. 연간 재다운로드 필요
+  - 관광소비 유형(외지인): 두 지역에 해당 카드 원본이 없어 0행
+  - 세대별 인기관광지 · 핫플레이스 · 유입/유출 · 전년 대비 증감 · 소셜미디어: 이번 수집 범위 밖이거나 사이트 제한으로 미수집
+  - 빈 파일(22바이트, "출력할 데이터가 없습니다")은 제외
+- 달서구 외국인 관심 관광지는 원본 행이 매우 적다(4개 언어 합계 37행). 원래 값이 적은 것으로 보이며 확인이 필요하다.
+- 행 수 (추가 후 전체): visitor_residence 5,938 · spending_industry_outsider 1,926 · navigation_search 2,325 · paid_spot_visitors 4,192 · spot_rankings 3,200 · foreign_interest_spots 475 · stay_destination_inflow 987. related_spots 100, spending_type 34 (변경 없음)
+- 기존 17개 중 나머지 파일(세대별 · 유입 · 소셜미디어)은 변경하지 않았다.

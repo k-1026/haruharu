@@ -34,3 +34,7 @@
 - 2022년 상반기는 방역 완화 과정이라 영향 가능 (팀 판단)
 - 입장객 수는 잠정치 가능
 - 문서 파일: `datalab_regional_collection_plan.md` (수집 계획), `datalab_consolidated_spec.md` (열 명세)
+
+## 2026-11-11 추가
+- 대상에 `달서구`(시군구)와 `대구광역시`(시도 기준선)가 추가됐다. 합친 지표와 빠진 지표는 `datalab_consolidated_spec.md` 마지막 절 참고.
+- 원본 대장: `raw_ledger_dalseo_daegu.csv` (원래 zip 파일명·해시)
