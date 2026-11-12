@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>야시장 오늘의 매대판 (superpower 적용 후)</title>
+<style>
+  /* 디자인 토큰: spec/spec.md 12.2 · 라이트 기본 */
+  :root {
+    --bg: #FFF9F3;
+    --surface: #FFFFFF;
+    --ink: #2B2330;
+    --ink-muted: #6E6370;
+    --primary: #D94A32;
+    --primary-soft: #FFE7DF;
+    --lantern: #FFB547;
+    --open-ink: #1E7A55;   --open-bg: #E3F6EC;
+    --wait-ink: #8A5A00;   --wait-bg: #FFF1CC;
+    --closed-ink: #5E5866; --closed-bg: #ECE9EF;
+    --soldout-ink: #B3261E; --soldout-bg: #FDE5E2;
+    --unknown-ink: #6E6370; --unknown-bg: #F3F0F5;
+    --info-ink: #1F6FB2;   --info-bg: #E4F0FB;
+    --shadow: 0 4px 12px rgba(43, 35, 48, 0.08);
+  }
+  /* 다크 모드 (야간): spec/spec.md 12.2 */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1F1A24; --surface: #2A2431; --ink: #FBEFE6; --ink-muted: #B9AEBF;
+      --primary: #FF8A75; --primary-soft: #3D2A2F; --lantern: #FFC766;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1F1A24; --surface: #2A2431; --ink: #FBEFE6; --ink-muted: #B9AEBF;
+    --primary: #FF8A75; --primary-soft: #3D2A2F; --lantern: #FFC766;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+
+  /* 간격 4px 배수 · 모서리 카드 16 · 입력 12 · 칩·배지 999 */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Noto Sans KR", -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 40px; }
+
+  /* 헤더: 등불 점 패턴 6% (헤더에만) */
+  header {
+    margin: 0 -16px;
+    padding: 28px 16px 20px;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle, rgba(255, 181, 71, 0.18) 2px, transparent 2.5px);
+    background-size: 18px 18px;
+    border-bottom: 1px solid rgba(217, 74, 50, 0.12);
+  }
+  .eyebrow { font-size: 13px; color: var(--primary); font-weight: 700; }
+  h1 { margin: 4px 0 4px; font-size: 24px; line-height: 1.3; font-weight: 700; }
+  .date { color: var(--ink-muted); font-size: 14px; }
+
+  /* 요약 타일 */
+  .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0 12px; }
+  .summary div {
+    background: var(--surface); border-radius: 16px; box-shadow: var(--shadow);
+    padding: 12px 8px; text-align: center; border-top: 3px solid var(--lantern);
+  }
+  .summary strong { display: block; font-size: 20px; font-weight: 700; }
+  .summary span { font-size: 13px; color: var(--ink-muted); }
+
+  /* 검색 · 칩 (터치 44px 이상) */
+  .search {
+    width: 100%; font: inherit; font-size: 16px; min-height: 44px; padding: 10px 14px;
+    border-radius: 12px; border: 1px solid rgba(43, 35, 48, 0.14);
+    background: var(--surface); color: var(--ink); outline: none;
+  }
+  .search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0 4px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto; font: inherit; font-size: 14px; min-height: 44px; padding: 8px 16px;
+    border-radius: 999px; border: 1px solid rgba(43, 35, 48, 0.14);
+    background: var(--surface); color: var(--ink); cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #FFFFFF; font-weight: 600; }
+  .chip:focus-visible { outline: 3px solid var(--primary-soft); outline-offset: 2px; }
+
+  /* 매대 카드 */
+  .list { display: grid; gap: 12px; margin-top: 12px; }
+  .stall {
+    background: var(--surface); border-radius: 16px; box-shadow: var(--shadow);
+    padding: 16px;
+  }
+  .stall-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .stall-no { font-size: 13px; color: var(--ink-muted); font-weight: 600; letter-spacing: .03em; }
+  .stall-name { margin: 2px 0 0; font-size: 18px; font-weight: 700; line-height: 1.3; word-break: keep-all; }
+
+  /* 상태 배지: 색 + 글자 + 점 (색만으로 전달하지 않음) */
+  .badge {
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; padding: 5px 10px; border-radius: 999px; white-space: nowrap;
+  }
+  .badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .badge.open    { color: var(--open-ink);    background: var(--open-bg); }
+  .badge.wait    { color: var(--wait-ink);    background: var(--wait-bg); }
+  .badge.closed  { color: var(--closed-ink);  background: var(--closed-bg); }
+  .badge.soldout { color: var(--soldout-ink); background: var(--soldout-bg); }
+
+  .menu { margin: 10px 0 0; font-size: 15px; word-break: keep-all; }
+  .menu .sold { text-decoration: line-through; color: var(--ink-muted); }
+  .menu .sold-tag { margin-left: 6px; font-size: 12px; font-weight: 600; color: var(--soldout-ink); }
+
+  /* 결제 칩: 받는 수단 ✓ 진하게 · 안 받는 수단 옅게 · 입력 없음은 점선 */
+  .pays { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .pay { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+  .pay.yes { color: var(--open-ink); background: var(--open-bg); }
+  .pay.no  { color: var(--ink-muted); background: var(--unknown-bg); font-weight: 400; }
+  .pay.unknown { color: var(--unknown-ink); background: transparent; border: 1px dashed rgba(110, 99, 112, 0.6); font-weight: 400; }
+
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; font-size: 14px; color: var(--ink-muted); }
+  .meta b { color: var(--ink); font-weight: 600; }
+  .stamp { margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(43, 35, 48, 0.12); font-size: 13px; color: var(--info-ink); }
+
+  .empty { text-align: center; color: var(--ink-muted); padding: 40px 0; }
+  footer { margin-top: 24px; font-size: 13px; color: var(--ink-muted); line-height: 1.6; }
+
+  /* 동작 줄이기 설정이면 모든 움직임 끔 */
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">야시장 · 오늘의 매대판</div>
+    <h1>오늘 문 여는 매대</h1>
+    <div class="date" id="today"></div>
+  </header>
+
+  <section class="summary" aria-label="요약">
+    <div><strong id="cnt-open">0</strong><span>영업중</span></div>
+    <div><strong id="cnt-wait">0</strong><span>오픈 전</span></div>
+    <div><strong id="cnt-all">0</strong><span>전체 매대</span></div>
+  </section>
+
+  <input class="search" id="q" type="search" placeholder="매대명 · 메뉴 검색" aria-label="검색">
+  <nav class="chips" id="chips" aria-label="카테고리"></nav>
+  <main class="list" id="list"></main>
+
+  <footer>
+    ※ 이 화면의 매대 정보와 결제 수단은 예시 데이터입니다. 실제 운영 시간·메뉴·결제·품절 여부는 현장에서 확인해 주세요.
+    영업 상태는 기기 시간 기준으로 자동 계산됩니다.
+  </footer>
+</div>
+
+<script>
+  // 매대 데이터 (예시). open/close는 24시간제 "HH:MM", soldout은 오늘 품절 여부,
+  // pay는 결제 수단 {현금, 카드, 계좌이체} 중 받는 여부. null이면 "정보 없음".
+  const STALLS = [
+    { no: "A-01", name: "꼬치 한 상",     cat: "먹거리", menu: "양념 닭꼬치 · 대파 삼겹꼬치", price: "3,000원~", open: "18:00", close: "23:00", soldout: false, note: "매운맛 조절 가능", pay: { 현금: true, 카드: false, 계좌이체: true } },
+    { no: "A-02", name: "호떡 할매",       cat: "간식",   menu: "흑설탕 호떡 · 견과 호떡",     price: "2,000원~", open: "17:30", close: "22:30", soldout: false, note: "현금 할인 500원", pay: { 현금: true, 카드: true, 계좌이체: false } },
+    { no: "A-03", name: "야끼소바 1번가",  cat: "먹거리", menu: "야끼소바 · 오징어 볶음",      price: "6,000원~", open: "18:00", close: "23:30", soldout: true,  note: "오징어 품절", pay: { 현금: false, 카드: true, 계좌이체: true } },
+    { no: "B-01", name: "레몬에이드 공방", cat: "음료",   menu: "레몬에이드 · 자몽에이드",     price: "4,000원",  open: "17:00", close: "23:00", soldout: false, note: "얼음 추가 무료", pay: { 현금: true, 카드: true, 계좌이체: true } },
+    { no: "B-02", name: "붕어빵 굽는 집",  cat: "간식",   menu: "팥 붕어빵 · 슈크림 붕어빵",   price: "1,000원~", open: "18:30", close: "22:00", soldout: false, note: "", pay: { 현금: true, 카드: false, 계좌이체: false } },
+    { no: "B-03", name: "버터구이 옥수수", cat: "먹거리", menu: "버터 옥수수 · 치즈 옥수수",   price: "3,500원",  open: "18:00", close: "23:00", soldout: false, note: "", pay: null },
+    { no: "C-01", name: "핸드메이드 키링", cat: "소품",   menu: "키링 · 자수 파우치",          price: "5,000원~", open: "19:00", close: "23:30", soldout: false, note: "주문 제작 가능", pay: { 현금: true, 카드: true, 계좌이체: false } },
+    { no: "C-02", name: "달고나 뽑기",     cat: "간식",   menu: "달고나 · 솜사탕",             price: "2,000원~", open: "18:00", close: "22:30", soldout: false, note: "", pay: { 현금: true, 카드: false, 계좌이체: true } },
+    { no: "C-03", name: "전통 수제 음료",  cat: "음료",   menu: "오미자 에이드 · 식혜",        price: "3,000원",  open: "17:30", close: "22:00", soldout: false, note: "무가당 선택 가능", pay: { 현금: true, 카드: true, 계좌이체: false } },
+    { no: "D-01", name: "떡볶이 골목",     cat: "먹거리", menu: "떡볶이 · 순대 · 튀김",        price: "4,000원~", open: "18:00", close: "23:00", soldout: false, note: "", pay: { 현금: false, 카드: true, 계좌이체: true } }
+  ];
+
+  const CATS = ["전체", "먹거리", "간식", "음료", "소품"];
+  const ORDER = { open: 0, wait: 1, closed: 2, soldout: 1 }; // 정렬: 영업중 → 오픈 전 → 마감 (품절은 오픈 전 다음)
+  let currentCat = "전체";
+  let query = "";
+
+  function toMin(hhmm) {
+    const [h, m] = hhmm.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  // 상태: 품절 → 오픈 전 → 영업중 → 마감 (현재 기기 시각 기준)
+  function statusOf(s, now) {
+    if (s.soldout) return { key: "soldout", label: "품절" };
+    const t = now.getHours() * 60 + now.getMinutes();
+    if (t < toMin(s.open)) return { key: "wait", label: "오픈 전 · " + s.open };
+    if (t < toMin(s.close)) return { key: "open", label: "영업중" };
+    return { key: "closed", label: "마감" };
+  }
+
+  function formatToday(d) {
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    const pad = n => String(n).padStart(2, "0");
+    return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} (${days[d.getDay()]}) ${pad(d.getHours())}:${pad(d.getMinutes())} 기준`;
+  }
+
+  function esc(str) {
+    return String(str).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  function payChips(pay) {
+    if (!pay) return `<span class="pay unknown">결제 수단 정보 없음</span>`;
+    return Object.keys(pay).map(k =>
+      pay[k]
+        ? `<span class="pay yes">${esc(k)} ✓</span>`
+        : `<span class="pay no">${esc(k)} 안 받음</span>`
+    ).join("");
+  }
+
+  function render() {
+    const now = new Date();
+    document.getElementById("today").textContent = formatToday(now);
+
+    const items = STALLS.map(s => ({ s, st: statusOf(s, now) }));
+    document.getElementById("cnt-open").textContent = items.filter(x => x.st.key === "open").length;
+    document.getElementById("cnt-wait").textContent = items.filter(x => x.st.key === "wait").length;
+    document.getElementById("cnt-all").textContent = STALLS.length;
+
+    document.getElementById("chips").innerHTML = CATS.map(c =>
+      `<button class="chip" type="button" aria-pressed="${c === currentCat}" data-cat="${esc(c)}">${esc(c)}</button>`
+    ).join("");
+
+    const q = query.trim().toLowerCase();
+    const shown = items
+      .filter(({ s }) => {
+        const catOk = currentCat === "전체" || s.cat === currentCat;
+        const text = (s.name + " " + s.menu + " " + s.no + " " + s.cat).toLowerCase();
+        return catOk && (!q || text.includes(q));
+      })
+      .sort((a, b) => ORDER[a.st.key] - ORDER[b.st.key]);
+
+    const list = document.getElementById("list");
+    if (shown.length === 0) {
+      list.innerHTML = `<div class="empty">조건에 맞는 매대가 없습니다.</div>`;
+      return;
+    }
+    list.innerHTML = shown.map(({ s, st }) => {
+      const menuHtml = s.soldout
+        ? `<span class="sold">${esc(s.menu)}</span><span class="sold-tag">품절</span>`
+        : esc(s.menu);
+      return `
+      <article class="stall">
+        <div class="stall-top">
+          <div>
+            <div class="stall-no">${esc(s.no)} · ${esc(s.cat)}</div>
+            <h2 class="stall-name">${esc(s.name)}</h2>
+          </div>
+          <span class="badge ${st.key}">${esc(st.label)}</span>
+        </div>
+        <p class="menu">${menuHtml}</p>
+        <div class="pays" aria-label="결제 수단">${payChips(s.pay)}</div>
+        <div class="meta">
+          <span>가격 <b>${esc(s.price)}</b></span>
+          <span>운영 <b>${esc(s.open)}–${esc(s.close)}</b></span>
+          ${s.note ? `<span>${esc(s.note)}</span>` : ""}
+        </div>
+        <div class="stamp">AI 정리 · 상인 입력 기준</div>
+      </article>`;
+    }).join("");
+  }
+
+  document.getElementById("chips").addEventListener("click", e => {
+    const btn = e.target.closest(".chip");
+    if (!btn) return;
+    currentCat = btn.dataset.cat;
+    render();
+  });
+  document.getElementById("q").addEventListener("input", e => {
+    query = e.target.value;
+    render();
+  });
+
+  render();
+  setInterval(render, 60 * 1000); // 시간에 따라 상태가 바뀌므로 1분마다 갱신
+</script>
+</body>
+</html>
