@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>고객여정지도 v0.1 — 공공 관광기관 담당자 (5단계)</title>
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#1f2328; --sub:#5b6168; --line:#dfe2e6; --head:#2e8c85;
+  --pain:#c0392b; --opp:#2e7d32; --accent:#2e8c85; --i:#8a5a00; --u:#6b6b6b; --hyp:#6a4c93;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16181b; --card:#1f2327; --ink:#e8eaed; --sub:#a4aab1; --line:#333940; --head:#3aa39b;
+    --pain:#ef9a9a; --opp:#81c784; --accent:#6fc2bb; --i:#ffcc80; --u:#b0b0b0; --hyp:#c5a8e8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16181b; --card:#1f2327; --ink:#e8eaed; --sub:#a4aab1; --line:#333940; --head:#3aa39b;
+  --pain:#ef9a9a; --opp:#81c784; --accent:#6fc2bb; --i:#ffcc80; --u:#b0b0b0; --hyp:#c5a8e8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,"Segoe UI","Malgun Gothic",sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:24px 16px 40px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:17px;margin:28px 0 8px}
+.sub{color:var(--sub);font-size:13px;margin:0}
+.badge{font-size:12px;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.panel{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 14px 18px;overflow-x:auto}
+.map{min-width:900px}
+.row{display:grid;grid-template-columns:110px repeat(5,1fr);gap:8px;align-items:stretch}
+.lbl{font-weight:700;font-size:13px;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.hd{background:var(--head);color:#fff;border-radius:8px;padding:8px 6px;text-align:center;font-weight:700;font-size:13px}
+.hd small{display:block;font-weight:400;font-size:11px;opacity:.92;margin-top:2px}
+.cell{padding:8px 8px;text-align:center;font-size:12px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.45;gap:4px}
+.cell .q{font-style:italic;color:var(--sub)}
+.pain{color:var(--pain);font-weight:600}
+.opp{color:var(--opp);font-weight:600}
+.dim{color:var(--u)}
+.note{font-size:11px;color:var(--sub);font-weight:400}
+.sep{border-top:1px dashed var(--line);margin:10px 0}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:0 5px;border-radius:999px;border:1px solid currentColor;margin:0 1px;white-space:nowrap}
+.tF{color:var(--opp)} .tI{color:var(--i)} .tH{color:var(--hyp)} .tC{color:var(--u)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card h3{margin:0 0 6px;font-size:14px}
+.card p{margin:4px 0;font-size:13px}
+.persona{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:18px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;font-size:12px;color:var(--sub)}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--head);color:#fff;font-weight:700}
+.qlist{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 16px}
+.qlist ol{margin:8px 0;padding-left:20px}
+.qlist li{margin:8px 0;font-size:13px}
+.note-box{margin-top:14px;font-size:13px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="head">
+  <div>
+    <h1>고객여정지도 v0.1 — <span style="color:var(--accent)">공공 관광기관 담당자</span> (5단계)</h1>
+    <p class="sub">시작 조건부터 기획안 전달까지의 흐름입니다. 기준: 2026-11-13.</p>
+  </div>
+  <div class="badge">v0.1 · 5단계 · 기획안 전달까지</div>
+</div>
+
+<div class="persona">
+  <div class="card">
+    <h3>고객 (가정) <span class="tag tH">가설</span></h3>
+    <p>재단 등 공공 관광기관의 관련 사업 담당자 1명. 월·계절과 외국인 타깃 조건으로 대구 중구→동구 숙박형 코스와 홍보물 기획안을 마련.</p>
+  </div>
+  <div class="card">
+    <h3>결과물 <span class="tag tH">가설</span></h3>
+    <p>분석 근거 · 확정 코스 · 홍보물을 묶은 기획안 한 묶음. 운영 주체가 받아 실행.</p>
+  </div>
+</div>
+
+<div class="legend">
+  <span><span class="tag tF">근거</span> 자료에서 확인</span>
+  <span><span class="tag tI">해석</span> 자료를 바탕으로 한 판단</span>
+  <span><span class="tag tH">가설</span> 검증 전 값</span>
+  <span><span class="tag tC">수집 필요</span> 자료로 확인해야 함</span>
+</div>
+
+<div class="panel">
+<div class="map">
+
+  <div class="row" style="margin-bottom:10px">
+    <div class="lbl"></div>
+    <div class="hd">① 기획 조건 정하기<small>월·계절, 국가, 기간, 예산</small></div>
+    <div class="hd">② 수요 근거 확인하기<small>출처·대상·시점 확인</small></div>
+    <div class="hd">③ 코스 검토·수정하기<small>동선·음식·숙박·스탬프</small></div>
+    <div class="hd">④ 홍보 콘텐츠 검토하기<small>언어·영상·문구</small></div>
+    <div class="hd">⑤ 기획안 확정·전달하기<small>묶어 저장 후 운영 주체에 전달</small></div>
+  </div>
+
+  <div class="row">
+    <div class="lbl">행동</div>
+    <div class="cell"><span>시기·타깃 국가·기간·예산 범위를 정하고 목표를 적는다</span></div>
+    <div class="cell"><span>국가·시기별 통계를 열어 출처·대상·시점을 확인하고 기획 방향을 정한다</span></div>
+    <div class="cell"><span>중구→동구 동선에 음식·숙박·스탬프 지점을 넣고 영업일·이동 시간을 확인하며 고친다</span></div>
+    <div class="cell"><span>확정 코스에 맞춰 언어·채널별 문구와 영상을 검토하고 고친다</span></div>
+    <div class="cell"><span>근거·코스·홍보물을 한 묶음으로 저장해 운영 주체에 넘긴다</span></div>
+  </div>
+  <div class="sep"></div>
+
+  <div class="row">
+    <div class="lbl">생각<br><span class="note">가설 질문</span></div>
+    <div class="cell"><span class="q">"이 시기·이 나라로 정하면 근거가 있나?"</span><span class="tag tH">가설</span></div>
+    <div class="cell"><span class="q">"이 수치가 이 시기·이 나라에 해당하나?"</span><span class="tag tH">가설</span></div>
+    <div class="cell"><span class="q">"이 동선이 영업시간·이동 시간 안에 맞나?"</span><span class="tag tH">가설</span></div>
+    <div class="cell"><span class="q">"영상 장면이 코스와 같은 장소·순서인가?"</span><span class="tag tH">가설</span></div>
+    <div class="cell"><span class="q">"운영 주체가 이 묶음만으로 실행할 수 있나?"</span><span class="tag tH">가설</span></div>
+  </div>
+  <div class="sep"></div>
+
+  <div class="row">
+    <div class="lbl">터치포인트</div>
+    <div class="cell"><span>기획 조건 입력 (방향 §3)</span><span class="tag tF">근거</span></div>
+    <div class="cell"><span>관광 통계·설문 원표</span><span class="tag tC">수집 필요</span></div>
+    <div class="cell"><span>장소·이동·영업 자료</span><span class="tag tC">수집 필요</span><span class="note">코스 설계서 초안은 가설</span></div>
+    <div class="cell"><span>확정 코스 설계서 · 언어·채널</span><span class="tag tC">수집 필요</span></div>
+    <div class="cell"><span>기획안 묶음 (저장 형식 미정)</span><span class="tag tC">수집 필요</span><span class="note">전달 채널 미정</span></div>
+  </div>
+  <div class="sep"></div>
+
+  <div class="row">
+    <div class="lbl">문제 가설<br><span class="note">핵심 3개</span></div>
+    <div class="cell dim"><span>이 단계에서는 핵심 가설 없음</span></div>
+    <div class="cell pain"><span>① 자료 비교의 어려움</span><span class="note">출처·기간·대상이 달라 한 표로 비교하기 어렵다</span><span class="tag tH">가설</span></div>
+    <div class="cell pain"><span>② 코스 조건 조율</span><span class="note">영업일·휴무·이동 시간·스탬프 조건을 한 번에 맞추기 어렵다</span><span class="tag tH">가설</span></div>
+    <div class="cell pain"><span>③ 코스 변경에 따른 홍보물 수정</span><span class="note">코스가 바뀌면 영상·문구를 다시 손봐야 한다</span><span class="tag tH">가설</span></div>
+    <div class="cell dim"><span>이 단계에서는 핵심 가설 없음</span></div>
+  </div>
+  <div class="sep"></div>
+
+  <div class="row">
+    <div class="lbl">개선 기회</div>
+    <div class="cell opp"><span>입력 조건 한 화면 정리</span><span class="tag tI">해석</span></div>
+    <div class="cell opp"><span>수치마다 출처·시점·한계를 붙인 근거표</span><span class="tag tI">해석</span></div>
+    <div class="cell opp"><span>장소별 영업·이동 조건 체크리스트 (출처 표기)</span><span class="tag tI">해석</span></div>
+    <div class="cell opp"><span>코스 장면 → 홍보물 대응표</span><span class="tag tI">해석</span></div>
+    <div class="cell opp"><span>근거·코스·홍보물을 묶은 전달 패키지 (확인 상태 포함)</span><span class="tag tI">해석</span></div>
+  </div>
+
+</div>
+</div>
+
+<h2>직접 검증 항목</h2>
+<table>
+  <tr><th style="width:22%">검증 항목</th><th style="width:14%">단계</th><th>확인 방법</th></tr>
+  <tr><td>통계 정확성</td><td>②</td><td>원표의 출처·대상·시점·분모 대조</td></tr>
+  <tr><td>코스 실행 조건</td><td>③</td><td>영업일·휴장·이동 시간을 출처와 함께 확인 (예: 땅땅치킨랜드 화~일 10:00~18:00, 월요일·명절 휴장, 요금 변동 가능 — 통합 §2 ⑤)</td></tr>
+  <tr><td>홍보물 일치 여부</td><td>④</td><td>영상·문구의 장소·순서가 확정 코스와 같은지 대조</td></tr>
+</table>
+
+<div class="note-box">
+  <p><b>미검증:</b> 인터뷰 미실시로 담당자의 불편·감정·구매 의향은 미검증입니다.</p>
+  <p><b>이번 서비스 범위 밖:</b> 발주·입찰, 예산 잔액, 재단 전체 성과관리.</p>
+</div>
+
+<h2>확인할 질문</h2>
+<div class="qlist">
+  <ol>
+    <li>통계 원표를 어떤 기준(국가·시기·대상·분모)으로 쓸 수 있나? <span class="tag tC">②</span></li>
+    <li>장소별 영업일·이동 시간은 어떤 출처로 확인하나? <span class="tag tC">③</span></li>
+    <li>영상 제작 범위는 대본·스토리보드까지인가, 영상 파일까지인가? (방향 §10) <span class="tag tC">④</span></li>
+    <li>담당자가 코스를 직접 짜나, 검토만 하나? (방향 §5·§10) <span class="tag tC">①③</span></li>
+    <li>최종 전달 묶음의 형식과 받는 운영 주체는? <span class="tag tC">⑤</span></li>
+  </ol>
+</div>
+
+<p class="note-box" style="margin-top:14px">출처: 방향 = 관광상품_기획_에이전트_방향성과_다음과제_2026-11-13.md (§3 시나리오, §6 수요 자료, §10 미정) · 통합 = valuechain_통합.md (§2 ⑤).</p>
+
+</div>
+</body>
+</html>
