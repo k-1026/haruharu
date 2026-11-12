@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>여정 지도 층 구조 — 평화시장 닭똥집골목 (v1)</title>
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#1f2328; --sub:#5b6168; --line:#dfe2e6; --head:#2e8c85;
+  --pain:#c0392b; --opp:#2e7d32; --accent:#2e8c85; --i:#8a5a00; --u:#6b6b6b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16181b; --card:#1f2327; --ink:#e8eaed; --sub:#a4aab1; --line:#333940; --head:#3aa39b;
+    --pain:#ef9a9a; --opp:#81c784; --accent:#6fc2bb; --i:#ffcc80; --u:#b0b0b0;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16181b; --card:#1f2327; --ink:#e8eaed; --sub:#a4aab1; --line:#333940; --head:#3aa39b;
+  --pain:#ef9a9a; --opp:#81c784; --accent:#6fc2bb; --i:#ffcc80; --u:#b0b0b0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,"Segoe UI","Malgun Gothic",sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 16px 40px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--sub);font-size:13px;margin:0}
+.badge{font-size:12px;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.panel{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 14px 18px;overflow-x:auto}
+.map{min-width:980px}
+.row{display:grid;grid-template-columns:110px repeat(6,1fr);gap:8px;align-items:stretch}
+.lbl{font-weight:700;font-size:13px;color:var(--ink);display:flex;align-items:center;justify-content:flex-start}
+.hd{background:var(--head);color:#fff;border-radius:8px;padding:9px 6px;text-align:center;font-weight:700;font-size:14px}
+.cell{padding:8px 6px;text-align:center;font-size:12px;color:var(--ink);min-height:44px;display:flex;align-items:center;justify-content:center;white-space:pre-line}
+.thought{color:var(--sub);font-style:italic}
+.pain{color:var(--pain);font-weight:600}
+.opp{color:var(--opp);font-weight:600}
+.u{color:var(--u)}
+.emo{padding:6px 0}
+.emo svg{width:100%;height:150px;display:block}
+.sep{border-top:1px dashed var(--line);margin:10px 0}
+.foot{margin-top:12px;color:var(--sub);font-size:12px}
+.foot b{color:var(--i)}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:0 6px;border-radius:999px;border:1px solid currentColor;margin-left:2px}
+.tV{color:var(--accent)} .tI{color:var(--i)} .tU{color:var(--u)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="head">
+  <div>
+    <h1>여정 지도의 층 구조 — <span style="color:var(--accent)">평화시장 닭똥집골목 방문객</span></h1>
+    <p class="sub">가로는 여정 단계, 세로는 층. 위에서 아래로 행동 → 생각 → 감정 → 터치포인트 → 페인포인트 → 기회 순으로 읽습니다.</p>
+  </div>
+  <div class="badge">VOC 36건 · 6단계 · 6층</div>
+</div>
+
+<div class="panel">
+<div class="map">
+
+  <!-- 단계 헤더 -->
+  <div class="row" style="margin-bottom:10px">
+    <div class="lbl"></div>
+    <div class="hd">알아보기</div>
+    <div class="hd">도착</div>
+    <div class="hd">둘러보기</div>
+    <div class="hd">주문·결제</div>
+    <div class="hd">먹기</div>
+    <div class="hd">재방문</div>
+  </div>
+
+  <!-- 행동 -->
+  <div class="row">
+    <div class="lbl">행동</div>
+    <div class="cell">지도 앱 검색 <span class="tag tU">U</span></div>
+    <div class="cell">피크 시간 방문<br>주차장 찾기</div>
+    <div class="cell">테이블 자리 확인<br>2층 공간 둘러보기</div>
+    <div class="cell">메뉴 고르기<br>물·수저 받기</div>
+    <div class="cell">똥집·치킨 먹기<br>셀프 반찬 리필</div>
+    <div class="cell">리뷰 작성<br>가족과 재방문</div>
+  </div>
+  <div class="sep"></div>
+
+  <!-- 생각 -->
+  <div class="row">
+    <div class="lbl">생각 <span class="tag tI">I</span></div>
+    <div class="cell thought">"어디서 먹을까?"</div>
+    <div class="cell thought">"자리 있을까?"</div>
+    <div class="cell thought">"분위기 괜찮은가?"</div>
+    <div class="cell thought">"추가로 뭘 시키지?"</div>
+    <div class="cell thought">"맛있다 / 양념이 인위적?"</div>
+    <div class="cell thought">"다음에 또 와야지"</div>
+  </div>
+  <div class="sep"></div>
+
+  <!-- 감정 곡선 -->
+  <div class="row emo">
+    <div class="lbl">감정 <span class="tag tI">I</span></div>
+    <div style="grid-column:2 / span 6">
+      <svg viewBox="0 0 600 150" preserveAspectRatio="none" role="img" aria-label="감정 곡선 (가정)">
+        <!-- 기준선 0 -->
+        <line x1="0" y1="75" x2="600" y2="75" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="4" y="20" font-size="11" fill="var(--sub)">+2</text>
+        <text x="4" y="72" font-size="11" fill="var(--sub)">0</text>
+        <text x="4" y="140" font-size="11" fill="var(--sub)">-2</text>
+        <!-- 점수: 알아보기 0 · 도착 -1 · 둘러보기 +1 · 주문 0 · 먹기 +1 · 재방문 +2 (y = 75 - 식 점수×30) -->
+        <path d="M50,75 C 120,75 130,105 150,105 S 230,45 250,45 S 330,75 350,75 S 430,45 450,45 S 530,15 550,15" fill="none" stroke="var(--accent)" stroke-width="3"/>
+        <circle cx="50" cy="75" r="5" fill="var(--accent)"/>
+        <circle cx="150" cy="105" r="5" fill="var(--pain)"/>
+        <circle cx="250" cy="45" r="5" fill="var(--accent)"/>
+        <circle cx="350" cy="75" r="5" fill="var(--pain)"/>
+        <circle cx="450" cy="45" r="5" fill="var(--accent)"/>
+        <circle cx="550" cy="15" r="5" fill="var(--opp)"/>
+      </svg>
+    </div>
+  </div>
+  <div class="sep"></div>
+
+  <!-- 터치포인트 -->
+  <div class="row">
+    <div class="lbl">터치포인트</div>
+    <div class="cell">네이버 플레이스 · 블로그 리뷰 <span class="tag tV">VOC</span></div>
+    <div class="cell">매장 입구 · 주차 <span class="tag tV">VOC</span></div>
+    <div class="cell">매장 내부 · 셀프바 <span class="tag tV">VOC</span></div>
+    <div class="cell">계산대 · 물·수저 · 추가요금 <span class="tag tV">VOC</span></div>
+    <div class="cell">테이블 · 셀프 코너 <span class="tag tV">VOC</span></div>
+    <div class="cell">플레이스 리뷰 · 재방문 <span class="tag tV">VOC</span></div>
+  </div>
+  <div class="sep"></div>
+
+  <!-- 페인포인트 -->
+  <div class="row">
+    <div class="lbl">페인포인트</div>
+    <div class="cell pain">리뷰 0건<br><span class="u">[U] 탐색 근거 없음</span></div>
+    <div class="cell pain">P1 피크 대기<br>P2 전용 주차장 없음<br><span class="note">V-06 · 강도 1</span></div>
+    <div class="cell u">없음<br>(의자 청결은 먹기 단계)</div>
+    <div class="cell pain">P3 물·수저 안내 없음<br>P4 추가요금 안내 없음<br><span class="note">V-23 · 강도 1</span></div>
+    <div class="cell pain">P5 맛 편차·튀김 기름<br>P6 의자 청결<br>P7 매운 정도<br><span class="note">V-07·V-19·V-25·V-05 · 강도 1</span></div>
+    <div class="cell u">—<br>(불만 0건)</div>
+  </div>
+  <div class="sep"></div>
+
+  <!-- 기회 -->
+  <div class="row">
+    <div class="lbl">기회</div>
+    <div class="cell opp">탐색 리뷰 수집 필요 <span class="tag tI">I</span></div>
+    <div class="cell opp">피크 시간 대기 안내 <span class="tag tI">I</span></div>
+    <div class="cell opp">통창·2층 개방감 알리기 <span class="tag tV">V-09</span></div>
+    <div class="cell opp">수저·물·추가요금 사전 안내 <span class="tag tI">I</span></div>
+    <div class="cell opp">간장 맛 강점·떡튀김 사이드 <span class="tag tV">V-05·V-36</span></div>
+    <div class="cell opp">가족 단골 재방문 혜택 <span class="tag tI">I</span></div>
+  </div>
+
+</div>
+</div>
+
+<div class="foot">
+  <p><b>읽는 법:</b> 감정 곡선은 점수 +2(좋음)에서 -2(나쁨)까지입니다. 빨간 점은 불만이 있는 단계입니다. 감정 점수는 리뷰의 칭찬·불만 건수로 정한 <span class="tag tI">I</span> 값입니다.</p>
+  <p><b>근거:</b> <span class="tag tV">VOC</span> 실제 고객 리뷰 36건 (평화시장 닭똥집골목 · 독립 매장 4곳). 단계별 건수와 페인포인트 ID(P1~P7)는 <code>고객여정지도.html</code>과 같습니다. <span class="tag tU">U</span>는 근거가 없는 항목입니다.</p>
+  <p><b>주의:</b> 이 매장들은 4사 기업 매장이 아닙니다. 기업 자료 연결은 없어서 페인포인트마다 [U]입니다. 샘플 편향(상위·최신 10건씩)이 있으므로 경향만 말할 수 있습니다.</p>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>고객여정지도 — 평화시장 닭똥집골목 (v1)</title>
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#1f2328; --sub:#5b6168; --line:#dfe2e6;
+  --f:#2e7d32; --i:#8a5a00; --u:#6b6b6b;
+  --pain:#c62828; --painbg:#fdecea; --opp:#2e7d32; --oppbg:#e8f5e9; --accent:#2e8c85;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16181b; --card:#1f2327; --ink:#e8eaed; --sub:#a4aab1; --line:#333940;
+    --f:#81c784; --i:#ffcc80; --u:#b0b0b0;
+    --pain:#ef9a9a; --painbg:#3a1f1f; --opp:#81c784; --oppbg:#1f3322; --accent:#6fc2bb;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16181b; --card:#1f2327; --ink:#e8eaed; --sub:#a4aab1; --line:#333940;
+  --f:#81c784; --i:#ffcc80; --u:#b0b0b0;
+  --pain:#ef9a9a; --painbg:#3a1f1f; --opp:#81c784; --oppbg:#1f3322; --accent:#6fc2bb;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,"Segoe UI","Malgun Gothic",sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:24px;margin:0 0 6px}
+h2{font-size:18px;margin:32px 0 10px;border-left:4px solid var(--accent);padding-left:10px}
+h3{font-size:15px;margin:0 0 6px}
+p{margin:6px 0}
+.sub{color:var(--sub)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid currentColor;margin-right:4px;white-space:nowrap}
+.tF{color:var(--f)} .tI{color:var(--i)} .tU{color:var(--u)} .tV{color:var(--accent)}
+.note{font-size:13px;color:var(--sub)}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--line);font-size:12px;margin:2px 4px 2px 0}
+.ask{border:1px dashed var(--i)}
+.stages{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:8px}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.stage .n{font-size:12px;color:var(--sub)}
+.stage .t{font-weight:700;font-size:14px}
+@media (max-width:820px){
+  .stages{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .wrap{padding:16px}
+  table{font-size:13px}
+}
+.tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;background:var(--card)}
+th,td{border:1px solid var(--line);padding:8px;vertical-align:top;text-align:left}
+th{background:var(--line)}
+.pp{background:var(--painbg);border-left:4px solid var(--pain);padding:6px 8px;border-radius:6px;margin:4px 0}
+.op{background:var(--oppbg);border-left:4px solid var(--opp);padding:6px 8px;border-radius:6px;margin:4px 0}
+.lvl{font-weight:700;color:var(--pain)}
+svg text{fill:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>고객여정지도 — 평화시장 닭똥집골목 방문객 (v1)</h1>
+<p class="sub">기준일 2026-11-12 · 팀 내부 공유용 · 실제 리뷰 36건(VOC 통합표) + 기업 자료 5개 파일 · 6단계 (VOC 여정 단계 기준)</p>
+
+<div class="card ask">
+  <p><b>먼저 알아둘 점</b></p>
+  <ol style="margin:6px 0 0 18px;padding:0">
+    <li><b>VOC 대상 매장은 4사 매장이 아닙니다.</b> 똥집을 잘 아는 남자, 똥집대통령, 고인돌, 똥집본부는 독립 매장입니다. 따라서 VOC는 <b>시장 수준의 고객 경험</b>으로만 쓰고, 특정 기업의 페인포인트로 보지 않습니다.</li>
+    <li><b>기업 자료와 직접 연결되는 항목은 거의 없습니다.</b> 기업 자료 연결이 없는 항목은 <span class="tag tU">U</span>로 표시했습니다.</li>
+    <li><b>샘플 편향:</b> 고인돌·똥집대통령은 네이버 기본 정렬 상위 10건, 똥집본부는 최신순 10건을 읽었습니다. 경향만 말할 수 있고 비율은 확정할 수 없습니다.</li>
+    <li><b>강도:</b> 36건 중 강도 2(반복 불만)나 3(포기·손해)은 없습니다. 모든 불만은 1건씩 언급된 것입니다.</li>
+  </ol>
+</div>
+
+<h2>1. 고객 페르소나 (VOC 기반)</h2>
+<div class="grid g2">
+  <div class="card">
+    <h3>평화시장 닭똥집골목 방문 내국인</h3>
+    <p><span class="pill">가족 (아이 동반)</span><span class="pill">친구·동료 (맥주 한잔)</span><span class="pill">재방문 단골</span></p>
+    <p class="note"><span class="tag tV">VOC</span> 아이 동반 (V-28, V-29), 맥주·생맥 (V-10, V-27), 야구 관람 후 방문 (V-30), 몇 년째 단골 (V-12)</p>
+  </div>
+  <div class="card">
+    <h3>목표 (VOC에서 읽은 것)</h3>
+    <p>① 맛있는 똥집을 푸짐하게 먹기 · ② 가성비 (둘이 22,000원 수준) · ③ 편하게 앉아 먹기</p>
+    <p class="note"><span class="tag tV">VOC</span> 가격·양 (V-03, V-16, V-30), 셀프 편의 (V-03, V-35), 분위기 (V-03, V-09). 목표 문장은 해석입니다 <span class="tag tI">I</span>.</p>
+  </div>
+</div>
+
+<h2>2. 여정 요약 (VOC 여정 단계 6개)</h2>
+<div class="stages">
+  <div class="stage"><div class="n">1</div><div class="t">알아보기</div><div class="note">리뷰 0건 <span class="tag tU">U</span></div></div>
+  <div class="stage"><div class="n">2</div><div class="t">도착</div><div class="note">대기·주차</div></div>
+  <div class="stage"><div class="n">3</div><div class="t">둘러보기</div><div class="note">공간·분위기</div></div>
+  <div class="stage"><div class="n">4</div><div class="t">주문·결제</div><div class="note">물·수저·추가요금</div></div>
+  <div class="stage"><div class="n">5</div><div class="t">먹기</div><div class="note">맛·양·청결</div></div>
+  <div class="stage"><div class="n">6</div><div class="t">재방문</div><div class="note">단골·가족</div></div>
+</div>
+<p class="note">단계명은 VOC 통합표의 여정 단계와 같습니다. 1109 5단계와 맞추면 ①→1, ②→1, ③→1, ④→4, ⑤→5, ⑥→6으로 볼 수 있습니다 <span class="tag tI">I</span>.</p>
+
+<h2>3. 여정별 칭찬·불만 (VOC 건수)</h2>
+<div class="card">
+<svg viewBox="0 0 720 300" width="100%" role="img" aria-label="여정 단계별 칭찬과 불만 건수">
+  <!-- 칭찬 bars: scale 29 = 520px -->
+  <g font-size="13">
+    <text x="20" y="30">알아보기</text>
+    <text x="20" y="75">도착</text>
+    <text x="20" y="120">둘러보기</text>
+    <text x="20" y="165">주문·결제</text>
+    <text x="20" y="210">먹기</text>
+    <text x="20" y="255">재방문</text>
+  </g>
+  <g>
+    <rect x="130" y="14" width="0" height="16" fill="var(--accent)"/>
+    <rect x="130" y="34" width="0" height="16" fill="var(--pain)"/>
+    <rect x="130" y="59" width="18" height="16" fill="var(--accent)"/>
+    <rect x="130" y="79" width="18" height="16" fill="var(--pain)"/>
+    <rect x="130" y="104" width="18" height="16" fill="var(--accent)"/>
+    <rect x="130" y="124" width="0" height="16" fill="var(--pain)"/>
+    <rect x="130" y="149" width="36" height="16" fill="var(--accent)"/>
+    <rect x="130" y="169" width="18" height="16" fill="var(--pain)"/>
+    <rect x="130" y="194" width="520" height="16" fill="var(--accent)"/>
+    <rect x="130" y="214" width="71" height="16" fill="var(--pain)"/>
+    <rect x="130" y="239" width="90" height="16" fill="var(--accent)"/>
+    <rect x="130" y="259" width="0" height="16" fill="var(--pain)"/>
+  </g>
+  <g font-size="12">
+    <text x="140" y="27">칭찬 0</text>
+    <text x="140" y="47">불만 0</text>
+    <text x="156" y="72">칭찬 1</text>
+    <text x="156" y="92">불만 1</text>
+    <text x="156" y="117">칭찬 1</text>
+    <text x="140" y="137">불만 0</text>
+    <text x="174" y="162">칭찬 2</text>
+    <text x="156" y="182">불만 1</text>
+    <text x="658" y="207">칭찬 29</text>
+    <text x="210" y="227">불만 4</text>
+    <text x="228" y="252">칭찬 5</text>
+    <text x="140" y="272">불만 0</text>
+  </g>
+</svg>
+<p class="note"><span class="tag tV">VOC</span> 한 리뷰가 여러 단계에 걸치면 각 단계에 모두 셉니다. 먹기 단계의 칭찬 29건에는 V-05, V-07, V-19, V-25처럼 불만이 함께 있는 리뷰도 포함됩니다. 건수는 리뷰 기준이며, 샘플 편향이 있습니다.</p>
+</div>
+
+<h2>4. 단계별 여정 (고객 행동 · 접점 · 페인포인트 · 기회)</h2>
+<div class="tbl">
+<table>
+  <thead>
+    <tr><th style="width:11%">단계</th><th>고객이 하는 일 (VOC)</th><th>접점 (VOC 매장)</th><th>감정 <span class="note">(-2~+2, <span class="tag tI">I</span>)</span></th><th>페인포인트</th><th>기회 (칭찬 근거)</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>1. 알아보기</b></td>
+      <td>리뷰에 검색·정보 탐색 흔적이 없습니다 <span class="tag tU">U</span>.</td>
+      <td>네이버 플레이스 · 블로그 (VOC 출처) <span class="tag tV">VOC</span></td>
+      <td>해당 없음 <span class="tag tU">U</span></td>
+      <td><div class="pp"><span class="lvl">P0</span> 리뷰 0건 — 탐색 단계 불편은 근거가 없습니다 <span class="tag tU">U</span></div></td>
+      <td><div class="op">O0 탐색 단계 리뷰 수집 필요 (<span class="tag tI">I</span>)</div></td>
+    </tr>
+    <tr>
+      <td><b>2. 도착</b></td>
+      <td>저녁 피크 시간에 가고, 주차장을 찾습니다.</td>
+      <td>똥집대통령 (블로그 V-06), 똥집본부 (V-30 야구 우천취소 후 방문)</td>
+      <td>-1 (불편 1건, 칭찬 1건)</td>
+      <td>
+        <div class="pp"><span class="lvl">P1</span> 저녁 피크 시간에는 테이블이 빨리 찹니다. 대기 불편 1건. <span class="tag tV">VOC V-06</span> 강도 1</div>
+        <div class="pp"><span class="lvl">P2</span> 전용 주차장이 없습니다. 대중교통이나 시장 공영주차장을 써야 합니다. <span class="tag tV">VOC V-06</span> 강도 1</div>
+      </td>
+      <td><div class="op">O1 피크 시간 대기 안내 또는 예약 (<span class="tag tI">I</span>) · 기업 자료 연결 <span class="tag tU">U</span></div></td>
+    </tr>
+    <tr>
+      <td><b>3. 둘러보기</b></td>
+      <td>공간과 분위기를 봅니다.</td>
+      <td>고인돌 (V-25 화장실 깨끗), 골목 전반 (V-09 2층 통창)</td>
+      <td>+1 (칭찬 1건, 불만 0)</td>
+      <td><div class="pp">불만 없음. 다만 의자가 더럽다는 불만이 1건 있습니다 (P6 참조) <span class="tag tV">VOC V-25</span></div></td>
+      <td><div class="op">O2 통창·2층 개방감을 강점으로 알리기 (<span class="tag tV">VOC V-09</span>)</div></td>
+    </tr>
+    <tr>
+      <td><b>4. 주문·결제</b></td>
+      <td>물과 수저를 받고, 추가 메뉴(생수, 공기밥)를 고릅니다. 셀프 코너에서 반찬을 가져옵니다.</td>
+      <td>고인돌 (V-23 1점), 똥집대통령 (V-13 결제 칭찬), 고인돌 (V-22 모듬 18,000원)</td>
+      <td>0 (칭찬 2, 불만 1)</td>
+      <td>
+        <div class="pp"><span class="lvl">P3</span> 물을 줄 때 설명이 없고, 수저통과 셀프 코너에 수저·젓가락이 없습니다. <span class="tag tV">VOC V-23</span> 1점, 강도 1</div>
+        <div class="pp"><span class="lvl">P4</span> 생수 500원, 공기밥 1,500원이 추가 요금인데 사전 안내가 없었다는 불만입니다 (V-23과 같은 리뷰). <span class="tag tV">VOC V-23</span> 강도 1</div>
+      </td>
+      <td><div class="op">O3 주문 시 수저·물·추가요금 안내 (<span class="tag tI">I</span>) · 셀프바 편의 칭찬 (<span class="tag tV">VOC V-03, V-35</span>)</div></td>
+    </tr>
+    <tr>
+      <td><b>5. 먹기</b></td>
+      <td>똥집·치킨을 먹고 맛, 양, 청결을 평가합니다.</td>
+      <td>4개 매장 전체 <span class="tag tV">VOC</span></td>
+      <td>+1 (칭찬 29건, 불만 4건)</td>
+      <td>
+        <div class="pp"><span class="lvl">P5</span> 맛이 기대와 다릅니다. 양념은 인위적이고 후라이드는 양이 적다는 불만입니다 (똥집본부, V-07). 튀김에 기름이 많고 맛이 그저 그렇다는 불만도 있습니다 (고인돌, V-19). <span class="tag tV">VOC V-07, V-19</span> 강도 1</div>
+        <div class="pp"><span class="lvl">P6</span> 의자가 더럽다는 불만입니다. 화장실은 깨끗하다는 칭찬도 같은 리뷰에 있습니다 (고인돌, V-25). <span class="tag tV">VOC V-25</span> 강도 1</div>
+        <div class="pp"><span class="lvl">P7</span> 매운 정도가 기대보다 약하다는 불만입니다 (V-05). 반대로 양념은 맵다는 정보도 있습니다 (V-11, 일본어 원문, 번역 임시). <span class="tag tV">VOC V-05, V-11</span> 강도 1</div>
+      </td>
+      <td><div class="op">O4 간장 맛 칭찬을 활용한 메뉴 안내 (<span class="tag tV">VOC V-05, V-11, V-15, V-24</span>) · 떡튀김 사이드 (<span class="tag tV">VOC V-36</span>) · 매장에서 바로 먹는 편이 낫다는 의견 (<span class="tag tV">VOC V-20, V-21</span>)</div></td>
+    </tr>
+    <tr>
+      <td><b>6. 재방문</b></td>
+      <td>가족과 다시 오거나, 몇 년째 단골로 옵니다.</td>
+      <td>똥집대통령 (V-08, V-12, V-17), 똥집본부 (V-28, V-29)</td>
+      <td>+2 (칭찬 5건, 불만 0)</td>
+      <td><div class="pp">재방문 단계의 불만은 없습니다. 다만 재방문은 리뷰로 확인된 사례일 뿐이며, 재방문 비율은 <span class="tag tU">U</span>입니다.</div></td>
+      <td><div class="op">O5 단골 고객을 위한 가족 메뉴 또는 재방문 혜택 (<span class="tag tI">I</span>)</div></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2>5. 페인포인트 전체 목록</h2>
+<p class="note">모든 페인포인트는 강도 1(한 번 언급)입니다. 같은 불만이 여러 리뷰에서 반복되지 않았으므로, 우선순위는 영향과 실현 가능성 기준의 <span class="tag tI">I</span>입니다.</p>
+<div class="tbl">
+<table>
+  <thead>
+    <tr><th>ID</th><th>페인포인트</th><th>단계</th><th>VOC</th><th>강도</th><th>근거 등급</th><th>기업 자료 연결</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>P1</td><td>저녁 피크 시간 대기 (테이블이 빨리 참)</td><td>도착</td><td>V-06</td><td>1</td><td><span class="tag tV">VOC</span> <span class="tag tF">F</span> (개인 리뷰)</td><td><span class="tag tU">U</span></td></tr>
+    <tr><td>P2</td><td>전용 주차장 없음</td><td>도착</td><td>V-06</td><td>1</td><td><span class="tag tV">VOC</span> <span class="tag tF">F</span> (개인 리뷰)</td><td><span class="tag tU">U</span></td></tr>
+    <tr><td>P3</td><td>물 제공 시 설명 없음, 수저·젓가락 없음</td><td>주문·결제</td><td>V-23</td><td>1</td><td><span class="tag tV">VOC</span> <span class="tag tF">F</span> (1점 리뷰)</td><td><span class="tag tU">U</span></td></tr>
+    <tr><td>P4</td><td>추가요금(생수 500원, 공기밥 1,500원) 사전 안내 없음</td><td>주문·결제</td><td>V-23</td><td>1</td><td><span class="tag tV">VOC</span> <span class="tag tF">F</span> (1점 리뷰)</td><td><span class="tag tU">U</span></td></tr>
+    <tr><td>P5</td><td>양념이 인위적, 후라이드 양이 적음, 튀김 기름 많음, 맛이 그저 그럼</td><td>먹기</td><td>V-07, V-19</td><td>1</td><td><span class="tag tV">VOC</span> <span class="tag tF">F</span> (개인 리뷰)</td><td><span class="tag tU">U</span></td></tr>
+    <tr><td>P6</td><td>의자 청결 불만</td><td>먹기</td><td>V-25</td><td>1</td><td><span class="tag tV">VOC</span> <span class="tag tF">F</span> (개인 리뷰)</td><td><span class="tag tU">U</span></td></tr>
+    <tr><td>P7</td><td>매운 정도가 기대보다 약함</td><td>먹기</td><td>V-05</td><td>1</td><td><span class="tag tV">VOC</span> <span class="tag tF">F</span> (개인 리뷰)</td><td><span class="tag tU">U</span></td></tr>
+  </tbody>
+</table>
+</div>
+<p class="note"><b>기업 자료 연결 [U]:</b> 4사 파일에는 독립 매장의 대기·주차·수저·추가요금·청결 정보가 없습니다. 교촌의 간장 메뉴, bhc의 골드킹 등은 개인 리뷰로만 확인되며, 이 매장들과 직접 연결되지 않습니다.</p>
+
+<h2>6. 칭찬 기반 기회</h2>
+<div class="grid g2">
+  <div class="op"><b>셀프바·반찬 리필 편의</b><br><span class="note">V-03 (반찬 리필이 편함), V-35 (셀프바로 마음껏)</span></div>
+  <div class="op"><b>간장 맛 강점</b><br><span class="note">V-05 (양념보단 간장), V-11 (간장이 가장 맛있다), V-15 (간장맛이 절묘), V-24 (간장치킨 맛있어요)</span></div>
+  <div class="op"><b>가족 재방문</b><br><span class="note">V-12 (몇 년째 단골), V-28 (아이들과 다시), V-29 (아이들과 자주)</span></div>
+  <div class="op"><b>떡튀김 사이드</b><br><span class="note">V-36 (떡튀김을 꼭 먹어봐야 함)</span></div>
+</div>
+<p class="note"><span class="tag tI">I</span> 기회는 칭찬 리뷰에서 읽은 내용을 바탕으로 한 해석입니다. 실현 가능성은 확인하지 않았습니다.</p>
+
+<h2>7. 근거 등급 · 확인 필요</h2>
+<p class="note"><span class="tag tV">VOC</span> 실제 고객 리뷰 (36건 원문) · <span class="tag tF">F</span> 기업 자료·공식 자료 · <span class="tag tI">I</span> 해석 · <span class="tag tU">U</span> 미확인</p>
+<ul>
+  <li><b>불만 건수 불일치:</b> VOC 통합표 요약은 "불만 포함 리뷰 7건"이라고 쓰고 있지만, 원문 기준으로 세면 <b>6건</b>입니다 (V-05, V-06, V-07, V-19, V-23, V-25). V-11은 정보성 리뷰라서 불만에 넣지 않았습니다. 통합표 요약을 고쳐야 합니다.</li>
+  <li><b>V-11 일본어 원문:</b> 번역은 작성자 확인 전 임시 번역입니다. P7의 근거로 쓰지만 최종 발표 전에 확인해야 합니다.</li>
+  <li><b>플레이스 링크:</b> 리뷰별 개별 링크가 없어서 매장 플레이스 주소를 씁니다.</li>
+  <li><b>샘플 편향:</b> 상위 10건과 최신 10건만 읽었습니다. 고인돌 2,366건, 똥집대통령 798건, 똥집본부 721건 중 일부입니다. 페인포인트 비율은 말할 수 없습니다.</li>
+  <li><b>1단계 알아보기:</b> 리뷰에 탐색 과정이 없습니다. 이 단계는 U입니다.</li>
+  <li><b>기업 자료 연결:</b> 4사 파일과 VOC 매장은 직접 연결되지 않습니다. 이 여정지도는 시장 수준의 고객 경험으로 봐야 합니다.</li>
+</ul>
+
+</div>
+</body>
+</html>
