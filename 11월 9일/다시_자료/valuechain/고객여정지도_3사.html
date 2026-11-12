@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>여정 지도 층 구조 — 대구 1박 여행객 (여행산업 3사)</title>
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#1f2328; --sub:#5b6168; --line:#dfe2e6; --head:#2e8c85;
+  --pain:#c0392b; --opp:#2e7d32; --accent:#2e8c85; --i:#8a5a00; --u:#6b6b6b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16181b; --card:#1f2327; --ink:#e8eaed; --sub:#a4aab1; --line:#333940; --head:#3aa39b;
+    --pain:#ef9a9a; --opp:#81c784; --accent:#6fc2bb; --i:#ffcc80; --u:#b0b0b0;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16181b; --card:#1f2327; --ink:#e8eaed; --sub:#a4aab1; --line:#333940; --head:#3aa39b;
+  --pain:#ef9a9a; --opp:#81c784; --accent:#6fc2bb; --i:#ffcc80; --u:#b0b0b0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,"Segoe UI","Malgun Gothic",sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:24px 16px 40px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--sub);font-size:13px;margin:0}
+.badge{font-size:12px;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.panel{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 14px 18px;overflow-x:auto}
+.map{min-width:1040px}
+.row{display:grid;grid-template-columns:110px repeat(7,1fr);gap:8px;align-items:stretch}
+.lbl{font-weight:700;font-size:13px;display:flex;align-items:center}
+.hd{background:var(--head);color:#fff;border-radius:8px;padding:9px 6px;text-align:center;font-weight:700;font-size:13px}
+.cell{padding:8px 6px;text-align:center;font-size:12px;min-height:44px;display:flex;align-items:center;justify-content:center;white-space:pre-line;line-height:1.45}
+.thought{color:var(--sub);font-style:italic}
+.pain{color:var(--pain);font-weight:600}
+.opp{color:var(--opp);font-weight:600}
+.u{color:var(--u)}
+.emo{padding:6px 0}
+.emo svg{width:100%;height:150px;display:block}
+.sep{border-top:1px dashed var(--line);margin:10px 0}
+.foot{margin-top:12px;color:var(--sub);font-size:12px}
+.foot b{color:var(--i)}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:0 5px;border-radius:999px;border:1px solid currentColor;margin-left:2px}
+.tV{color:var(--accent)} .tI{color:var(--i)} .tU{color:var(--u)} .tF{color:var(--opp)} .tP{color:var(--pain)}
+.note{font-size:11px;color:var(--sub)}
+.persona{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card h3{margin:0 0 6px;font-size:14px}
+.card p{margin:4px 0;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="head">
+  <div>
+    <h1>여정 지도 층 구조 — <span style="color:var(--accent)">대구 1박 여행객</span> (여행산업 3사 기준)</h1>
+    <p class="sub">가로는 여정 7단계(수요→정보→기획→예약→이동→체류→사후), 세로는 층. 위에서 아래로 행동 → 생각 → 감정 → 터치포인트 → 페인포인트 → 기회 순으로 읽습니다.</p>
+  </div>
+  <div class="badge">3사 · 7단계 · 6층 · 기준 2026-11-12</div>
+</div>
+
+<div class="persona">
+  <div class="card">
+    <h3>고객 (가정) <span class="tag tI">I</span></h3>
+    <p>수도권·외국인 여행객 또는 가족. 대구에서 1박 2일로 낮 관광과 저녁 치킨을 원함.</p>
+    <p class="note">근거: 롯데 원페이저의 수도권·외국인 고객 가정, 대구 Threads 여행객 질문 9건 (표본)</p>
+  </div>
+  <div class="card">
+    <h3>3사가 닿는 접점 <span class="tag tF">F</span></h3>
+    <p><b>노랑풍선</b>: 직판(방문·홈페이지·앱), 제휴(홈쇼핑·대리점) <span class="tag tF">P</span></p>
+    <p><b>코레일네트웍스</b>: 승차권 예약·발매, 열차 상품 (대구 운영 근거 U)</p>
+    <p><b>롯데관광개발</b>: 대구지점·대구수성점·대구중구점, 대리점, 홈페이지 <span class="tag tF">F</span></p>
+  </div>
+  <div class="card">
+    <h3>근거 한계 <span class="tag tU">U</span></h3>
+    <p>3사 모두 대구 치킨 관광 상품의 운영 실적이 확인되지 않음. 고객 만족·재구매 데이터도 없음.</p>
+    <p class="note">Threads 반응은 개인 게시글 표본이며 대구 전체를 대표하지 않음.</p>
+  </div>
+</div>
+
+<div class="panel">
+<div class="map">
+
+  <div class="row" style="margin-bottom:10px">
+    <div class="lbl"></div>
+    <div class="hd">① 수요·동기</div>
+    <div class="hd">② 정보·영감</div>
+    <div class="hd">③ 상품 기획·선택</div>
+    <div class="hd">④ 예약·결제</div>
+    <div class="hd">⑤ 이동</div>
+    <div class="hd">⑥ 현지 체류</div>
+    <div class="hd">⑦ 사후</div>
+  </div>
+
+  <div class="row">
+    <div class="lbl">행동</div>
+    <div class="cell">대구 1박을 정함</div>
+    <div class="cell">블로그·Threads에서 맛집·코스 검색</div>
+    <div class="cell">패키지·열차 상품 비교</div>
+    <div class="cell">예약 · 결제 · 변경 문의</div>
+    <div class="cell">KTX·버스로 대구 이동</div>
+    <div class="cell">낮 관광 → 저녁 치킨, 골목 방문</div>
+    <div class="cell">리뷰 작성 · 재방문 결정</div>
+  </div>
+  <div class="sep"></div>
+
+  <div class="row">
+    <div class="lbl">생각 <span class="tag tI">I</span></div>
+    <div class="cell thought">"대구 1박 갈까?"</div>
+    <div class="cell thought">"무엇을 꼭 먹어야 하나?"</div>
+    <div class="cell thought">"먹고 보는 상품이 있나?"</div>
+    <div class="cell thought">"환불·변경은 어디서?"</div>
+    <div class="cell thought">"기차 표 있을까?"</div>
+    <div class="cell thought">"줄 길까? 주차는?"</div>
+    <div class="cell thought">"다시 와야지 / 다른 곳도"</div>
+  </div>
+  <div class="sep"></div>
+
+  <div class="row emo">
+    <div class="lbl">감정 <span class="tag tI">I</span></div>
+    <div style="grid-column:2 / span 7">
+      <svg viewBox="0 0 700 150" preserveAspectRatio="none" role="img" aria-label="감정 곡선 (가정)">
+        <line x1="0" y1="75" x2="700" y2="75" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="4" y="20" font-size="11" fill="var(--sub)">+2</text>
+        <text x="4" y="72" font-size="11" fill="var(--sub)">0</text>
+        <text x="4" y="140" font-size="11" fill="var(--sub)">-2</text>
+        <!-- 점수 → y = 75 - 30×점수. ①0 ②-1 ③0 ④-1 ⑤-1 ⑥+1 ⑦+1 -->
+        <path d="M50,75 C 100,75 120,105 150,105 S 200,75 250,75 S 300,105 350,105 S 400,105 450,105 S 550,45 600,45 S 650,45 680,45" fill="none" stroke="var(--accent)" stroke-width="3"/>
+        <circle cx="50" cy="75" r="5" fill="var(--accent)"/>
+        <circle cx="150" cy="105" r="5" fill="var(--pain)"/>
+        <circle cx="250" cy="75" r="5" fill="var(--accent)"/>
+        <circle cx="350" cy="105" r="5" fill="var(--pain)"/>
+        <circle cx="450" cy="105" r="5" fill="var(--pain)"/>
+        <circle cx="550" cy="45" r="5" fill="var(--opp)"/>
+        <circle cx="650" cy="45" r="5" fill="var(--opp)"/>
+      </svg>
+    </div>
+  </div>
+  <div class="sep"></div>
+
+  <div class="row">
+    <div class="lbl">터치포인트</div>
+    <div class="cell">대구 관광 수요 자료 <span class="tag tU">U</span></div>
+    <div class="cell">블로그 · Threads · 플레이스 리뷰</div>
+    <div class="cell">노랑풍선 직판·대리점 <span class="tag tF">F</span><br>롯데 대구지점 <span class="tag tF">F</span></div>
+    <div class="cell">노랑풍선 앱·홈페이지 <span class="tag tF">F</span><br>KNPARK 열차 예약 <span class="tag tF">F</span></div>
+    <div class="cell">승차권 발매 (코레일) <span class="tag tF">F</span></div>
+    <div class="cell">골목 매장 · 셀프바 · 동성로 <span class="tag tV">VOC</span></div>
+    <div class="cell">플랫폼 리뷰 · 재방문 <span class="tag tU">U</span></div>
+  </div>
+  <div class="sep"></div>
+
+  <div class="row">
+    <div class="lbl">페인포인트</div>
+    <div class="cell pain">P1 대구 여행 정보를 찾기 어려움<br><span class="note">Threads 질문 9건 (표본) <span class="tag tV">Threads</span></span></div>
+    <div class="cell pain">P2 대구 치킨 관광 상품이 공개돼 있지 않음<br><span class="note">3사 모두 근거 U</span></div>
+    <div class="cell pain">P3 예약 창구가 회사마다 달라 비교가 어려움<br><span class="note">판매 채널 U <span class="tag tI">I</span></span></div>
+    <div class="cell pain">P4 대구행 기차 매진<br><span class="note">Threads 1건 (2026-07-29) <span class="tag tV">Threads</span></span></div>
+    <div class="cell pain">P5 피크 대기 · 전용 주차 없음<br><span class="note">VOC V-06 · 대기 45분 Threads</span></div>
+    <div class="cell pain">P6 추가요금·수저 안내 부족<br><span class="note">VOC V-23 (1점)</span></div>
+    <div class="cell u">P7 리뷰·재구매 데이터 없음<br><span class="note">3사 모두 U</span></div>
+  </div>
+  <div class="sep"></div>
+
+  <div class="row">
+    <div class="lbl">기회</div>
+    <div class="cell opp">대구 정보 한 곳에 모은 안내 <span class="tag tI">I</span></div>
+    <div class="cell opp">대구 치킨 1박 상품 기획 (O1) <span class="tag tI">I</span></div>
+    <div class="cell opp">예약 창구·취소 규칙 한 화면에 <span class="tag tI">I</span></div>
+    <div class="cell opp">열차 + 식사 + 체험 묶음 (춘천 사례 참고) <span class="tag tF">F</span></div>
+    <div class="cell opp">피크 시간 안내·예약 구간 <span class="tag tI">I</span></div>
+    <div class="cell opp">수저·물·추가요금 사전 안내 <span class="tag tI">I</span></div>
+    <div class="cell opp">재방문 혜택·리뷰 수집 <span class="tag tI">I</span></div>
+  </div>
+
+</div>
+</div>
+
+<div class="foot">
+  <p><b>읽는 법:</b> 감정 곡선은 +2(좋음)~-2(나쁨)이며 <span class="tag tI">I</span> 가정 값입니다. 빨간 점은 불만이 있는 단계입니다.</p>
+  <p><b>근거:</b> <span class="tag tF">F</span> 원페이저·저장 자료 · <span class="tag tF">P</span> DART 대조 (노랑풍선 판매 채널 구조) · <span class="tag tV">VOC</span> 평화시장 닭똥집골목 리뷰 36건 (독립 매장, 3사와 무관) · <span class="tag tV">Threads</span> 대구 여행객 게시글 표본 (개인 주관, 사실 확인 없음) · <span class="tag tI">I</span> 해석 · <span class="tag tU">U</span> 미확인.</p>
+  <p><b>주의:</b> 평화시장 VOC의 매장은 3사의 매장이 아닙니다. 페인포인트 P5·P6은 시장 수준의 불편으로만 읽습니다. 3사의 대구 운영 실적은 확인되지 않았습니다.</p>
+</div>
+
+</div>
+</body>
+</html>
