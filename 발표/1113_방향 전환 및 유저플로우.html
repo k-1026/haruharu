@@ -86,6 +86,7 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:19px;width:8px;hei
 .jm .dim{opacity:.5}
 .flowsvg{width:100%;height:auto;margin-top:14px;display:block}
 .flowsvg text{font-family:"Noto Sans KR",system-ui,sans-serif}
+.mermaid svg{max-width:100%!important;height:auto;max-height:430px}
 .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:15px;color:var(--muted);margin-top:10px;align-items:center}
 .legend i{display:inline-block;width:26px;height:0;border-top:3px solid var(--muted);vertical-align:middle;margin-right:6px}
 .legend i.dash{border-top:3px dashed var(--accent)}
@@ -424,7 +425,48 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:19px;width:8px;hei
   <div class="sec">3 · 서비스 흐름 — 유저플로우</div>
   <h2>담당자 기획 흐름과 예외 경로</h2>
   <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0;margin-top:14px">
-    <img src="flow_userflow.png" alt="유저플로우 순서도: 시작, S1 기획 조건, S2 수요 근거, S3 코스 검토, S4 홍보 검토, S5 PDF 저장, 완료, 예외 경로 포함" style="width:100%;max-height:100%;object-fit:contain;background:#fff;border-radius:6px;border:1px solid var(--line)">
+    <pre class="mermaid" style="width:100%;margin:0;text-align:center">
+flowchart LR
+  START(["시작 · 기획 시작"]) -->|"조건 입력"| S1["S1 기획 조건 입력<br/>월·계절·국가·기간·예산"]
+  S1 --> D1{"필수 조건<br/>입력됨?"}
+  D1 -.->|"아니오 · 다시 입력"| S1
+  D1 -->|"예 · 숙박형 또는 당일형"| S2["S2 수요 근거 확인<br/>지역·소비·활동 구분"]
+  S2 --> D2{"담당자 확인<br/>출처·시점 확인됨?"}
+  D2 -->|"예"| S3["S3 코스 검토·수정<br/>중구→동구 기본안 · 스탬프 설정"]
+  D2 -.->|"아니오 · E1 근거 부족"| D3{"진행 방식 선택"}
+  D3 -.->|"조건 변경"| S1
+  D3 -.->|"자료 재검토"| S2
+  D3 -.->|"한계 표시 후 진행"| S3
+  S3 --> D4{"담당자 확인<br/>운영 조건 충돌?"}
+  D4 -.->|"예 · E2 담당자 수정"| S3
+  D4 -->|"아니오"| S4["S4 홍보 콘텐츠 검토<br/>방향·문구·번역"]
+  S4 --> D5{"코스 수정 필요?"}
+  D5 -.->|"예 · E3 S3에서 수정 후 재검토"| S3
+  D5 -->|"아니오"| S5["S5 기획안 PDF 저장"]
+  S5 --> D6{"저장 성공?"}
+  D6 -.->|"아니오 · E5 재시도"| S5
+  D6 -->|"예"| END(["완료 · 기획안 PDF"])
+  END -.-> FOLLOW["후속 업무<br/>운영 주체 전달 (범위 밖)"]
+
+  classDef term fill:#1e2a4a,stroke:#1e2a4a,color:#ffffff
+  classDef dec fill:#fff8e6,stroke:#d98b00,color:#1f2937
+  classDef s1 fill:#e8f0fd,stroke:#2f6fdb,stroke-width:2px,color:#1f2937
+  classDef s2 fill:#e6f6f4,stroke:#0e9384,stroke-width:2px,color:#1f2937
+  classDef s3 fill:#f0ebfb,stroke:#7a4fd0,stroke-width:2px,color:#1f2937
+  classDef s4 fill:#fbe9f2,stroke:#c2417f,stroke-width:2px,color:#1f2937
+  classDef s5 fill:#f0f5e6,stroke:#557a1a,stroke-width:2px,color:#1f2937
+  classDef out fill:#f3f4f6,stroke:#9ca3af,color:#4b5563
+  class START,END term
+  class D1,D2,D3,D4,D5,D6 dec
+  class S1 s1
+  class S2 s2
+  class S3 s3
+  class S4 s4
+  class S5 s5
+  class FOLLOW out
+  linkStyle 2,6,7,8,9,11,14,17 stroke:#e8730c,stroke-width:2px,stroke-dasharray:6 4,color:#9a3f00
+  linkStyle 19 stroke:#9ca3af,stroke-dasharray:3 3
+</pre>
   </div>
   <div class="legend"><span><i></i>정상 진행</span><span><i class="dash"></i>예외·수정 경로</span></div>
   <div class="src"><b>출처</b> 팀 설계 문서 「유저플로우 초안 v0」·userflow.md(2026-11-13). 설계안이며 실제 이용자 검증 전</div>
@@ -432,3 +474,7 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:19px;width:8px;hei
 </section>
 
 </main>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  try { mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'neutral', flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' } }); } catch (e) {}
+</script>
