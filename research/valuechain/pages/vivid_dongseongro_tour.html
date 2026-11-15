@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>비비드 동성로 투어</title>
+<style>
+:root{
+ --bg:#f5f6f4; --fg:#1d2330; --muted:#5f6670; --card:#ffffff; --line:#dfe3e0; --accent:#1f6f66;
+ --f:#15803d; --f-bg:#e7f5ec; --u:#6b7280; --u-bg:#eef0f2; --i:#c2410c; --i-bg:#fdf0e6;
+ --money-bg:#FEF6E4; --money-ink:#9A5B00; --data-bg:#E9F0FC; --data-ink:#2558B8; --cost:#E8603C; --opp:#7DB83A;
+}
+@media (prefers-color-scheme: dark){
+ :root:not([data-theme="light"]){
+ --bg:#15171c; --fg:#eceef2; --muted:#a3aab5; --card:#20242c; --line:#353b46; --accent:#7fd1c6;
+ --f:#86efac; --f-bg:#1d3327; --u:#9ca3af; --u-bg:#2a2e37; --i:#fdba74; --i-bg:#3a2a1d;
+ --money-bg:#3a2e14; --money-ink:#fdba74; --data-bg:#1c2640; --data-ink:#93b4ff;
+ }
+}
+:root[data-theme="dark"]{
+ --bg:#15171c; --fg:#eceef2; --muted:#a3aab5; --card:#20242c; --line:#353b46; --accent:#7fd1c6;
+ --f:#86efac; --f-bg:#1d3327; --u:#9ca3af; --u-bg:#2a2e37; --i:#fdba74; --i-bg:#3a2a1d;
+ --money-bg:#3a2e14; --money-ink:#fdba74; --data-bg:#1c2640; --data-ink:#93b4ff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;line-height:1.65}
+main{max-width:980px;margin:0 auto;padding:16px}
+a{color:var(--accent)}
+nav.top{display:flex;flex-wrap:wrap;gap:8px;font-size:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+nav.top a{text-decoration:none;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+h1{font-size:1.5rem;margin:18px 0 6px}
+h2{font-size:1.15rem;margin:28px 0 10px;border-left:4px solid var(--accent);padding-left:10px}
+.summary{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;font-size:14px}
+.summary b{color:var(--muted);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:14px 0 0;font-size:13px;color:var(--muted);align-items:center}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 7px;border-radius:4px;border:1px solid currentColor;white-space:nowrap}
+.tag.f{color:var(--f);background:var(--f-bg)} .tag.u{color:var(--u);background:var(--u-bg)} .tag.i{color:var(--i);background:var(--i-bg)}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px}
+.card h3{font-size:14px;margin:0 0 6px;color:var(--accent)}
+.card ul{margin:0;padding-left:18px}
+.card li{margin:3px 0}
+/* 가치사슬 */
+.chain{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;overflow-x:auto}
+.row{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:8px;min-width:820px}
+.act{background:#E7F5F1;border:1px solid #9FD4C6;border-radius:8px;padding:8px;font-size:12.5px;color:#1E2B2F}
+.act b{display:block;font-size:13.5px;margin-bottom:3px}
+.stake{border:1px dashed var(--line);border-radius:8px;padding:6px 8px;font-size:12.5px;background:var(--bg)}
+.lbl{min-width:820px;font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 4px}
+.band{min-width:820px;border-radius:8px;padding:8px 10px;font-size:13px;margin-top:6px}
+.band.money{background:var(--money-bg);color:var(--money-ink)}
+.band.data{background:var(--data-bg);color:var(--data-ink)}
+.mk{display:inline-block;font-size:11px;font-weight:700;padding:0 5px;border-radius:4px;margin-right:4px;color:#fff}
+.mk.B{background:#b91c1c} .mk.C{background:var(--cost)} .mk.O{background:var(--opp)} .mk.X{background:#555}
+.band.mark{background:var(--bg);border:1px solid var(--line)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+ol.check{padding-left:20px;font-size:14px} ol.check li{margin:6px 0}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+@media (max-width:760px){ .summary,.cards{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<main>
+
+<nav class="top">
+  <a href="index.html">← 허브 (관점별 목록)</a>
+  <a href="../valuechain_v2.0.html">최종 맵</a>
+  <a href="#refs">근거 목록</a>
+</nav>
+
+<h1>비비드 동성로 투어 (Pick &amp; Go)</h1>
+<div class="summary">
+  <div><b>운영 주체</b> 대구 중구청 관광콘텐츠팀 <span class="tag f">F</span></div>
+  <div><b>유형</b> 구청 발주·운영 사례 (저조) <span class="tag f">F</span></div>
+  <div><b>기간</b> 2026.03 ~ 12 (운영 계획) <span class="tag f">F</span></div>
+  <div><b>관점</b> 발주·용역 (1차), 운영 현황, 실행 파트너</div>
+  <div style="grid-column:1/-1"><b>한 줄 요약</b> 중구청이 테마 조합형 투어를 발주했지만, 실제 운영은 1회, 참여 2명에 그쳤습니다. 홍보 부족과 근대골목 투어와의 노선 중복이 원인으로 보도됐습니다.</div>
+</div>
+
+<div class="legend">
+  <span><span class="tag f">F</span> 확인된 사실 (출처 번호)</span>
+  <span><span class="tag u">U</span> 미확인 (자료 없음)</span>
+  <span><span class="tag i">I</span> 해석</span>
+</div>
+
+<h2>1. 리서치 (여덟 칸)</h2>
+<div class="cards">
+  <div class="card"><h3>기관 개요</h3><ul>
+    <li><span class="tag f">F</span> 중구청 관광콘텐츠팀이 운영 (V-04, V-05)</li>
+    <li><span class="tag f">F</span> 동성로가 2024.07 대구 첫 관광특구로 지정된 뒤 콘텐츠 보강 목적 (V-14)</li>
+  </ul></div>
+  <div class="card"><h3>사업 모델 · 누구에게 · 무엇을</h3><ul>
+    <li><span class="tag f">F</span> 대상: 외국인 관광객 중심, 내국인도 참여 가능 (V-05, V-14)</li>
+    <li><span class="tag f">F</span> 7개 테마(역사·문화, 놀이·체험, 힐링, 미식, K-뷰티·패션, 한류, 야간경관)에서 방문지를 골라 코스를 짬 (V-05)</li>
+  </ul></div>
+  <div class="card"><h3>사업 모델 · 어떻게 전달</h3><ul>
+    <li><span class="tag f">F</span> 해설사 동행 또는 개별 투어, 해설 5개 언어 (V-05)</li>
+    <li><span class="tag f">F</span> 신청: 구청 누리집, 전화, 관광안내소 (V-05)</li>
+    <li><span class="tag f">F</span> SNS 인증 시 기념품 (V-04)</li>
+  </ul></div>
+  <div class="card"><h3>사업 모델 · 어떻게 돈 · 얼마나 들어</h3><ul>
+    <li><span class="tag f">F</span> 예산 1,500여만 원 (V-04)</li>
+    <li><span class="tag f">F</span> 해설사 비용은 무료 (V-05)</li>
+    <li><span class="tag u">U</span> 참여자 자부담 금액 (현장 직원은 자부담이 장벽이라고 언급, V-04)</li>
+  </ul></div>
+  <div class="card"><h3>실적</h3><ul>
+    <li><span class="tag f">F</span> 실제 운영 1회, 참여 2명 (대만인 관광객) (V-04)</li>
+    <li><span class="tag f">F</span> 참여자는 3·1만세운동길과 계산예가를 방문, 동성로 상권 업소는 이용하지 않음 (V-04)</li>
+    <li><span class="tag u">U</span> 구청의 공식 실적 자료 (요청 필요)</li>
+  </ul></div>
+  <div class="card"><h3>저조 원인 (언론 보도 기준)</h3><ul>
+    <li><span class="tag f">F</span> 외국어 홍보물이 영문 팸플릿뿐 (V-04, V-05)</li>
+    <li><span class="tag f">F</span> 기존 근대골목 투어(1~5코스)와 노선이 겹침 (V-04)</li>
+    <li><span class="tag f">F</span> 구청 홈페이지에는 배너만, 코스 안내 없음 (V-04)</li>
+    <li><span class="tag i">I</span> 구청은 사업 초기 홍보 부족을 인정, 영문 카드뉴스로 보강 계획 (V-04)</li>
+  </ul></div>
+  <div class="card" style="border-color:var(--accent)"><h3>우리 자산과의 접점</h3><ul>
+    <li><span class="tag i">I</span> 우리 도구가 풀려는 문제(다국어 홍보 부족, 상품 중복, 방향 불분명)와 같음</li>
+    <li><span class="tag i">I</span> 근대골목 투어의 4개 언어 팸플릿은 재사용 가능한 자산</li>
+    <li><span class="tag i">I</span> 치킨은 동성로 미식 테마의 선택지로 연결 가능 (메인 아님)</li>
+  </ul></div>
+  <div class="card"><h3>미확인 · 충돌</h3><ul>
+    <li><span class="tag u">U</span> 목표 참여 인원, 세부 일정, 가격 (기사에 없음)</li>
+    <li><span class="tag u">U</span> 2026년 하반기 이후 운영 여부 (최신 보도 확인 안 됨)</li>
+    <li><span class="tag u">U</span> 발주 방식(수의·입찰), 계약 금액 중 용역비 구조</li>
+  </ul></div>
+</div>
+
+<h2>2. 가치사슬</h2>
+<div class="chain">
+  <div class="lbl">활동 (단계)</div>
+  <div class="row">
+    <div class="act"><b>1 기획·테마 설계</b>7개 테마 조합형 코스 설계 <span class="tag f">F</span></div>
+    <div class="act"><b>2 홍보·정보</b>영문 팸플릿, 구청 배너만 <span class="mk B">B</span>(② 홍보 부족)</div>
+    <div class="act"><b>3 모집·신청</b>누리집·전화·안내소 <span class="tag f">F</span></div>
+    <div class="act"><b>4 현장 운영</b>해설사 동행, 실제 1회 운영 <span class="mk B">B</span>(④ 참여 2명)</div>
+    <div class="act"><b>5 보상·사후</b>SNS 인증 기념품, 실적 공개 없음 <span class="mk X">✕</span></div>
+  </div>
+
+  <div class="lbl">이해관계자 (굵게 = 하는 사람, 괄호 = 영향 주는 사람)</div>
+  <div class="row">
+    <div class="stake"><b>중구청 관광콘텐츠팀</b> (예산 집행)</div>
+    <div class="stake"><b>중구청 관광콘텐츠팀</b> (홍보 계획)</div>
+    <div class="stake"><b>구청 누리집·안내소</b> (신청 창구)</div>
+    <div class="stake"><b>해설사</b> (보수 [U])</div>
+    <div class="stake"><b>구청</b> (실적 집계 [U])</div>
+  </div>
+  <div class="row" style="margin-top:6px">
+    <div class="stake">(기존 근대골목 투어 · 노선 중복) <span class="tag f">F</span></div>
+    <div class="stake">(동성로 상권 · 참여 못 함) <span class="tag f">F</span></div>
+    <div class="stake">(참여자 · 자부담 [U])</div>
+    <div class="stake">[U]</div>
+    <div class="stake">[U]</div>
+  </div>
+
+  <div class="lbl">돈 흐름 (시작점 → 흐름 → 끝점)</div>
+  <div class="band money">중구 예산 1,500여만 원 <span class="tag f">F</span> → 구청 사업 운영 → 참여자 자부담 [U] (<span class="mk C">C</span> 참여 장벽) / 해설사 무료 <span class="tag f">F</span></div>
+
+  <div class="lbl">데이터 흐름 (데이터명 · 보유자)</div>
+  <div class="band data">신청 기록 · 구청 [U] → 방문 기록 · 구청 [U] → 실적 집계 · 구청 [U] → 공개 <span class="mk X">✕</span> 공개되지 않음 (⑤ 사후 단절)</div>
+
+  <div class="lbl">마커 (칸 위 표시)</div>
+  <div class="band mark">
+    <span class="mk B">B</span>병목 (② 홍보 부족, ④ 참여 2명) &nbsp;
+    <span class="mk C">C</span>비용 (참여자 자부담 [U]) &nbsp;
+    <span class="mk O">O</span>기회·강점 (4개 언어 자산 재사용) &nbsp;
+    <span class="mk X">✕</span>단절 (⑤ 실적 공개 없음)
+  </div>
+  <p class="note">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람 · 칸의 사실은 리서치 칸과 같은 출처 번호를 씁니다.</p>
+</div>
+
+<h2>3. 점검</h2>
+<ol class="check">
+  <li><span class="tag f">F</span> 지금 병목: 홍보 부족, 노선 중복, 상권 연결 실패, 참여 2명 (V-04)</li>
+  <li><span class="tag i">I</span> 보완 방향: 근대골목과 노선을 나눠 차별화, 상권 업소를 코스에 포함, 영문 외 언어 홍보물 추가</li>
+  <li><span class="tag u">U</span> 실적 데이터 공개 방식 (구청에 요청 후 확인)</li>
+</ol>
+<div class="card" style="margin-top:10px"><h3>유지할 강점</h3><ul>
+  <li><span class="tag f">F</span> 7테마 조합형 구조, 해설 5개 언어 무료 (V-05)</li>
+</ul></div>
+
+<h2 id="refs">4. 근거 목록</h2>
+<table>
+  <tr><th>번호</th><th>자료명</th><th>발행처·날짜</th><th>등급</th><th>링크</th></tr>
+  <tr><td>V-04</td><td>대구 중구청 비비드 동성로 투어 '개점휴업' (실적·저조 원인)</td><td>대구일보, 2026.06.11</td><td>F-2차 (언론)</td><td><a href="https://www.idaegu.com/news/articleView.html?idxno=663559">idaegu 663559</a></td></tr>
+  <tr><td>V-05</td><td>Pick&amp;Go 비비드 동성로 투어 운영 안내</td><td>뉴시스, 2026.03.22</td><td>F-2차 (언론)</td><td><a href="https://www.newsis.com/view/NISX20260322_0003558726">newsis NISX20260322_0003558726</a></td></tr>
+  <tr><td>V-14</td><td>Pick&amp;Go 비비드 동성로 투어 첫 운영 (3.23 보도)</td><td>대구일보, 2026.03.23</td><td>F-2차 (언론)</td><td><a href="https://www.idaegu.com/news/articleView.html?idxno=659053">idaegu 659053</a></td></tr>
+</table>
+
+</main>
+</body>
+</html>

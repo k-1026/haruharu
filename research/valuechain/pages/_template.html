@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사례 페이지 틀</title>
+<style>
+:root{
+ --bg:#f5f6f4; --fg:#1d2330; --muted:#5f6670; --card:#ffffff; --line:#dfe3e0; --accent:#1f6f66;
+ --f:#15803d; --f-bg:#e7f5ec; --u:#6b7280; --u-bg:#eef0f2; --i:#c2410c; --i-bg:#fdf0e6;
+ --money:#E8930C; --money-bg:#FEF6E4; --data:#2F6FE0; --data-bg:#E9F0FC; --cost:#E8603C; --opp:#7DB83A;
+}
+@media (prefers-color-scheme: dark){
+ :root:not([data-theme="light"]){
+ --bg:#15171c; --fg:#eceef2; --muted:#a3aab5; --card:#20242c; --line:#353b46; --accent:#7fd1c6;
+ --f:#86efac; --f-bg:#1d3327; --u:#9ca3af; --u-bg:#2a2e37; --i:#fdba74; --i-bg:#3a2a1d;
+ --money-bg:#3a2e14; --data-bg:#1c2640;
+ }
+}
+:root[data-theme="dark"]{
+ --bg:#15171c; --fg:#eceef2; --muted:#a3aab5; --card:#20242c; --line:#353b46; --accent:#7fd1c6;
+ --f:#86efac; --f-bg:#1d3327; --u:#9ca3af; --u-bg:#2a2e37; --i:#fdba74; --i-bg:#3a2a1d;
+ --money-bg:#3a2e14; --data-bg:#1c2640;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;line-height:1.65}
+main{max-width:980px;margin:0 auto;padding:16px}
+a{color:var(--accent)}
+nav.top{display:flex;flex-wrap:wrap;gap:8px;font-size:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+nav.top a{text-decoration:none;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+h1{font-size:1.5rem;margin:18px 0 6px}
+h2{font-size:1.15rem;margin:28px 0 10px;border-left:4px solid var(--accent);padding-left:10px}
+.summary{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;font-size:14px}
+.summary b{color:var(--muted);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:14px 0 0;font-size:13px;color:var(--muted);align-items:center}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 7px;border-radius:4px;border:1px solid currentColor;white-space:nowrap}
+.tag.f{color:var(--f);background:var(--f-bg)} .tag.u{color:var(--u);background:var(--u-bg)} .tag.i{color:var(--i);background:var(--i-bg)}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px}
+.card h3{font-size:14px;margin:0 0 6px;color:var(--accent)}
+.card ul{margin:0;padding-left:18px}
+.chain{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;overflow-x:auto}
+.steps{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:6px;min-width:840px}
+.step{border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;background:var(--bg)}
+.step b{display:block;font-size:13px;margin-bottom:4px}
+.band{min-width:840px;margin-top:8px;border-radius:8px;padding:8px 10px;font-size:12px}
+.band.money{background:var(--money-bg)} .band.data{background:var(--data-bg)}
+.mk{display:inline-block;font-size:11px;font-weight:700;padding:0 5px;border-radius:4px;margin-right:4px}
+.mk.B{background:#fde2e2;color:#b91c1c} .mk.C{background:var(--cost);color:#fff} .mk.O{background:var(--opp);color:#fff} .mk.X{background:#ddd;color:#222}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+ol.check{padding-left:20px;font-size:14px} ol.check li{margin:6px 0}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+@media (max-width:760px){ .summary,.cards{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<main>
+
+<nav class="top">
+  <a href="index.html">← 허브 (관점별 목록)</a>
+  <a href="../valuechain_v2.0.html">최종 맵</a>
+  <a href="#refs">근거 목록</a>
+</nav>
+
+<h1>[사례 이름]</h1>
+<div class="summary">
+  <div><b>운영 주체</b> [미정]</div>
+  <div><b>유형</b> [발주 사례 / 운영 사례 / 참고 사례]</div>
+  <div><b>기간</b> [미정]</div>
+  <div><b>관점</b> [발주·용역 / 예산·수익 / 자격 / 운영 현황 / 수요 / 실행 파트너]</div>
+  <div style="grid-column:1/-1"><b>한 줄 요약</b> [미정]</div>
+</div>
+
+<div class="legend">
+  <span><span class="tag f">F</span> 확인된 사실 (출처 번호)</span>
+  <span><span class="tag u">U</span> 미확인 (자료 없음)</span>
+  <span><span class="tag i">I</span> 해석</span>
+</div>
+
+<h2>1. 리서치 (여덟 칸)</h2>
+<div class="cards">
+  <div class="card"><h3>기관 개요</h3><ul><li>[F/U/I] 내용 [출처 번호]</li></ul></div>
+  <div class="card"><h3>사업 모델 · 누구에게</h3><ul><li>[F/U/I] 내용</li></ul></div>
+  <div class="card"><h3>사업 모델 · 무엇을 · 어떻게 전달</h3><ul><li>[F/U/I] 내용</li></ul></div>
+  <div class="card"><h3>사업 모델 · 어떻게 돈 · 얼마나 들어</h3><ul><li>[F/U/I] 내용</li></ul></div>
+  <div class="card"><h3>주요 서비스 · 최근 동향</h3><ul><li>[F/U/I] 내용</li></ul></div>
+  <div class="card"><h3>산업 내 위치 · 확장 경로</h3><ul><li>[F/U/I] 내용</li></ul></div>
+  <div class="card" style="border-color:var(--accent)"><h3>우리 자산과의 접점</h3><ul><li>[I] 중구청 장소·안내소·치킨 선택지·계절 집계와 어떻게 맞닿는지</li></ul></div>
+  <div class="card"><h3>미확인 · 충돌</h3><ul><li>[U] 내용</li></ul></div>
+</div>
+
+<h2>2. 가치사슬</h2>
+<div class="chain">
+  <div class="steps">
+    <div class="step"><b>① 수요·동기</b>[활동 한 줄]</div>
+    <div class="step"><b>② 정보·영감</b>[활동 한 줄]</div>
+    <div class="step"><b>③ 상품 기획</b>[활동 한 줄]</div>
+    <div class="step"><b>④ 유통·예약</b>[활동 한 줄]</div>
+    <div class="step"><b>⑤ 이동</b>[활동 한 줄]</div>
+    <div class="step"><b>⑥ 현지 체류</b>[활동 한 줄]</div>
+    <div class="step"><b>⑦ 사후·성과</b>[활동 한 줄]</div>
+  </div>
+  <div class="steps" style="margin-top:8px">
+    <div class="step"><b>이해관계자</b>(영향) <b>굵게</b> = 하는 사람 [U]</div>
+    <div class="step">[주체]</div>
+    <div class="step">[주체]</div>
+    <div class="step">[주체]</div>
+    <div class="step">[주체]</div>
+    <div class="step">[주체]</div>
+    <div class="step">[주체]</div>
+  </div>
+  <div class="band money">💰 돈 흐름 (시작점 명시) : [금액 또는 U] → [흐름] → [끝점]</div>
+  <div class="band data">📊 데이터 흐름 : [데이터명 · 보유자] → [다음 단계]</div>
+  <div class="band" style="background:var(--bg)">
+    <span class="mk B">B</span>병목 · <span class="mk C">C</span>비용 · <span class="mk O">O</span>기회·강점 · <span class="mk X">✕</span>단절 : [칸 위치와 괄호 상태]
+  </div>
+  <p class="note">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람 · 칸의 사실은 리서치 칸과 같은 출처 번호를 씁니다.</p>
+</div>
+
+<h2>3. 점검</h2>
+<ol class="check">
+  <li>지금 병목: [내용] [근거 또는 I]</li>
+  <li>보완해야 할 점: [내용] [근거 또는 I]</li>
+</ol>
+<div class="card" style="margin-top:10px"><h3>유지할 강점</h3><ul><li>[내용] [근거]</li></ul></div>
+
+<h2 id="refs">4. 근거 목록</h2>
+<table>
+  <tr><th>번호</th><th>자료명</th><th>발행처·날짜</th><th>등급</th><th>링크 / 위치</th></tr>
+  <tr><td>1</td><td>[자료명]</td><td>[발행처, 날짜]</td><td>F-2차 / I / U</td><td>[URL 또는 로컬 경로]</td></tr>
+</table>
+
+</main>
+</body>
+</html>
