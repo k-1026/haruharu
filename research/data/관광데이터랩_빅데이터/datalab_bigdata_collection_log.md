@@ -4,7 +4,7 @@
 - 대상 메뉴: 한국관광데이터랩 > **빅데이터** (이동통신 · 신용카드 · 내비게이션). 지역별 현황 메뉴는 수집 대상이 아니다.
 - 지역: 대구광역시 중구, 대구광역시 동구. 기준선(대구광역시 전체)은 포함하지 않았다.
 - 상태: 수집 기록. 사람 검토 전.
-- 계획 문서: `research/data/datalab_regional_collection_plan.md` (지역별 현황 기준 계획, 이 기록과 별도)
+- 계획 문서: `research/data/관광데이터랩_지역_수집계획.md` (지역별 현황 기준 계획, 이 기록과 별도)
 
 ## 1. 한 줄 요약
 
@@ -68,7 +68,7 @@
 ## 7. 원본 대장
 
 - 원본 ZIP은 Downloads 폴더에 있고 옮기거나 수정하지 않았다.
-- 원래 ZIP·CSV 이름, raw 파일명, SHA-256 대장: `research/data/datalab_bigdata_raw_ledger.csv` (306행).
+- 원래 ZIP·CSV 이름, raw 파일명, SHA-256 대장: `research/data/(원본대장 CSV 미보관)` (306행).
 
 ## 8. 파일명 규칙
 
