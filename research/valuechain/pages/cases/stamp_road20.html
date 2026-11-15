@@ -175,6 +175,7 @@ footer{color:var(--muted);font-size:13px;margin:34px 0 18px;border-top:1px solid
 }
 </style>
 <link rel="stylesheet" href="../assets/map.css">
+<style>.mermaid-wrap{background:var(--card,#fff);border:1px solid var(--line,#dfe3e0);border-radius:12px;padding:12px;overflow-x:auto}</style>
 </head>
 <body>
 <main id="top">
@@ -259,44 +260,42 @@ footer{color:var(--muted);font-size:13px;margin:34px 0 18px;border-top:1px solid
   <!-- 2. 가치사슬: DAY 10 형식 -->
   <section id="value-chain" aria-labelledby="t2">
     <div class="sec-t"><span class="num">2</span><h2 id="t2">가치사슬</h2></div>
-<section class="map" aria-label="밸류체인 맵 (스탬프 로드 20)">
-  <div class="mrow"><div class="rl">① 활동 (단계)</div>
-    <div class="st">1 기획·거점<small>9개 구·군 명소 20곳 <span class="tag f">F</span></small></div>
-    <div class="st">2 인증 도구 조달<small>캐시워크 팀워크 탭 <span class="mk O">O</span></small></div>
-    <div class="st">3 모집·배포<small>문체부 여행가는 달 연계 <span class="tag f">F</span></small></div>
-    <div class="st">4 방문·인증<small>앱에서 투어 선택 후 스탬프 <span class="tag f">F</span></small></div>
-    <div class="st last">5 보상·수령<small>보상 방식 기사에 없음 <span class="mk B">B</span></small></div>
-  </div>
-  <div class="mrow"><div class="rl">② 이해관계자</div>
-    <div class="sk"><b>대구문화예술진흥원 관광본부</b><small>(대구시 · 9개 구·군)</small></div>
-    <div class="sk"><b>캐시워크</b><small>(민간 앱 · 제휴 조건 [U])</small></div>
-    <div class="sk"><b>팀워크 탭</b><small>(문체부 · 행안부 · 농식품부)</small></div>
-    <div class="sk"><b>방문객</b><small>(앱 이용자)</small></div>
-    <div class="sk"><b>캐시워크</b><small>(인증 데이터 보유 [I])</small></div>
-  </div>
-  <div class="mrow"><div class="rl">③ 돈 흐름</div>
-    <div class="fl m">앱 보상 [U]</div>
-    <div class="fl m">제휴·광고비 [U] <span class="mk C">C</span></div>
-    <div class="fl m">—</div>
-    <div class="fl m">현장 소비 [U]</div>
-    <div class="fl m"><b>시작점</b> 예산 [U]</div>
-  </div>
-  <div class="mrow"><div class="rl">④ 데이터 흐름</div>
-    <div class="fl d">명소 20곳 목록 · 진흥원</div>
-    <div class="fl d">투어 페이지 · 캐시워크</div>
-    <div class="fl d">참여 신청 · 캐시워크 [I]</div>
-    <div class="fl d">방문 인증 로그 · 캐시워크 [I]</div>
-    <div class="fl d">진흥원 공유 범위 [U] <span class="mk X">✕</span></div>
-  </div>
-  <div class="fbl">피드백 ⑤ → ① : 인증 로그를 다음 시즌 코스 설계에 반영 (공유 범위 미확인 → 단절)</div>
-  <svg class="fb" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path d="M960 2 C960 40, 40 40, 40 2" fill="none" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4"/><polygon points="34,10 40,0 46,10" fill="#3B6FD8"/></svg>
-</section>
-<div class="rules">
-  <div class="rule"><b>규칙 1 — 활동</b>단계 이름은 산업 용어로 짓고, 이해관계자는 굵게(하는 사람)와 괄호(영향 주는 사람)로 구분.</div>
-  <div class="rule"><b>규칙 2 — 돈</b>돈은 소비자에서 원천으로 흐른다. 제휴·광고비가 비용 포인트.</div>
-  <div class="rule"><b>규칙 3 — 데이터</b>인증 데이터의 보유자와 피드백 여부를 적는다.</div>
+<div class="mermaid-wrap">
+<pre class="mermaid">
+flowchart LR
+  subgraph S1["① 기획·거점"]
+    A1["**진흥원 관광본부**(대구시 · 9개 구·군)"]
+    A2["명소 20곳(전체 목록 [U])"]
+  end
+  subgraph S2["② 인증 도구 조달"]
+    B1["**캐시워크**(민간 앱, 제휴 조건 [U])"]
+    B2["팀워크 탭(문체부·행안부·농식품부)"]
+  end
+  subgraph S3["③ 모집·배포"]
+    C1["**진흥원 관광본부**(모집·배포)"]
+    C2["문체부 여행가는 달 연계"]
+  end
+  subgraph S4["④ 방문·인증"]
+    D1["**방문객**(앱 이용자)"]
+    D2["투어 선택 후 방문 스탬프"]
+  end
+  subgraph S5["⑤ 보상·수령"]
+    E1["**캐시워크**(보상 지급 [U])"]
+    E2["참여 수치 비공개 [U]"]
+  end
+  A1 --> B1
+  B1 --> C1
+  C1 --> D1
+  D1 --> E1
+  A1 ==>|"예산 [U]"| B1
+  B1 ==>|"제휴·광고비 [U]"| C1
+  E1 ==>|"보상 [U]"| D1
+  A2 -.->|"명소 목록 · 진흥원"| B1
+  D1 -.->|"방문 인증 로그 · 캐시워크 [I]"| B1
+  E1 -.->|"인증 로그 공유 범위 [U] ✕"| A1
+</pre>
 </div>
-<p class="mnote">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람</p>
+<p class="note">[U] = 자료 없음 · [I] = 해석 · 화살표: 상품 흐름 →, 돈 흐름 ⇒, 데이터 흐름 ⇢ · 괄호 = 영향 주는 사람</p>
 
     <div class="sec-t"><span class="num">3</span><h2 id="t3">점검</h2></div>
     <div class="grid">
@@ -339,5 +338,7 @@ footer{color:var(--muted);font-size:13px;margin:34px 0 18px;border-top:1px solid
   </footer>
 
 </main>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true,securityLevel:"loose"});</script>
 </body>
 </html>
