@@ -22,7 +22,7 @@
 | datalab_spot_rankings.csv | 인기관광지(외지인), 중심관광지, 지역맛집(외지인) | 코스에 넣을 장소 후보 |
 | datalab_related_spots.csv | 연관 관광지 (연간) | 코스 연결 후보 |
 | datalab_paid_spot_visitors.csv | 유료 관광지 입장객 (월간, 전체·외국인) | 계절별 방문 규모, 외국인 비중 |
-| datalab_foreign_interest_spots.csv | 외국인 관심 관광지 (연간, 언어별) | 글로벌 손님 코스 후보 |
+| 외국인/관광데이터랩_외국인관심관광지_정리_2022-2025.csv | 외국인 관심 관광지 (연간, 언어별) | 글로벌 손님 코스 후보 |
 | datalab_social_mentions.csv | 동반·여행유형 언급량 (월간·연간, SNS) | 동반 유형 참고 (외지인 기준 아님) |
 | datalab_social_keywords.csv | 동반·여행유형 키워드 (연간, SNS) | 상품 문구·테마 참고 |
 | datalab_age_popular_spots.csv | 세대별 인기관광지 (연간, 전체) | 연령 참고 (외지인 구분 없음) |

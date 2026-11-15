@@ -12,7 +12,7 @@
 |---|---|---|---|---|---|
 | datalab_age_hotplace_growth.csv | 세대별 핫플레이스 (성장율) | 전체(연령별) | 114 | 12 | 2026.10 스냅샷 1회. 과거 이력 없음 |
 | datalab_age_popular_spots.csv | 세대별 인기관광지 | 전체(연령별) | 360 | 12 | age_group 기준. 세대 필터 있음 |
-| datalab_foreign_interest_spots.csv | 외국인 관심 관광지 (영어권·일본어·중간체·중번체) | 외국인 | 145 | 8 | language_group 기준. 연간만 |
+| 외국인/관광데이터랩_외국인관심관광지_정리_2022-2025.csv | 외국인 관심 관광지 (영어권·일본어·중간체·중번체) | 외국인 | 145 | 8 | language_group 기준. 연간만 |
 | datalab_inflow_origin_destination.csv | 유입 출발지 - 유출 목적지 분포 | 전체 | 80 | 2 | 연간만. 지역 선택 기준 구분 |
 | datalab_inflow_outflow_type.csv | 유입/유출 목적지 유형 분포 | 전체 | 464 | 14 | direction으로 유입·유출 구분 |
 | datalab_inflow_period_avg_change.csv | 조회기간 평균 유입 증감 (연간) | 전체 | 51 | 6 | origin_region = 비교 출발지. 2022~2025 평균 |
@@ -38,7 +38,7 @@
 
 - 열: `region`, `period`, `rank`, `spot_id`, `spot_name`, `spot_type`, `age_group`, `ratio_pct`, `source_file`
 
-### datalab_foreign_interest_spots.csv
+### 외국인/관광데이터랩_외국인관심관광지_정리_2022-2025.csv
 
 - 열: `region`, `period`, `language_group`, `language`, `spot_name`, `spot_type`, `source_file`
 
@@ -122,7 +122,7 @@
   - 주요 유료관광지 입장객 수(전체 · 외국인) → datalab_paid_spot_visitors.csv (월간 + 연간)
   - 인기관광지(외지인) → datalab_spot_rankings.csv `popular_outsider` (월간 + 연간)
   - 중심 관광지 · 지역 맛집(외지인) → datalab_spot_rankings.csv `center`, `restaurant_outsider` (연간만)
-  - 외국인 관심 관광지 4개 언어 → datalab_foreign_interest_spots.csv (연간만)
+  - 외국인 관심 관광지 4개 언어 → 외국인/관광데이터랩_외국인관심관광지_정리_2022-2025.csv (연간만)
   - 숙박 목적지 유입 지역 분포 → datalab_stay_destination_inflow.csv (연간만)
 - 합치지 않은 것:
   - 연관 관광지: 연간 2022~2025 원본이 없어 이번 추가에서 0행. 연간 재다운로드 필요
