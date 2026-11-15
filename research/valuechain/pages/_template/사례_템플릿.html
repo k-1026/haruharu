@@ -54,6 +54,7 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
 th{background:var(--bg)}
 @media (max-width:760px){ .summary,.cards{grid-template-columns:1fr} }
 </style>
+<link rel="stylesheet" href="../assets/map.css">
 </head>
 <body>
 <main>
@@ -92,32 +93,44 @@ th{background:var(--bg)}
 </div>
 
 <h2>2. 가치사슬</h2>
-<div class="chain">
-  <div class="steps">
-    <div class="step"><b>① 수요·동기</b>[활동 한 줄]</div>
-    <div class="step"><b>② 정보·영감</b>[활동 한 줄]</div>
-    <div class="step"><b>③ 상품 기획</b>[활동 한 줄]</div>
-    <div class="step"><b>④ 유통·예약</b>[활동 한 줄]</div>
-    <div class="step"><b>⑤ 이동</b>[활동 한 줄]</div>
-    <div class="step"><b>⑥ 현지 체류</b>[활동 한 줄]</div>
-    <div class="step"><b>⑦ 사후·성과</b>[활동 한 줄]</div>
+<section class="map" aria-label="밸류체인 맵 (사례 틀)">
+  <div class="mrow"><div class="rl">① 활동 (단계)</div>
+    <div class="st">1 [단계 이름]<small>[한 줄 설명]</small></div>
+    <div class="st">2 [단계 이름]<small>[한 줄 설명]</small></div>
+    <div class="st">3 [단계 이름]<small>[한 줄 설명]</small></div>
+    <div class="st">4 [단계 이름]<small>[한 줄 설명]</small></div>
+    <div class="st last">5 [단계 이름]<small>[한 줄 설명]</small></div>
   </div>
-  <div class="steps" style="margin-top:8px">
-    <div class="step"><b>이해관계자</b>(영향) <b>굵게</b> = 하는 사람 [U]</div>
-    <div class="step">[주체]</div>
-    <div class="step">[주체]</div>
-    <div class="step">[주체]</div>
-    <div class="step">[주체]</div>
-    <div class="step">[주체]</div>
-    <div class="step">[주체]</div>
+  <div class="mrow"><div class="rl">② 이해관계자</div>
+    <div class="sk"><b>[하는 사람]</b><small>([영향 주는 사람])</small></div>
+    <div class="sk"><b>[하는 사람]</b><small>([영향 주는 사람])</small></div>
+    <div class="sk"><b>[하는 사람]</b><small>([영향 주는 사람])</small></div>
+    <div class="sk"><b>[하는 사람]</b><small>([영향 주는 사람])</small></div>
+    <div class="sk"><b>[하는 사람]</b><small>([영향 주는 사람])</small></div>
   </div>
-  <div class="band money">💰 돈 흐름 (시작점 명시) : [금액 또는 U] → [흐름] → [끝점]</div>
-  <div class="band data">📊 데이터 흐름 : [데이터명 · 보유자] → [다음 단계]</div>
-  <div class="band" style="background:var(--bg)">
-    <span class="mk B">B</span>병목 · <span class="mk C">C</span>비용 · <span class="mk O">O</span>기회·강점 · <span class="mk X">✕</span>단절 : [칸 위치와 괄호 상태]
+  <div class="mrow"><div class="rl">③ 돈 흐름</div>
+    <div class="fl m">[금액 또는 U]</div>
+    <div class="fl m">[금액 또는 U]</div>
+    <div class="fl m">[금액 또는 U]</div>
+    <div class="fl m">[금액 또는 U]</div>
+    <div class="fl m"><b>시작점</b> [금액 또는 U]</div>
   </div>
-  <p class="note">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람 · 칸의 사실은 리서치 칸과 같은 출처 번호를 씁니다.</p>
+  <div class="mrow"><div class="rl">④ 데이터 흐름</div>
+    <div class="fl d">[데이터명 · 보유자]</div>
+    <div class="fl d">[데이터명 · 보유자]</div>
+    <div class="fl d">[데이터명 · 보유자]</div>
+    <div class="fl d">[데이터명 · 보유자]</div>
+    <div class="fl d">[데이터명 · 보유자] <span class="mk X">✕</span></div>
+  </div>
+  <div class="fbl">피드백 ⑤ → ① : [피드백 내용 또는 단절]</div>
+  <svg class="fb" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path d="M960 2 C960 40, 40 40, 40 2" fill="none" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4"/><polygon points="34,10 40,0 46,10" fill="#3B6FD8"/></svg>
+</section>
+<div class="rules">
+  <div class="rule"><b>규칙 1 — 활동</b>단계 이름은 5단계 내외로 짓고, 이해관계자는 "하는 사람"(굵게)과 괄호 안 "영향을 주는 사람"으로 구분한다.</div>
+  <div class="rule"><b>규칙 2 — 돈</b>돈은 소비자 쪽에서 원천 쪽으로 흐른다. 단계 사이에서 누가 얼마를 떼는지가 비용 포인트다.</div>
+  <div class="rule"><b>규칙 3 — 데이터</b>단계마다 생기는 데이터와 보유자를 적고, 피드백이 없으면 ✕.</div>
 </div>
+<p class="mnote">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람 · 칸의 사실은 리서치 칸과 같은 출처 번호를 씁니다.</p>
 
 <h2>3. 점검</h2>
 <ol class="check">

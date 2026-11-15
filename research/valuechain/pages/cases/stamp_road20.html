@@ -174,6 +174,7 @@ footer{color:var(--muted);font-size:13px;margin:34px 0 18px;border-top:1px solid
   .step:not(.last)::after{display:none}
 }
 </style>
+<link rel="stylesheet" href="../assets/map.css">
 </head>
 <body>
 <main id="top">
@@ -258,96 +259,45 @@ footer{color:var(--muted);font-size:13px;margin:34px 0 18px;border-top:1px solid
   <!-- 2. 가치사슬: DAY 10 형식 -->
   <section id="value-chain" aria-labelledby="t2">
     <div class="sec-t"><span class="num">2</span><h2 id="t2">가치사슬</h2></div>
-    <div class="map">
+<section class="map" aria-label="밸류체인 맵 (스탬프 로드 20)">
+  <div class="mrow"><div class="rl">① 활동 (단계)</div>
+    <div class="st">1 기획·거점<small>9개 구·군 명소 20곳 <span class="tag f">F</span></small></div>
+    <div class="st">2 인증 도구 조달<small>캐시워크 팀워크 탭 <span class="mk O">O</span></small></div>
+    <div class="st">3 모집·배포<small>문체부 여행가는 달 연계 <span class="tag f">F</span></small></div>
+    <div class="st">4 방문·인증<small>앱에서 투어 선택 후 스탬프 <span class="tag f">F</span></small></div>
+    <div class="st last">5 보상·수령<small>보상 방식 기사에 없음 <span class="mk B">B</span></small></div>
+  </div>
+  <div class="mrow"><div class="rl">② 이해관계자</div>
+    <div class="sk"><b>대구문화예술진흥원 관광본부</b><small>(대구시 · 9개 구·군)</small></div>
+    <div class="sk"><b>캐시워크</b><small>(민간 앱 · 제휴 조건 [U])</small></div>
+    <div class="sk"><b>팀워크 탭</b><small>(문체부 · 행안부 · 농식품부)</small></div>
+    <div class="sk"><b>방문객</b><small>(앱 이용자)</small></div>
+    <div class="sk"><b>캐시워크</b><small>(인증 데이터 보유 [I])</small></div>
+  </div>
+  <div class="mrow"><div class="rl">③ 돈 흐름</div>
+    <div class="fl m">앱 보상 [U]</div>
+    <div class="fl m">제휴·광고비 [U] <span class="mk C">C</span></div>
+    <div class="fl m">—</div>
+    <div class="fl m">현장 소비 [U]</div>
+    <div class="fl m"><b>시작점</b> 예산 [U]</div>
+  </div>
+  <div class="mrow"><div class="rl">④ 데이터 흐름</div>
+    <div class="fl d">명소 20곳 목록 · 진흥원</div>
+    <div class="fl d">투어 페이지 · 캐시워크</div>
+    <div class="fl d">참여 신청 · 캐시워크 [I]</div>
+    <div class="fl d">방문 인증 로그 · 캐시워크 [I]</div>
+    <div class="fl d">진흥원 공유 범위 [U] <span class="mk X">✕</span></div>
+  </div>
+  <div class="fbl">피드백 ⑤ → ① : 인증 로그를 다음 시즌 코스 설계에 반영 (공유 범위 미확인 → 단절)</div>
+  <svg class="fb" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path d="M960 2 C960 40, 40 40, 40 2" fill="none" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4"/><polygon points="34,10 40,0 46,10" fill="#3B6FD8"/></svg>
+</section>
+<div class="rules">
+  <div class="rule"><b>규칙 1 — 활동</b>단계 이름은 산업 용어로 짓고, 이해관계자는 굵게(하는 사람)와 괄호(영향 주는 사람)로 구분.</div>
+  <div class="rule"><b>규칙 2 — 돈</b>돈은 소비자에서 원천으로 흐른다. 제휴·광고비가 비용 포인트.</div>
+  <div class="rule"><b>규칙 3 — 데이터</b>인증 데이터의 보유자와 피드백 여부를 적는다.</div>
+</div>
+<p class="mnote">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람</p>
 
-      <div class="map-head">
-        <span class="pill">STAMP ROAD 20</span>
-        <h3>가치사슬 — 활동 · 이해관계자 · 돈 · 데이터</h3>
-      </div>
-
-      <!-- 활동 (단계 상자 + 마커 칩) -->
-      <div class="lane">
-        <div class="lane-label">① 활동 (단계)<small>1~5</small></div>
-        <div>
-          <div class="step"><span class="no">①</span><b>코스 선택</b><small>20곳 중 자유 선택 <span class="tag u">U</span></small></div>
-        </div>
-        <div>
-          <div class="step"><span class="no">②</span><b>현장 방문</b><small>지정 관광지 방문 <span class="tag u">U</span></small></div>
-          <div class="chips"><div class="chip O"><i>O 기회 (보류)</i> 낮 방문을 저녁 체류로 잇는 지점 <span class="tag i">I</span></div></div>
-        </div>
-        <div>
-          <div class="step"><span class="no">③</span><b>앱 인증</b><small>GPS 방문 인증 (캐시워크 보도) <span class="tag u">U</span> <a class="cite" href="#src-V-14">V-14</a></small></div>
-        </div>
-        <div>
-          <div class="step"><span class="no">④</span><b>스탬프 획득</b><small>스탬프 활성화 후 수집 <span class="tag u">U</span></small></div>
-        </div>
-        <div>
-          <div class="step last"><span class="no">⑤</span><b>보상·종료</b><small>캐시 지급, 회차 종료 (보도) <span class="tag u">U</span></small></div>
-          <div class="chips">
-            <div class="chip C"><i>C 비용</i> 보상 예산 출처·규모 [U]</div>
-            <div class="chip B"><i>B 병목</i> 상시 운영 여부 [U]</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 이해관계자 -->
-      <div class="lane">
-        <div class="lane-label">② 이해관계자<small>굵게 = 하는 사람 · (괄호) = 영향 주는 사람</small></div>
-        <div class="strip"><b>방문객</b></div>
-        <div class="strip"><b>방문객</b><span class="inf">(관광지 운영처) <span class="tag u">U</span></span></div>
-        <div class="strip"><b>참여 앱 운영사</b><span class="inf"><span class="tag u">U</span></span></div>
-        <div class="strip"><b>방문객</b></div>
-        <div class="strip"><b>운영 기관</b><span class="inf">(참여 앱) <span class="tag u">U</span></span></div>
-      </div>
-
-      <!-- 돈 흐름 -->
-      <div class="lane">
-        <div class="lane-label">③ 돈 흐름<small>시작점 → 끝점</small></div>
-        <div class="money-band"><span>시작점: 운영 예산 <span class="tag u">U</span></span><div class="arr"></div></div>
-        <div class="money-band"><span>—</span></div>
-        <div class="money-band"><span>앱 쪽 수익 구조 <span class="tag u">U</span></span></div>
-        <div class="money-band"><span>현장 소비 <span class="tag u">U</span></span></div>
-        <div class="money-band"><span>끝점: 보상 캐시, 금액 <span class="tag u">U</span></span></div>
-      </div>
-
-      <!-- 데이터 흐름 (✕ 단절 포함) -->
-      <div class="data-wrap">
-        <div class="data-break">
-          <div class="lbl"></div>
-          <div class="txt">
-            <span class="x">✕</span>
-            인증 로그 → 운영 기관: 공유 범위 미확인 <span class="tag u">U</span> · 집계 결과가 다음 회차로 돌아가는 경로 없음 <span class="tag i">I</span>
-          </div>
-        </div>
-        <div class="lane" style="margin-bottom:0">
-          <div class="lane-label">④ 데이터 흐름<small>데이터명 · 보유자</small></div>
-          <div class="data-band"><span>코스 목록 · 운영 기관 <span class="tag u">U</span></span><div class="arr"></div></div>
-          <div class="data-band"><span>방문 인증 · 참여 앱 <span class="tag u">U</span></span><div class="arr"></div></div>
-          <div class="data-band"><span>인증 기록 · 참여 앱 <span class="tag u">U</span></span><div class="arr"></div></div>
-          <div class="data-band"><span>스탬프 수 · 참여 앱 <span class="tag u">U</span></span><div class="arr"></div></div>
-          <div class="data-band"><span>지급 기록 · 미확인 <span class="tag u">U</span></span></div>
-        </div>
-      </div>
-
-      <div class="map-legend">
-        <span><span class="sw" style="background:var(--b-bg);border-color:var(--b-line)"></span>병목 B</span>
-        <span><span class="sw" style="background:var(--c-bg);border-color:var(--c-line)"></span>비용·제약 C</span>
-        <span><span class="sw" style="background:var(--o-bg);border-color:var(--o-line)"></span>기회·강점 O</span>
-        <span><span class="sw" style="background:var(--strip);border-color:var(--muted)"></span>✕ 단절</span>
-        <span>[U] 자료 없음 · [I] 해석 · 괄호 = 영향 주는 사람</span>
-      </div>
-
-      <div class="bottom">
-        <div class="note a"><b>활동</b>보도 기준으로 코스 20곳을 자유롭게 골라 GPS 앱으로 인증하고, 스탬프에 따라 보상을 받는 구조로 보인다. 원문 확인 전이라 모두 <span class="tag u">U</span> <a class="cite" href="#src-V-14">V-14</a></div>
-        <div class="note b"><b>돈</b>보상 예산과 금액, 지급 방식이 확인되지 않았다 <span class="tag u">U</span>. 운영 기관의 예산 출처도 미확인이다.</div>
-        <div class="note c"><b>데이터</b>방문 인증 기록은 앱 쪽에 남는 것으로 보인다 <span class="tag i">I</span>. 운영 기관과 공유되는지는 미확인이다 <span class="tag u">U</span>.</div>
-      </div>
-    </div>
-
-    <p class="foot-legend">가치사슬 칸의 사실은 위 리서치 칸과 같은 출처 번호를 쓴다. [U] = 자료 없음, [I] = 해석, 괄호 = 영향 주는 사람.</p>
-  </section>
-
-  <section id="review" aria-labelledby="t3">
     <div class="sec-t"><span class="num">3</span><h2 id="t3">점검</h2></div>
     <div class="grid">
       <div class="card">
