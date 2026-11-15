@@ -62,7 +62,6 @@ th{background:var(--bg)}
 @media (max-width:760px){ .summary,.cards{grid-template-columns:1fr} }
 </style>
 <link rel="stylesheet" href="../assets/map.css">
-<style>.mermaid-wrap{background:var(--card,#fff);border:1px solid var(--line,#dfe3e0);border-radius:12px;padding:12px;overflow-x:auto}</style>
 </head>
 <body>
 <main>
@@ -132,42 +131,51 @@ th{background:var(--bg)}
 </div>
 
 <h2>2. 가치사슬</h2>
-<div class="mermaid-wrap">
-<pre class="mermaid">
-flowchart LR
-  subgraph S1["① 기획·테마 설계"]
-    A1["**중구청 관광콘텐츠팀**(예산 집행)"]
-    A2["해설사(보수 [U])"]
-  end
-  subgraph S2["② 홍보·정보"]
-    B1["**구청 관광콘텐츠팀**(홍보 계획)"]
-    B2["영문 팸플릿·배너만 [V-04]"]
-  end
-  subgraph S3["③ 모집·신청"]
-    C1["**구청 누리집·전화·안내소**(신청 창구)"]
-    C2["참여자(자부담 [U])"]
-  end
-  subgraph S4["④ 현장 운영"]
-    D1["**해설사 동행**(실제 1회 운영)"]
-    D2["근대골목 투어와 노선 중복 [V-04]"]
-  end
-  subgraph S5["⑤ 보상·사후"]
-    E1["**구청**(실적 집계 [U])"]
-    E2["SNS 인증 기념품, 실적 공개 없음 [V-04]"]
-  end
-  A1 --> B1
-  B1 --> C1
-  C1 --> D1
-  D1 --> E1
-  A1 ==>|"예산 1,500여만 원 [V-04]"| D1
-  C2 ==>|"자부담 [U]"| C1
-  E1 ==>|"정산 [U]"| A1
-  C1 -.->|"신청 기록 · 구청 [U]"| E1
-  D1 -.->|"방문 기록 · 구청 [U]"| E1
-  E1 -.->|"실적 공개 없음 ✕ (피드백 단절)"| B1
-</pre>
+<section class="map" aria-label="밸류체인 맵">
+  <div class="mrow">
+    <div class="rl">① 활동 (단계)</div>
+    <div class="st">1 기획·테마 설계<small>7개 테마 조합형 코스 <span class="tag f">F</span></small></div>
+    <div class="st">2 홍보·정보<small>영문 팸플릿, 배너만 <span class="mk B">B</span></small></div>
+    <div class="st">3 모집·신청<small>누리집·전화·안내소 <span class="tag f">F</span></small></div>
+    <div class="st">4 현장 운영<small>해설사 동행, 1회 운영 <span class="mk B">B</span></small></div>
+    <div class="st last">5 보상·사후<small>SNS 인증 기념품 · 실적 공개 없음 <span class="mk X">✕</span></small></div>
+  </div>
+  <div class="mrow">
+    <div class="rl">② 이해관계자</div>
+    <div class="sk"><b>중구청 관광콘텐츠팀</b><small>(예산 집행)</small></div>
+    <div class="sk"><b>중구청 관광콘텐츠팀</b><small>(홍보 계획)</small></div>
+    <div class="sk"><b>구청 누리집·안내소</b><small>(신청 창구)</small></div>
+    <div class="sk"><b>해설사</b><small>(보수 [U])</small></div>
+    <div class="sk"><b>구청</b><small>(실적 집계 [U])</small></div>
+  </div>
+  <div class="mrow">
+    <div class="rl">③ 돈 흐름</div>
+    <div class="fl m">해설사 무료 <span class="tag f">F</span></div>
+    <div class="fl m">운영비 [U]</div>
+    <div class="fl m">참여자 자부담 [U] <span class="mk C">C</span></div>
+    <div class="fl m"><b>시작점</b> 구청 예산 1,500여만 원 <span class="tag f">F</span></div>
+    <div class="fl m">기념품 보상 [U]</div>
+  </div>
+  <div class="mrow">
+    <div class="rl">④ 데이터 흐름</div>
+    <div class="fl d">신청 기록 · 구청 [U]</div>
+    <div class="fl d">방문 기록 · 구청 [U]</div>
+    <div class="fl d">실적 집계 · 구청 [U]</div>
+    <div class="fl d">공개 <span class="mk X">✕</span> 공개 안 됨</div>
+    <div class="fl d">다음 기획 반영 <span class="mk X">✕</span></div>
+  </div>
+  <div class="fbl">피드백 ⑤ → ① : 실적·리뷰를 다음 기획에 반영 (현재 단절)</div>
+  <svg class="fb" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M960 2 C960 40, 40 40, 40 2" fill="none" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4"/>
+    <polygon points="34,10 40,0 46,10" fill="#3B6FD8"/>
+  </svg>
+</section>
+<div class="rules">
+  <div class="rule"><b>규칙 1 — 활동</b>단계 이름은 5단계 내외로 짓고, 이해관계자는 "하는 사람"(굵게)과 괄호 안 "영향을 주는 사람"으로 구분한다.</div>
+  <div class="rule"><b>규칙 2 — 돈</b>돈은 소비자 쪽에서 원천 쪽으로 흐른다. 단계 사이에서 누가 얼마를 떼는지(수수료·마진)가 비용 포인트다.</div>
+  <div class="rule"><b>규칙 3 — 데이터</b>단계마다 생기는 데이터와 보유자를 적고, 뒤 단계에서 앞 단계로 되돌아가는 피드백을 표시한다. 피드백이 없으면 ✕.</div>
 </div>
-<p class="note">[U] = 자료 없음 · 화살표: 상품 흐름 →, 돈 흐름 ⇒, 데이터 흐름 ⇢ · 괄호 = 영향 주는 사람</p>
+<p class="mnote">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람 · 칸의 사실은 리서치 칸과 같은 출처 번호를 씁니다.</p>
 
 <h2>3. 점검</h2>
 <ol class="check">
@@ -188,7 +196,5 @@ flowchart LR
 </table>
 
 </main>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
-<script>mermaid.initialize({startOnLoad:true,securityLevel:"loose"});</script>
 </body>
 </html>
