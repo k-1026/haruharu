@@ -24,6 +24,7 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
 .card h3{font-size:14px;margin:0 0 6px;color:var(--accent)}
 .todo{color:var(--muted)}
 </style>
+<link rel="stylesheet" href="../assets/map.css">
 </head>
 <body>
 <main>
@@ -36,6 +37,45 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
   <span><span class="tag u">U</span> 미확인</span>
   <span><span class="tag i">I</span> 해석</span>
 </div>
+
+<section class="map" aria-label="밸류체인 맵 (자격)">
+  <div class="mrow"><div class="rl">① 활동 (단계)</div>
+    <div class="st">1 자격 확인<small>요건 목록 <span class="tag f">F</span></small></div>
+    <div class="st">2 등록 신청<small>소프트웨어사업자 등록 [U]</small></div>
+    <div class="st">3 공고 참여<small>입찰 자격 충족 여부 <span class="mk B">B</span></small></div>
+    <div class="st">4 공동 응찰<small>자격 있는 업체와 [U]</small></div>
+    <div class="st last">5 실적 축적<small>재입찰 기반 <span class="mk X">✕</span></small></div>
+  </div>
+  <div class="mrow"><div class="rl">② 이해관계자</div>
+    <div class="sk"><b>우리 팀</b><small>(등록 주체)</small></div>
+    <div class="sk"><b>등록 기관</b><small>(심사 [U])</small></div>
+    <div class="sk"><b>발주 구청</b><small>(요건 제시)</small></div>
+    <div class="sk"><b>공동 응찰 업체</b><small>(자격 보완 [U])</small></div>
+    <div class="sk"><b>나라장터</b><small>(입찰 시스템)</small></div>
+  </div>
+  <div class="mrow"><div class="rl">③ 돈 흐름</div>
+    <div class="fl m">실적 기반 수주 [U]</div>
+    <div class="fl m">입찰 참가 비용 [U]</div>
+    <div class="fl m">등록 비용 [U] <span class="mk C">C</span></div>
+    <div class="fl m">공동 응찰 분담 [U]</div>
+    <div class="fl m"><b>시작점</b> 우리 팀 [U]</div>
+  </div>
+  <div class="mrow"><div class="rl">④ 데이터 흐름</div>
+    <div class="fl d">요건 목록 · 공고</div>
+    <div class="fl d">등록증 · 등록 기관 [U]</div>
+    <div class="fl d">입찰 자격 증빙 · 우리</div>
+    <div class="fl d">공동 실적 · 업체 [U]</div>
+    <div class="fl d">실적 목록 <span class="mk X">✕</span></div>
+  </div>
+  <div class="fbl">피드백 ⑤ → ① : 실적이 쌓여야 다음 자격 확인이 쉬워짐 (현재 단절)</div>
+  <svg class="fb" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path d="M960 2 C960 40, 40 40, 40 2" fill="none" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4"/><polygon points="34,10 40,0 46,10" fill="#3B6FD8"/></svg>
+</section>
+<div class="rules">
+  <div class="rule"><b>규칙 1 — 활동</b>자격 확인부터 실적 축적까지의 순서로 짓는다.</div>
+  <div class="rule"><b>규칙 2 — 돈</b>등록·참가 비용을 적고, 금액이 없으면 [U].</div>
+  <div class="rule"><b>규칙 3 — 데이터</b>등록증과 실적 증빙의 보유자를 적는다.</div>
+</div>
+<p class="mnote">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람</p>
 
 <h2>1. 자격 요건 (정리 중)</h2>
 <table>

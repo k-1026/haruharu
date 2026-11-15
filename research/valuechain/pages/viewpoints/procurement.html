@@ -25,6 +25,7 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
 .todo{color:var(--muted)}
 @media (max-width:760px){ table{font-size:12px} }
 </style>
+<link rel="stylesheet" href="../assets/map.css">
 </head>
 <body>
 <main>
@@ -40,6 +41,45 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
   <span><span class="tag u">U</span> 미확인</span>
   <span><span class="tag i">I</span> 해석</span>
 </div>
+
+<section class="map" aria-label="밸류체인 맵 (발주·용역)">
+  <div class="mrow"><div class="rl">① 활동 (단계)</div>
+    <div class="st">1 발주 계획<small>구청 관광 사업 계획 <span class="tag f">F</span></small></div>
+    <div class="st">2 공고<small>나라장터 공고 게시</small></div>
+    <div class="st">3 입찰·평가<small>자격·방식 확인 <span class="mk B">B</span></small></div>
+    <div class="st">4 계약·수행<small>기획안 수행 [U]</small></div>
+    <div class="st last">5 정산·실적<small>결과 보고 [U] <span class="mk X">✕</span></small></div>
+  </div>
+  <div class="mrow"><div class="rl">② 이해관계자</div>
+    <div class="sk"><b>중구청 관광과</b><small>(발주)</small></div>
+    <div class="sk"><b>나라장터</b><small>(공고·계약 시스템)</small></div>
+    <div class="sk"><b>입찰 업체</b><small>(자격 조건 [U])</small></div>
+    <div class="sk"><b>수행 업체 (우리)</b><small>(기획안 납품)</small></div>
+    <div class="sk"><b>구청</b><small>(검수·정산 [U])</small></div>
+  </div>
+  <div class="mrow"><div class="rl">③ 돈 흐름</div>
+    <div class="fl m">정산 [U]</div>
+    <div class="fl m">계약금 [U]</div>
+    <div class="fl m">수행 대금 [U] <span class="mk C">C</span></div>
+    <div class="fl m"><b>시작점</b> 구청 예산 <span class="tag u">U</span></div>
+    <div class="fl m">기타 [U]</div>
+  </div>
+  <div class="mrow"><div class="rl">④ 데이터 흐름</div>
+    <div class="fl d">공고 정보 · 나라장터</div>
+    <div class="fl d">제안서 · 우리</div>
+    <div class="fl d">평가 점수 · 구청 [U]</div>
+    <div class="fl d">과업 결과 · 구청 [U]</div>
+    <div class="fl d">실적 보고 <span class="mk X">✕</span></div>
+  </div>
+  <div class="fbl">피드백 ⑤ → ① : 실적을 다음 공고 준비에 반영 (현재 단절)</div>
+  <svg class="fb" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path d="M960 2 C960 40, 40 40, 40 2" fill="none" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4"/><polygon points="34,10 40,0 46,10" fill="#3B6FD8"/></svg>
+</section>
+<div class="rules">
+  <div class="rule"><b>규칙 1 — 활동</b>단계 이름은 공고 절차 기준으로 짓는다.</div>
+  <div class="rule"><b>규칙 2 — 돈</b>예산에서 계약금, 수행 대금 순으로 흐른다.</div>
+  <div class="rule"><b>규칙 3 — 데이터</b>공고·제안·평가·실적 데이터의 보유자를 적는다.</div>
+</div>
+<p class="mnote">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람</p>
 
 <h2>1. 중구청 관광 관련 공고 (정리 중)</h2>
 <table>

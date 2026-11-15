@@ -24,6 +24,7 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
 .card h3{font-size:14px;margin:0 0 6px;color:var(--accent)}
 .todo{color:var(--muted)}
 </style>
+<link rel="stylesheet" href="../assets/map.css">
 </head>
 <body>
 <main>
@@ -36,6 +37,45 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
   <span><span class="tag u">U</span> 미확인</span>
   <span><span class="tag i">I</span> 해석</span>
 </div>
+
+<section class="map" aria-label="밸류체인 맵 (실행 파트너)">
+  <div class="mrow"><div class="rl">① 활동 (단계)</div>
+    <div class="st">1 인센티브 공고<small>진흥원 지원 <span class="tag f">F</span></small></div>
+    <div class="st">2 상품 기획<small>우리 기획안 <span class="mk O">O</span></small></div>
+    <div class="st">3 숙박·교통 예약<small>여행사 실행 <span class="tag u">U</span></small></div>
+    <div class="st">4 판매 채널<small>네이버·OTA <span class="tag f">F</span></small></div>
+    <div class="st last">5 운영·정산<small>인센티브 신청 <span class="mk X">✕</span></small></div>
+  </div>
+  <div class="mrow"><div class="rl">② 이해관계자</div>
+    <div class="sk"><b>진흥원 관광본부</b><small>(인센티브 지급)</small></div>
+    <div class="sk"><b>우리 팀</b><small>(기획안 제공)</small></div>
+    <div class="sk"><b>여행사</b><small>(실행 파트너)</small></div>
+    <div class="sk"><b>OTA·네이버</b><small>(판매 채널)</small></div>
+    <div class="sk"><b>숙박업소</b><small>(객실 공급)</small></div>
+  </div>
+  <div class="mrow"><div class="rl">③ 돈 흐름</div>
+    <div class="fl m">정산 [U]</div>
+    <div class="fl m">판매 수수료 [U] <span class="mk C">C</span></div>
+    <div class="fl m">숙박비 [U]</div>
+    <div class="fl m">인센티브 1박 2만 원/인 <span class="tag f">F</span></div>
+    <div class="fl m"><b>시작점</b> 진흥원 예산 <span class="tag f">F</span></div>
+  </div>
+  <div class="mrow"><div class="rl">④ 데이터 흐름</div>
+    <div class="fl d">공고 조건 · 진흥원</div>
+    <div class="fl d">상품 정보 · 우리</div>
+    <div class="fl d">예약 기록 · 여행사 [U]</div>
+    <div class="fl d">판매 기록 · OTA [U]</div>
+    <div class="fl d">인센티브 신청 기록 <span class="mk X">✕</span></div>
+  </div>
+  <div class="fbl">피드백 ⑤ → ① : 인센티브 실적을 다음 공고 대응에 반영 (현재 단절)</div>
+  <svg class="fb" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path d="M960 2 C960 40, 40 40, 40 2" fill="none" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4"/><polygon points="34,10 40,0 46,10" fill="#3B6FD8"/></svg>
+</section>
+<div class="rules">
+  <div class="rule"><b>규칙 1 — 활동</b>여행사가 실행하는 단계만 따로 짓고, 우리 역할은 괄호로 표시.</div>
+  <div class="rule"><b>규칙 2 — 돈</b>진흥원 인센티브에서 여행사로, 숙박과 판매 수수료로 흐른다.</div>
+  <div class="rule"><b>규칙 3 — 데이터</b>예약·판매 기록은 여행사 보유, 공유 범위는 [U].</div>
+</div>
+<p class="mnote">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람</p>
 
 <h2>1. 참여 동기 (인센티브, 공식 공고)</h2>
 <table>

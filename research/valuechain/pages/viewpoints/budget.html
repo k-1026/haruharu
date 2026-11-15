@@ -24,6 +24,7 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
 .card h3{font-size:14px;margin:0 0 6px;color:var(--accent)}
 .todo{color:var(--muted)}
 </style>
+<link rel="stylesheet" href="../assets/map.css">
 </head>
 <body>
 <main>
@@ -36,6 +37,45 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
   <span><span class="tag u">U</span> 미확인</span>
   <span><span class="tag i">I</span> 해석</span>
 </div>
+
+<section class="map" aria-label="밸류체인 맵 (예산·수익)">
+  <div class="mrow"><div class="rl">① 활동 (단계)</div>
+    <div class="st">1 예산 편성<small>구청 예산서 <span class="tag u">U</span></small></div>
+    <div class="st">2 사업 배정<small>관광 사업 항목</small></div>
+    <div class="st">3 공고 금액<small>기초금액 공개 <span class="tag f">F</span></small></div>
+    <div class="st">4 계약<small>우리 수익 범위 [I]</small></div>
+    <div class="st last">5 집행·정산<small>지급 기록 [U] <span class="mk X">✕</span></small></div>
+  </div>
+  <div class="mrow"><div class="rl">② 이해관계자</div>
+    <div class="sk"><b>구청 예산 담당</b><small>(편성)</small></div>
+    <div class="sk"><b>구청 관광과</b><small>(사업 배정)</small></div>
+    <div class="sk"><b>나라장터</b><small>(금액 공개)</small></div>
+    <div class="sk"><b>수행 업체 (우리)</b><small>(수익 대상)</small></div>
+    <div class="sk"><b>구청 정산</b><small>(지급 [U])</small></div>
+  </div>
+  <div class="mrow"><div class="rl">③ 돈 흐름</div>
+    <div class="fl m">정산 지급 [U]</div>
+    <div class="fl m">계약금 [U]</div>
+    <div class="fl m">공고 금액 <span class="tag f">F</span> <span class="mk C">C</span></div>
+    <div class="fl m">사업비 배정 [U]</div>
+    <div class="fl m"><b>시작점</b> 구청 관광 예산 <span class="tag f">F</span></div>
+  </div>
+  <div class="mrow"><div class="rl">④ 데이터 흐름</div>
+    <div class="fl d">예산서 · 구청 [U]</div>
+    <div class="fl d">사업 계획 · 구청</div>
+    <div class="fl d">공고 금액 · 나라장터</div>
+    <div class="fl d">계약 조건 · 구청 [U]</div>
+    <div class="fl d">집행 실적 <span class="mk X">✕</span></div>
+  </div>
+  <div class="fbl">피드백 ⑤ → ① : 집행 실적을 다음 해 예산 요청에 반영 (현재 단절)</div>
+  <svg class="fb" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path d="M960 2 C960 40, 40 40, 40 2" fill="none" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4"/><polygon points="34,10 40,0 46,10" fill="#3B6FD8"/></svg>
+</section>
+<div class="rules">
+  <div class="rule"><b>규칙 1 — 활동</b>예산이 편성되어 집행되기까지의 단계로 짓는다.</div>
+  <div class="rule"><b>규칙 2 — 돈</b>예산에서 공고 금액, 계약, 정산 순으로 흐른다. 금액이 없으면 [U].</div>
+  <div class="rule"><b>규칙 3 — 데이터</b>예산서·계약·집행 기록의 보유자를 적는다.</div>
+</div>
+<p class="mnote">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람</p>
 
 <h2>1. 구청 관광 예산 (정리 중)</h2>
 <table>

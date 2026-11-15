@@ -24,6 +24,7 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
 .card h3{font-size:14px;margin:0 0 6px;color:var(--accent)}
 .todo{color:var(--muted)}
 </style>
+<link rel="stylesheet" href="../assets/map.css">
 </head>
 <body>
 <main>
@@ -36,6 +37,45 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
   <span><span class="tag u">U</span> 미확인</span>
   <span><span class="tag i">I</span> 해석</span>
 </div>
+
+<section class="map" aria-label="밸류체인 맵 (운영 현황)">
+  <div class="mrow"><div class="rl">① 활동 (단계)</div>
+    <div class="st">1 장소·코스 확보<small>근대골목·동성로 장소 <span class="tag f">F</span></small></div>
+    <div class="st">2 홍보·안내<small>영문 팸플릿, 배너 <span class="mk B">B</span></small></div>
+    <div class="st">3 신청·안내소<small>누리집·전화·안내소 <span class="tag f">F</span></small></div>
+    <div class="st">4 현장 운영<small>해설사 동행 [U]</small></div>
+    <div class="st last">5 실적 집계<small>이용 인원 [U] <span class="mk X">✕</span></small></div>
+  </div>
+  <div class="mrow"><div class="rl">② 이해관계자</div>
+    <div class="sk"><b>중구청 관광과</b><small>(운영 주체)</small></div>
+    <div class="sk"><b>안내소 직원</b><small>(신청·안내)</small></div>
+    <div class="sk"><b>해설사</b><small>(보수 [U])</small></div>
+    <div class="sk"><b>동성로 상권</b><small>(참여 못 함 <span class="tag f">F</span>)</small></div>
+    <div class="sk"><b>방문객</b><small>(외국인 · 내국인)</small></div>
+  </div>
+  <div class="mrow"><div class="rl">③ 돈 흐름</div>
+    <div class="fl m">방문객 소비 [U]</div>
+    <div class="fl m">해설사 무료 <span class="tag f">F</span></div>
+    <div class="fl m">운영비 [U] <span class="mk C">C</span></div>
+    <div class="fl m"><b>시작점</b> 구청 예산 <span class="tag f">F</span></div>
+    <div class="fl m">자부담 [U]</div>
+  </div>
+  <div class="mrow"><div class="rl">④ 데이터 흐름</div>
+    <div class="fl d">장소 목록 · 구청</div>
+    <div class="fl d">신청 기록 · 구청 [U]</div>
+    <div class="fl d">방문 기록 · 구청 [U]</div>
+    <div class="fl d">이용 인원 · 구청 [U]</div>
+    <div class="fl d">실적 공개 <span class="mk X">✕</span></div>
+  </div>
+  <div class="fbl">피드백 ⑤ → ① : 실적을 장소·코스 조정에 반영 (현재 단절)</div>
+  <svg class="fb" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path d="M960 2 C960 40, 40 40, 40 2" fill="none" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4"/><polygon points="34,10 40,0 46,10" fill="#3B6FD8"/></svg>
+</section>
+<div class="rules">
+  <div class="rule"><b>규칙 1 — 활동</b>장소 확보부터 실적 집계까지 운영 순서로 짓는다.</div>
+  <div class="rule"><b>규칙 2 — 돈</b>예산에서 운영비, 해설사 보수 순으로 흐른다. 자부담은 비용 포인트.</div>
+  <div class="rule"><b>규칙 3 — 데이터</b>신청·방문·이용 인원 기록의 보유자를 적는다.</div>
+</div>
+<p class="mnote">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람</p>
 
 <h2>1. 구청 운영 사업 (정리 중)</h2>
 <table>

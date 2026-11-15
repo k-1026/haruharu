@@ -24,6 +24,7 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
 .card h3{font-size:14px;margin:0 0 6px;color:var(--accent)}
 .todo{color:var(--muted)}
 </style>
+<link rel="stylesheet" href="../assets/map.css">
 </head>
 <body>
 <main>
@@ -36,6 +37,45 @@ th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-alig
   <span><span class="tag u">U</span> 미확인</span>
   <span><span class="tag i">I</span> 해석</span>
 </div>
+
+<section class="map" aria-label="밸류체인 맵 (수요)">
+  <div class="mrow"><div class="rl">① 활동 (단계)</div>
+    <div class="st">1 방문 발생<small>국가·언어권별 <span class="tag f">F</span></small></div>
+    <div class="st">2 관심 탐색<small>관심 관광지 <span class="tag f">F</span></small></div>
+    <div class="st">3 장소 선택<small>방문지 집중 <span class="tag f">F</span></small></div>
+    <div class="st">4 체류·소비<small>체류 시간 [U] <span class="mk O">O</span></small></div>
+    <div class="st last">5 재방문·후기<small>재방문 데이터 [U] <span class="mk X">✕</span></small></div>
+  </div>
+  <div class="mrow"><div class="rl">② 이해관계자</div>
+    <div class="sk"><b>방문객</b><small>(국가·언어권)</small></div>
+    <div class="sk"><b>검색 플랫폼</b><small>(관심 노출 [U])</small></div>
+    <div class="sk"><b>구청</b><small>(장소 노출)</small></div>
+    <div class="sk"><b>동성로·근대골목 상권</b><small>(소비 대상)</small></div>
+    <div class="sk"><b>여행사</b><small>(판매 [U])</small></div>
+  </div>
+  <div class="mrow"><div class="rl">③ 돈 흐름</div>
+    <div class="fl m">세수·상권 매출 [U]</div>
+    <div class="fl m">소비 지출 [U]</div>
+    <div class="fl m">숙박·교통 [U] <span class="mk C">C</span></div>
+    <div class="fl m">여행 상품 구매 [U]</div>
+    <div class="fl m"><b>시작점</b> 방문객 결제</div>
+  </div>
+  <div class="mrow"><div class="rl">④ 데이터 흐름</div>
+    <div class="fl d">거주지 국가 · 관광데이터랩 <span class="tag f">F</span></div>
+    <div class="fl d">관심 관광지 · 관광데이터랩 <span class="tag f">F</span></div>
+    <div class="fl d">방문 장소 · 공개 [U]</div>
+    <div class="fl d">체류 시간 · 관광데이터랩 <span class="tag u">U</span></div>
+    <div class="fl d">재방문 · 비공개 <span class="mk X">✕</span></div>
+  </div>
+  <div class="fbl">피드백 ⑤ → ① : 재방문·후기를 다음 계절 수요 분석에 반영 (현재 단절)</div>
+  <svg class="fb" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path d="M960 2 C960 40, 40 40, 40 2" fill="none" stroke="#3B6FD8" stroke-width="2" stroke-dasharray="6 4"/><polygon points="34,10 40,0 46,10" fill="#3B6FD8"/></svg>
+</section>
+<div class="rules">
+  <div class="rule"><b>규칙 1 — 활동</b>방문 발생부터 재방문까지 방문객 여정으로 짓는다.</div>
+  <div class="rule"><b>규칙 2 — 돈</b>방문객 결제에서 상권·구청 쪽으로 흐른다.</div>
+  <div class="rule"><b>규칙 3 — 데이터</b>국가·관심·체류 데이터의 출처와 보유자를 적는다.</div>
+</div>
+<p class="mnote">[U] = 자료 없음 · [I] = 해석 · 괄호 = 영향 주는 사람</p>
 
 <h2>1. 수요 근거 (정리 중)</h2>
 <table>
