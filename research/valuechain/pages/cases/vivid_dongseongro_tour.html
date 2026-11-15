@@ -43,8 +43,9 @@ h2{font-size:1.15rem;margin:28px 0 10px;border-left:4px solid var(--accent);padd
 /* 가치사슬 */
 .chain{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;overflow-x:auto}
 .row{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:8px;min-width:820px}
-.act{background:#E7F5F1;border:1px solid #9FD4C6;border-radius:8px;padding:8px;font-size:12.5px;color:#1E2B2F}
+.act{position:relative;background:#E7F5F1;border:1px solid #9FD4C6;border-radius:8px;padding:8px;font-size:12.5px;color:#1E2B2F}
 .act b{display:block;font-size:13.5px;margin-bottom:3px}
+.act:not(:last-child)::after{content:"→";position:absolute;right:-9px;top:50%;transform:translateY(-50%);font-size:16px;font-weight:700;color:var(--accent);background:var(--bg);line-height:1}
 .stake{border:1px dashed var(--line);border-radius:8px;padding:6px 8px;font-size:12.5px;background:var(--bg)}
 .lbl{min-width:820px;font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 4px}
 .band{min-width:820px;border-radius:8px;padding:8px 10px;font-size:13px;margin-top:6px}
@@ -65,8 +66,8 @@ th{background:var(--bg)}
 <main>
 
 <nav class="top">
-  <a href="index.html">← 허브 (관점별 목록)</a>
-  <a href="../valuechain_v2.0.html">최종 맵</a>
+  <a href="../index.html">← 허브 (관점별 목록)</a>
+  <a href="../../valuechain_v2.0.html">최종 맵</a>
   <a href="#refs">근거 목록</a>
 </nav>
 
