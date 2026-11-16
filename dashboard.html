@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에이전트 대시보드</title>
+<style>
+  :root { --bg:#0f1115; --panel:#181b22; --line:#2a2f3a; --text:#e8eaf0; --muted:#8a92a3;
+          --run:#ff9100; --done:#3ddc84; --hold:#ffd54f; --fail:#ff5252; --idle:#5c6578; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Malgun Gothic", "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+           padding:14px 20px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--bg); z-index:2; }
+  h1 { font-size:18px; margin:0; }
+  .sub { color:var(--muted); font-size:12px; margin-top:2px; }
+  .controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  button { border:0; border-radius:8px; padding:9px 16px; font-size:14px; font-weight:700; cursor:pointer; }
+  #btnRun { background:var(--done); color:#0b1d12; }
+  #btnStop { background:var(--fail); color:#fff; }
+  #btnLog, #btnCtl { background:var(--line); color:var(--text); font-weight:500; }
+  button:disabled { opacity:.45; cursor:default; }
+  #ctlState { font-size:13px; padding:6px 10px; border-radius:6px; background:var(--panel); border:1px solid var(--line); }
+  #msg { font-size:12px; color:var(--hold); width:100%; text-align:right; min-height:16px; }
+  main { padding:18px 20px 40px; }
+  .summary { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .chip { background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:14px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; display:flex; flex-direction:column; min-height:260px; }
+  .card.running { border-color:var(--run); box-shadow:0 0 0 1px var(--run), 0 0 18px rgba(255,145,0,.35); }
+  .top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+  .name { font-weight:700; font-size:15px; }
+  .desc { color:var(--muted); font-size:12px; margin-top:3px; }
+  .badge { font-size:12px; font-weight:700; padding:5px 10px; border-radius:999px; white-space:nowrap; color:#111; background:var(--idle); }
+  .badge.running { background:var(--run); color:#1a0f00; animation:blink 1s steps(2,start) infinite; }
+  .badge.done { background:var(--done); }
+  .badge.hold { background:var(--hold); }
+  .badge.fail { background:var(--fail); color:#fff; }
+  .badge.stale { background:transparent; color:var(--run); border:1px solid var(--run); }
+  @keyframes blink { 0% { opacity:1; box-shadow:0 0 12px var(--run); } 50% { opacity:.25; box-shadow:none; } 100% { opacity:1; box-shadow:0 0 12px var(--run); } }
+  .last { font-size:12px; color:var(--muted); margin:10px 0 6px; }
+  .last b { color:var(--text); font-weight:600; }
+  .log { flex:1; margin-top:8px; background:#0b0d11; border:1px solid var(--line); border-radius:8px; padding:8px;
+         height:200px; overflow:auto; font-family: Consolas, "Courier New", monospace; font-size:11.5px; line-height:1.5; }
+  .row { border-bottom:1px dashed #1f242e; padding:4px 0; }
+  .row:last-child { border-bottom:0; }
+  .t { color:var(--muted); }
+  .st { font-weight:700; }
+  .st.running { color:var(--run); }
+  .st.done { color:var(--done); }
+  .st.hold { color:var(--hold); }
+  .st.fail { color:var(--fail); }
+  .empty { color:var(--muted); text-align:center; padding:30px 10px; font-size:13px; }
+  .extra { margin-top:10px; background:#0b0d11; border:1px solid var(--line); border-radius:8px; padding:10px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .ph { font-weight:700; font-size:15px; margin-bottom:10px; }
+  .pgrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px; }
+  table.pl { width:100%; border-collapse:collapse; font-size:13px; }
+  table.pl th, table.pl td { border-bottom:1px solid var(--line); padding:7px 8px; text-align:right; }
+  table.pl th:first-child, table.pl td:first-child { text-align:left; }
+  table.pl thead th { color:var(--muted); font-weight:600; }
+  .xt { font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  .extra svg { width:100%; height:auto; display:block; }
+  .rv { font-size:12px; border-bottom:1px dashed #1f242e; padding:5px 0; }
+  .rv:last-child { border-bottom:0; }
+  .rv b { font-weight:700; }
+  @media (prefers-reduced-motion: reduce) { .badge.running, .card.running { animation:none; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>에이전트 대시보드</h1>
+    <div class="sub">run_log.jsonl을 2초마다 다시 읽습니다 · 마지막 갱신: <span id="updated">-</span></div>
+  </div>
+  <div class="controls">
+    <span id="ctlState">제어: 확인 중</span>
+    <button id="btnRun" title="에이전트가 다음 단계를 시작할 수 있게 합니다">실행</button>
+    <button id="btnStop" title="에이전트가 다음 단계를 시작하지 않고 멈추게 합니다">중지</button>
+    <button id="btnSample" title="내장 샘플 로그로 화면을 확인합니다">샘플 데이터</button>
+    <button id="btnLog" title="run_log.jsonl 파일을 직접 고릅니다">로그 파일 선택</button>
+    <button id="btnCtl" title="run_control.json 파일을 지정합니다">제어 파일 지정</button>
+    <!-- server.py로 열었을 때는 파일 선택 버튼이 필요 없어서 아래 스크립트에서 숨김 -->
+    <script>
+      if (location.protocol.startsWith('http')) {
+        document.getElementById('btnLog').style.display = 'none';
+        document.getElementById('btnCtl').style.display = 'none';
+      }
+    </script>
+    <input type="file" id="fileIn" accept=".jsonl" hidden>
+    <div id="msg"></div>
+  </div>
+</header>
+<main>
+  <div class="summary" id="summary"></div>
+  <div class="grid" id="grid"></div>
+  <div id="panel" style="margin-top:18px"></div>
+</main>
+
+<script>
+const AGENTS = [
+  { key: '메인',                name: '메인 오케스트레이터',  desc: '단계 순서와 전체 흐름 관리' },
+  { key: 'researcher',          name: 'researcher',          desc: '시장조사 · 입력 수집' },
+  { key: 'model-simulator',     name: 'model-simulator',     desc: '수익모델 계산 · 검증' },
+  { key: 'competitor-analyzer', name: 'competitor-analyzer', desc: '경쟁사 분석 · 포지셔닝' },
+  { key: 'reviewer',            name: 'reviewer',            desc: '검토 · 판정 (읽기 전용)' }
+];
+const STATUS_CLASS = { '진행중': 'running', '완료': 'done', '보류': 'hold', '실패': 'fail' };
+const POLL_MS = 2000;
+const STALE_MS = 10 * 60 * 1000;   // 진행중 줄 뒤로 10분 넘게 기록이 없으면 '응답 없음?'
+
+let logHandle = null;      // File System Access handle for run_log.jsonl (live re-read)
+let ctlHandle = null;      // handle for run_control.json (written by 실행/중지)
+let entries = [];
+let running = false;
+let logSource = '(없음)';
+let sampleMode = false;    // 샘플 데이터 표시 중이면 파일 자동 읽기를 멈춤
+
+let extra = null;          // dashboard_data.json: 손익 시나리오 값, 검토 지적 사항
+
+// 화면 확인용 샘플 값 (실제 엑셀 값이 아님). 손익은 엑셀 '손익' 시트 B12:G12 기준으로 채울 예정
+const SAMPLE_EXTRA = {
+  scenario_pl: {
+    A: { 보수: -30530124, 기준: -21152727, 낙관: 19004006 },
+    B: { 보수: -10934898, 기준: -4433007,  낙관: 29716157 }
+  },
+  conclusion: '조건부 시행',
+  review: [
+    { rule: '1', result: '통과', where: '-',         memo: '계획서 숫자 모두 엑셀 출처' },
+    { rule: '3', result: '확인필요', where: '자료!B13', memo: '연결 매출을 B마트 매출로 쓰는 문제' },
+    { rule: '4', result: '통과', where: '손익!B12:G12', memo: '세 시나리오 모두 표시' },
+    { rule: '6', result: '위반', where: '자료!B8',   memo: '개인 설문 값을 세대 이용률로 사용' }
+  ]
+};
+
+// 화면 확인용 내장 샘플 (실제 로그가 아님)
+const SAMPLE_LOG = [
+  { time: new Date(Date.now() - 40*60000).toISOString(), step: '1 사업 정의와 판정 기준', agent: '메인', goal: '판정 기준 확정', status: '완료' },
+  { time: new Date(Date.now() - 30*60000).toISOString(), step: '2 시장 규모 추정', agent: 'researcher', goal: '시장 규모 입력 수집', status: '진행중' },
+  { time: new Date(Date.now() - 29*60000).toISOString(), step: '2 시장 규모 추정', agent: 'researcher', goal: 'TAM 출처 확인', status: '완료' },
+  { time: new Date(Date.now() - 25*60000).toISOString(), step: '4 단위 경제', agent: 'model-simulator', goal: '주문 1건 공헌이익 계산', status: '완료' },
+  { time: new Date(Date.now() - 22*60000).toISOString(), step: '5 인건비', agent: 'model-simulator', goal: '시간당 인건비 계산', status: '보류', reason: '중지 요청' },
+  { time: new Date(Date.now() - 21*60000).toISOString(), step: '8 경쟁과 포지셔닝', agent: 'competitor-analyzer', goal: '경쟁 대안 조사', status: '완료' },
+  { time: new Date(Date.now() - 2*60000).toISOString(), step: '10 판정', agent: 'reviewer', goal: '규칙 1~8 점검', status: '진행중' }
+];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hhmmss = iso => { const d = new Date(iso); return isNaN(d) ? (iso || '') : d.toTimeString().slice(0, 8); };
+const setMsg = (t, control = false) => { $('msg').textContent = t || ''; $('msg').dataset.control = control ? '1' : ''; };
+
+function parseJsonl(text) {
+  const out = [];
+  for (const line of text.split('\n')) {
+    const l = line.trim();
+    if (!l) continue;
+    try { out.push(JSON.parse(l)); } catch (e) { /* 깨진 줄은 건너뜀 */ }
+  }
+  return out;
+}
+
+async function readLog() {
+  try {
+    if (logHandle) { const f = await logHandle.getFile(); logSource = '선택한 파일'; return await f.text(); }
+    const r = await fetch('run_log.jsonl?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    logSource = 'run_log.jsonl';
+    return await r.text();
+  } catch (e) {
+    logSource = '(없음)';
+    return null;
+  }
+}
+
+function agentState(key) {
+  const mine = entries.filter(e => e.agent === key);
+  const last = mine[mine.length - 1];
+  return { mine, last, cls: last ? (STATUS_CLASS[last.status] || 'idle') : 'idle' };
+}
+
+function render() {
+  const counts = { running: 0, done: 0, hold: 0, fail: 0 };
+  let html = '';
+  for (const a of AGENTS) {
+    let { mine, last, cls } = agentState(a.key);
+    if (cls in counts) counts[cls]++;
+    let label = last ? esc(last.status) : '대기';
+    const badgeCls = cls === 'idle' ? '' : cls;
+    const rows = mine.slice(-40).map(e => {
+      const sc = STATUS_CLASS[e.status] || '';
+      const why = e.reason ? ` (사유: ${esc(e.reason)})` : '';
+      return `<div class="row"><span class="t">${esc(hhmmss(e.time))}</span> ` +
+             `<span class="st ${sc}">[${esc(e.status || '-')}]</span> ` +
+             `${esc(e.step || '')} — ${esc(e.goal || '')}${why}</div>`;
+    }).join('') || '<div class="empty">아직 기록 없음 (에이전트를 실행하면 여기에 표시됩니다)</div>';
+    const stale = cls === 'running' && last && (Date.now() - new Date(last.time).getTime()) > STALE_MS;
+    if (stale) label = '응답 없음?';
+    html += `
+      <section class="card ${cls === 'running' ? 'running' : ''}">
+        <div class="top">
+          <div><div class="name">${esc(a.name)}</div><div class="desc">${esc(a.desc)}</div></div>
+          <span class="badge ${stale ? 'stale' : badgeCls}">${cls === 'running' && !stale ? '● 작업 중' : label}</span>
+        </div>
+        <div class="last">마지막 단계: <b>${esc(last ? (last.step || '-') : '-')}</b> · 시각 ${esc(last ? hhmmss(last.time) : '-')}</div>
+        <div class="log" data-key="${esc(a.key)}">${rows}</div>
+      </section>`;
+  }
+  $('grid').innerHTML = html;
+  $('panel').innerHTML = resultPanel() + feedHtml();
+  const feed = document.getElementById('feed');
+  if (feed) feed.scrollTop = feed.scrollHeight;
+  document.querySelectorAll('.log').forEach(el => { el.scrollTop = el.scrollHeight; });
+
+  $('summary').innerHTML =
+    `<span class="chip">작업 중 <b>${counts.running}</b></span>` +
+    `<span class="chip">완료 <b>${counts.done}</b></span>` +
+    `<span class="chip">보류 <b>${counts.hold}</b></span>` +
+    `<span class="chip">실패 <b>${counts.fail}</b></span>` +
+    `<span class="chip">로그 항목 <b>${entries.length}</b> · 출처 ${esc(logSource)}</span>`;
+
+  if (!entries.length && !$('msg').dataset.control) {
+    setMsg('로그가 없습니다. run_log.jsonl을 이 파일과 같은 폴더에 두거나 "로그 파일 선택"을 누르세요.');
+  }
+  $('updated').textContent = new Date().toTimeString().slice(0, 8);
+}
+
+async function readExtra() {
+  try {
+    const r = await fetch('dashboard_data.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) return null;
+    return JSON.parse(await r.text());
+  } catch (e) { return null; }
+}
+
+async function refresh() {
+  if (!sampleMode) {
+    const text = await readLog();
+    if (text !== null) entries = parseJsonl(text);
+    extra = await readExtra();
+  }
+  render();
+}
+
+// 월 손익 막대그래프 (SVG). 값은 원 단위, 표시는 만원
+function plChart(pl) {
+  const W = 320, H = 170, zero = 95, half = 70;
+  const vals = [];
+  for (const p of ['A', 'B']) for (const s of ['보수', '기준', '낙관']) vals.push(pl[p]?.[s] ?? 0);
+  const max = Math.max(...vals.map(v => Math.abs(v)), 1);
+  const k = half / max;
+  const man = v => (Math.round(v / 10000)).toLocaleString('ko-KR') + '만';
+  let bars = '';
+  let i = 0;
+  for (const p of ['A', 'B']) {
+    for (const s of ['보수', '기준', '낙관']) {
+      const v = pl[p]?.[s] ?? 0;
+      const h = Math.max(Math.abs(v) * k, 1);
+      const x = 22 + i * 48;
+      const y = v >= 0 ? zero - h : zero;
+      const fill = v >= 0 ? 'var(--done)' : 'var(--fail)';
+      const ly = v >= 0 ? y - 4 : y + h + 12;
+      bars += `<rect x="${x}" y="${y}" width="30" height="${h}" fill="${fill}" rx="3"/>`;
+      bars += `<text x="${x + 15}" y="${ly}" fill="#e8eaf0" font-size="10" text-anchor="middle">${man(v)}</text>`;
+      bars += `<text x="${x + 15}" y="${H - 6}" fill="#8a92a3" font-size="10" text-anchor="middle">${p}·${s}</text>`;
+      i++;
+    }
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="시나리오별 월 손익">
+    <line x1="10" y1="${zero}" x2="${W - 10}" y2="${zero}" stroke="#2a2f3a"/>${bars}</svg>
+    <div class="xt" style="margin-top:4px">A안·B안 × 보수/기준/낙관 · 원 값 기준 월 영업손익 (엑셀 손익 시트)</div>`;
+}
+
+function reviewList(items) {
+  const cls = { '통과': 'done', '위반': 'fail', '확인필요': 'hold' };
+  return items.map(r => `<div class="rv"><b class="st ${cls[r.result] || ''}">[${esc(r.result)}]</b> 규칙 ${esc(r.rule)} · ${esc(r.where)} — ${esc(r.memo)}</div>`).join('');
+}
+
+// 페이지 맨 아래 전체 이벤트 피드: 모든 에이전트의 최근 기록을 시간순으로 (최신이 아래)
+function feedHtml() {
+  const recent = entries.slice(-100);
+  const rows = recent.map(e => {
+    const sc = STATUS_CLASS[e.status] || '';
+    const why = e.reason ? ` (사유: ${esc(e.reason)})` : '';
+    return `<div class="row"><span class="t">${esc(hhmmss(e.time))}</span> ` +
+           `<b>${esc(e.agent || '-')}</b> ` +
+           `<span class="st ${sc}">[${esc(e.status || '-')}]</span> ` +
+           `${esc(e.step || '')} — ${esc(e.goal || '')}${why}</div>`;
+  }).join('') || '<div class="empty">아직 기록 없음 (에이전트가 실행되면 여기에 최신 기록이 아래로 쌓입니다)</div>';
+  return `<section class="panel" style="margin-top:14px">
+    <div class="ph">전체 이벤트 로그 (run_log.jsonl · 최신이 아래)</div>
+    <div class="log" id="feed" style="height:260px">${rows}</div>
+  </section>`;
+}
+
+// 카드 아래 공통 결과 패널: A안·B안 월 손익 표 + 막대그래프 + 검토 지적 사항
+function resultPanel() {
+  const man = v => (Math.round(v / 10000)).toLocaleString('ko-KR') + '만';
+  const pl = extra && extra.scenario_pl;
+  let table;
+  if (pl) {
+    const rows = ['기준', '보수', '낙관'].map(s => {
+      const a = pl.A?.[s], b = pl.B?.[s];
+      const cell = v => v == null ? '-' : `<span style="color:${v >= 0 ? 'var(--done)' : 'var(--fail)'}">${man(v)}원</span>`;
+      return `<tr><th>${s}</th><td>${cell(a)}</td><td>${cell(b)}</td></tr>`;
+    }).join('');
+    table = `<table class="pl"><thead><tr><th>시나리오</th><th>A안 월 손익</th><th>B안 월 손익</th></tr></thead><tbody>${rows}</tbody></table>`;
+  } else {
+    table = '<div class="empty">데이터 없음 (dashboard_data.json의 scenario_pl)</div>';
+  }
+  const chart = pl ? plChart(pl) : '';
+  const hasReview = extra && Array.isArray(extra.review) && extra.review.length > 0;
+  const rv = hasReview ? reviewList(extra.review) : '<div class="empty">검토 전 (reviewer 실행 후 표시)</div>';
+  const c = extra && extra.conclusion ? ` · 결론: ${esc(extra.conclusion)}` : '';
+  return `<section class="panel">
+    <div class="ph">결과 요약 (reviewer · competitor-analyzer 공통)</div>
+    <div class="pgrid">
+      <div class="extra"><div class="xt">A안·B안 월 손익 (원 값 기준 만원 표시)</div>${table}</div>
+      <div class="extra"><div class="xt">시나리오별 월 손익 그래프</div>${chart}</div>
+      <div class="extra"><div class="xt">검토 지적 사항${c}</div>${rv}</div>
+    </div>
+  </section>`;
+}
+
+$('btnSample').onclick = () => {
+  sampleMode = true;
+  entries = SAMPLE_LOG;
+  extra = SAMPLE_EXTRA;
+  logSource = '샘플(화면 확인용)';
+  render();
+  setMsg('샘플 데이터를 표시 중입니다. 실제 로그를 보려면 "로그 파일 선택"을 누르세요.');
+};
+
+if (location.protocol === 'file:') {
+  setMsg('파일을 직접 열면 같은 폴더의 로그를 자동으로 읽지 못합니다. "샘플 데이터"로 화면을 보거나 "로그 파일 선택"을 누르세요.');
+}
+
+function updateControl() {
+  $('ctlState').textContent = running ? '제어: 실행 허용' : '제어: 중지됨';
+  $('ctlState').style.color = running ? 'var(--done)' : 'var(--fail)';
+  // 두 버튼은 항상 누를 수 있어야 한다. 이미 실행 상태여도 '실행'을 다시 눌러 기록할 수 있게 함
+  $('btnRun').style.opacity = running ? 1 : 0.6;
+  $('btnStop').style.opacity = running ? 0.6 : 1;
+}
+
+async function ensureCtl() {
+  if (ctlHandle) return true;
+  if (!window.showSaveFilePicker) {
+    setMsg('이 브라우저는 파일 쓰기를 지원하지 않습니다(Chrome·Edge 권장). 에이전트에 전달되지 않습니다.');
+    return false;
+  }
+  ctlHandle = await showSaveFilePicker({
+    suggestedName: 'run_control.json',
+    types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+  });
+  return true;
+}
+
+async function setRunning(v) {
+  // 1) server.py가 켜져 있으면 서버가 run_control.json을 직접 씁니다 (파일 선택 불필요)
+  try {
+    const r = await fetch('/control', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ running: v })
+    });
+    if (r.ok) {
+      running = v;
+      updateControl();
+      setMsg(v ? '실행 허용을 기록했습니다. 에이전트는 다음 단계부터 시작합니다.' : '중지를 기록했습니다. 에이전트는 다음 단계 전에 멈춥니다.', true);
+      return;
+    }
+  } catch (e) { /* 서버가 없으면 아래 파일 방식으로 넘어감 */ }
+  if (location.protocol.startsWith('http')) {
+    setMsg('서버에 기록하지 못했습니다. server.py가 켜져 있는지, 최신 버전으로 다시 실행했는지 확인하세요.', true);
+    return;
+  }
+
+  // 2) 서버가 없으면 run_control.json 파일을 직접 지정해서 씁니다 (Chrome·Edge)
+  try {
+    if (!(await ensureCtl())) { running = v; updateControl(); return; }
+    const w = await ctlHandle.createWritable();
+    await w.write(JSON.stringify({ running: v, updated: new Date().toISOString() }, null, 2));
+    await w.close();
+    running = v;
+    updateControl();
+    setMsg(v ? '실행 허용을 기록했습니다. 에이전트는 다음 단계부터 시작합니다.' : '중지를 기록했습니다. 에이전트는 다음 단계 전에 멈춥니다.', true);
+  } catch (e) {
+    setMsg('제어 파일을 쓰지 못했습니다: ' + e.message, true);
+  }
+}
+
+async function loadCtlState() {
+  // 제어 파일이 지정돼 있으면 현재 상태를 읽어 버튼에 반영
+  if (!ctlHandle) { updateControl(); return; }
+  try {
+    const f = await ctlHandle.getFile();
+    running = !!JSON.parse(await f.text()).running;
+  } catch (e) { /* 읽기 실패 시 기존 상태 유지 */ }
+  updateControl();
+}
+
+$('btnRun').onclick  = () => setRunning(true);
+$('btnStop').onclick = () => setRunning(false);
+$('btnLog').onclick  = async () => {
+  if (!window.showOpenFilePicker) { $('fileIn').click(); return; }
+  try {
+    [logHandle] = await showOpenFilePicker({ types: [{ description: 'JSONL', accept: { 'application/octet-stream': ['.jsonl'], 'text/plain': ['.jsonl'] } }] });
+    sampleMode = false;
+    refresh();
+  } catch (e) { /* 취소 */ }
+};
+// 파일 선택 API가 없는 브라우저용: 한 번 고르면 그 내용을 읽습니다(자동 갱신은 없음)
+$('fileIn').onchange = async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  entries = parseJsonl(await f.text());
+  logSource = f.name + ' (수동 로드)';
+  sampleMode = false;
+  render();
+};
+$('btnCtl').onclick = async () => {
+  try {
+    if (!window.showSaveFilePicker) { setMsg('이 브라우저는 파일 쓰기를 지원하지 않습니다.'); return; }
+    ctlHandle = await showSaveFilePicker({ suggestedName: 'run_control.json', types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }] });
+    loadCtlState();
+  } catch (e) { /* 취소 */ }
+};
+
+async function initControl() {
+  // 같은 폴더의 run_control.json을 읽어 실행/중지 상태를 시작 시 반영 (없으면 실행 허용으로 간주)
+  try {
+    const r = await fetch('run_control.json?t=' + Date.now(), { cache: 'no-store' });
+    if (r.ok) running = !!JSON.parse(await r.text()).running; else running = true;
+  } catch (e) { running = true; }
+  updateControl();
+}
+
+initControl();
+refresh();
+setInterval(refresh, POLL_MS);
+</script>
+</body>
+</html>
