@@ -513,3 +513,12 @@
 |---|---|---|
 | `research/industry_food/저녁_식당_후보_중구.md` | 찜갈비·납작만두·콩국 식당 10곳 (주소 확인, 영업 미확인) | 웹 검색 (식신·언론). 출처 등급 낮음 |
 | `research/industry_food/치킨_노포_중구.md` | 중구 치킨 노포 2곳 (뉴욕통닭 1981, 원주통닭 1978), 동구 자료 제외 | 이예진 브랜치 검증표 (`대구치킨_스토리_검증표.md`) 기반 |
+
+### 10-4. 중구 유료 관광지 외국인 월별 입장객 (2026-11-17 추가)
+
+| 정리본 파일 | 원본 | 내용 | 기간 | 열 | 메모 |
+|---|---|---|---|---|---|
+| `research/data/datalab_jung_paid_attraction_foreign_monthly_2022_2026.csv` | 관광데이터랩 `관광데이터랩_대구광역시_주요유료관광지입장객수_외국인_202201-202212.csv`, `..._202301-202312.csv`, `..._202401-202412.csv`, `..._202501-202512.csv`, `..._202601-202609.csv` (origin/place-tour-jung-alley `research/data/raw/관광데이터랩/`) | 중구 행만 필터, 월별 외국인 입장객 | 2022-01~2026-09 | rank_in_period, region, district, spot_name, year_month, foreign_entrants, status, period_total_foreign, source_file | 57행. 순위는 원본 파일 기간별 값(대구 전체 기준)이며 월별 순위가 아니다. `status`가 "미집계"인 행은 원본 `-` (2026년 4~9월). 원본 `-`은 0으로 바꾸지 않았다. 원본 열 중 기간 총계는 `period_total_foreign`으로 옮겼다. 중구에서 외국인 행이 나온 장소는 향촌문화관 1곳뿐이다. |
+
+- 관심 장소는 언어권별 행을 합치지 않고 `datalab_jung_interest_spots_2022_2025.csv`에 그대로 둔다.
+- 저녁 식당 후보는 데이터 정리본이 아니라 `research/industry_food/저녁_식당_후보_중구.md`에 둔다.
