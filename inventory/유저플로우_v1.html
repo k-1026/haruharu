@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>유저플로우 v1</title>
+<style>
+/* 단계별 가로 흐름: 행 = 단계, 왼쪽 → 오른쪽 정상 진행, 아래 빨간 상자 = 예외 */
+:root{
+  --bg:#F6F7F9; --surface:#FFFFFF; --line:#D5DAE1; --ink:#1F2933; --muted:#5F6B7A;
+  --user:#2F6FDB; --user-bg:#EEF4FE; --agent:#64748B; --agent-bg:#F1F4F8;
+  --dia:#C98A00; --dia-bg:#FFF8E6; --res:#2F6FDB; --res-ink:#FFFFFF;
+  --exc:#D43F5E; --exc-bg:#FDEEF1; --ok:#1E8E5A; --off:#9AA4B2; --lane:#EEF1F5;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#14171C; --surface:#1D2128; --line:#353C47; --ink:#E6E9EE; --muted:#9AA4B2;
+  --user:#7FA8F0; --user-bg:#1C2738; --agent:#9AA4B2; --agent-bg:#232830;
+  --dia:#E5B04A; --dia-bg:#2E2717; --res:#4B7FE0; --res-ink:#FFFFFF;
+  --exc:#F0849A; --exc-bg:#3A1F27; --ok:#5CC892; --off:#6B7584; --lane:#1A1E24; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:14px;line-height:1.45;padding:24px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:1280px;margin:0 auto;display:grid;gap:18px}
+h1{margin:0;font-size:24px}
+.sub{margin:4px 0 0;color:var(--muted);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted);align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:18px;height:12px;border-radius:3px;border:1.5px solid}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px 10px}
+.row h2{margin:0 0 6px;font-size:15px;display:flex;gap:8px;align-items:baseline}
+.row h2 small{font-weight:400;color:var(--muted);font-size:12.5px}
+.scroll{overflow-x:auto}
+.canvas{position:relative;width:1290px;height:240px}
+.canvas svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.node{word-break:keep-all;position:absolute;display:grid;place-content:center;text-align:center;padding:6px 8px;border-radius:9px;border:1.5px solid;font-size:13px;font-weight:700;line-height:1.3}
+.node small{display:block;font-weight:400;font-size:11.5px;color:var(--muted);margin-top:2px}
+.n-term{background:var(--user-bg);border-color:var(--user);border-radius:999px;color:var(--user)}
+.n-user{background:var(--surface);border-color:var(--user)}
+.n-user::before{content:"담당자";position:absolute;top:-9px;left:8px;font-size:10px;font-weight:700;background:var(--user);color:#fff;padding:0 6px;border-radius:999px}
+.n-agent{background:var(--agent-bg);border-color:var(--agent)}
+.n-agent::before{content:"에이전트";position:absolute;top:-9px;left:8px;font-size:10px;font-weight:700;background:var(--agent);color:#fff;padding:0 6px;border-radius:999px}
+.n-res{background:var(--res);border-color:var(--res);color:var(--res-ink)}
+.n-res small{color:rgba(255,255,255,.85)}
+.n-exc{background:var(--exc-bg);border-color:var(--exc);color:var(--exc);font-size:12px}
+.n-exc small{color:var(--ink)}
+.n-pill{background:var(--lane);border-color:var(--line);border-radius:999px;font-size:12px;color:var(--muted)}
+.n-off{background:var(--surface);border-color:var(--off);border-style:dashed;color:var(--muted)}
+.n-dia{border:0;background:none;padding:0}
+.n-dia i{position:absolute;inset:0;margin:auto;width:76%;height:76%;transform:rotate(45deg);background:var(--dia-bg);border:1.5px solid var(--dia);border-radius:6px}
+.n-dia span{position:relative;font-size:11.5px;font-weight:700;max-width:92px;margin:0 auto;word-break:keep-all}
+.lbl{font-size:11.5px;font-weight:700}
+.tables{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.tables{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--surface)}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--lane);font-size:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;min-width:0}
+.card h3{margin:0;font-size:14px}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>유저플로우 v1 — 담당자용 체류 기획 에이전트</h1>
+    <p class="sub">기준: 담당자 · 에이전트 역할표 · 2026-11-17 초안(팀 검토 전) · 한 줄 = 한 단계, 왼쪽에서 오른쪽으로 진행 · 빨간 상자는 예외</p>
+  </header>
+
+  <div class="legend">
+    <span><i class="sw" style="border-color:var(--user);background:var(--surface)"></i>담당자가 하는 일</span>
+    <span><i class="sw" style="border-color:var(--agent);background:var(--agent-bg)"></i>에이전트가 하는 일</span>
+    <span><i class="sw" style="border-color:var(--dia);background:var(--dia-bg);transform:rotate(45deg);width:12px"></i>판정 · 선택</span>
+    <span><i class="sw" style="border-color:var(--res);background:var(--res)"></i>화면에 나오는 결과</span>
+    <span><i class="sw" style="border-color:var(--exc);background:var(--exc-bg)"></i>예외</span>
+    <span><svg width="34" height="10" aria-hidden="true"><line x1="0" y1="5" x2="34" y2="5" stroke="var(--exc)" stroke-width="2" stroke-dasharray="5 4"/></svg>되돌아가기</span>
+  </div>
+
+  <div id="rows" style="display:grid;gap:14px"></div>
+
+  <div class="tables">
+    <div class="card">
+      <h3>단계 사이에 넘기는 것</h3>
+      <table>
+        <tr><th>넘김</th><th>내용</th></tr>
+        <tr><td>① → ②</td><td>조건(계절 · 체류 기간 · 대상 국가), 골라 둔 데이터 목록, E1 알림 여부</td></tr>
+        <tr><td>② → ③</td><td>수요 분석 요약(방문객 · 좋았던 점 · 음식 · 숙박), 근거표(수치 · 출처 · 연도 · 표본 · 한계), 경고 목록</td></tr>
+        <tr><td>③ → ④</td><td>확정 코스(시간표 · 장소 · 순서), 장소별 근거 · 운영 주체 후보, 대체 이력, 남은 경고</td></tr>
+        <tr><td>④ → ⑤</td><td>확정 문구 · 번역, 장면 → 홍보물 대응표, 톤앤매너 · 시안 (⑤는 이번 범위 밖)</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>원칙과 미정 항목</h3>
+      <p class="note">에이전트는 표시와 제안만 하고, 진행할지는 담당자가 정합니다. 경고 · 충돌이 있어도 자동으로 막지 않으며, 경고는 다음 단계까지 따라갑니다.</p>
+      <p class="note"><b>미정:</b> 기관 데이터 올리는 형식 · 진행 차단 여부 · "근거 약함" 기준값 · 원어민 검토 방식 · 시안 도구와 캐릭터 사용 범위 · 대상 국가와 번역 언어 범위 · ⑤ 산출물 형식</p>
+      <p class="note"><b>확인 필요:</b> E1 · E4 · E5의 예시(겨울 당일형 무박 비율, 월요일 휴장, 순위 표현)는 역할표의 예시이며 원자료로 아직 확인하지 않았습니다.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// x: 칸 번호(0~6), y: "main" 또는 "exc"
+const COLX=c=>14+c*186, MAIN_Y=40, MAIN_H=66, EXC_Y=166, EXC_H=62, W=146;
+const ROWS=[
+ {t:"① 기획 조건",s:"담당자가 조건을 고르면, 에이전트가 맞는 데이터를 골라 두고 안 맞으면 알림",
+  n:[
+   {id:"a",c:0,k:"term",t:"시작",s:"새 기획"},
+   {id:"b",c:1,k:"user",t:"조건 선택",s:"계절 · 당일/1박2일 · 대상 국가"},
+   {id:"c",c:2,k:"dia",t:"맞는 데이터 충분?"},
+   {id:"d",c:3,k:"res",t:"조건 요약",s:"조건별 참고 문구"},
+   {id:"e",c:4,k:"pill",t:"② 수요 근거로 →"},
+   {id:"x1",c:2,y:"exc",k:"exc",t:"E1 조건·데이터 안 맞음",s:"예: 수요가 적은 조합 알림"}],
+  e:[["a","b"],["b","c"],["c","d","예"],["d","e"],["c","x1","아니오","down"],["x1","b","조건 바꾸기","back"],["x1","d","알림 남기고 진행","fwd"]]},
+ {t:"② 수요 근거",s:"기관 데이터를 올리거나 '없음' 체크 → 에이전트가 비교 · 근거표 · 경고",
+  n:[
+   {id:"a",c:0,k:"pill",t:"① 조건 요약에서"},
+   {id:"b",c:1,k:"user",t:"기관 데이터 올리기",s:"없으면 '없음' 체크 → 바로 근거표"},
+   {id:"c",c:2,k:"dia",t:"비교 가능한가?"},
+   {id:"d",c:3,k:"agent",t:"근거표 작성",s:"수치마다 출처 · 연도 · 표본 · 한계"},
+   {id:"f",c:4,k:"dia",t:"근거가 약한가?"},
+   {id:"g",c:5,k:"res",t:"수요 분석 요약",s:"근거표 + 경고"},
+   {id:"h",c:6,k:"pill",t:"③ 코스 검토로 →"},
+   {id:"x2",c:2,y:"exc",k:"exc",t:"E2 비교 불가",s:"출처 · 기간 · 단위 다름"},
+   {id:"x3",c:4,y:"exc",k:"exc",t:"E3 근거 약함 경고",s:"표본 작음 · 간접 근거 · 기간 다름"}],
+  e:[["a","b"],["b","c"],["c","d","예"],["d","f"],["f","g","아니오"],["g","h"],
+     ["c","x2","아니오","down"],["x2","b","다시 올리기","back"],["x2","d","경고 달고 쓰기","fwd"],
+     ["f","x3","예","down"],["x3","g","경고 남기고 진행","fwd"]],
+  foot:"E3에서 \"조건 바꾸기\"를 고르면 ① 기획 조건으로 돌아갑니다."},
+ {t:"③ 코스 검토",s:"코스 생성 → 에이전트가 기본 코스와 충돌 · 대체안 · 장소별 근거 → 담당자가 고치거나 확정",
+  n:[
+   {id:"a",c:0,k:"pill",t:"② 수요 분석에서"},
+   {id:"b",c:1,k:"user",t:"코스 생성",s:"버튼 누르기"},
+   {id:"c",c:2,k:"agent",t:"기본 코스 작성",s:"낮 중구 → 저녁 → 숙박 동구"},
+   {id:"d",c:3,k:"dia",t:"운영 충돌 있나?"},
+   {id:"f",c:4,k:"dia",t:"담당자 확정?"},
+   {id:"g",c:5,k:"res",t:"시간표 코스",s:"장소별 근거 · 운영 주체 후보"},
+   {id:"h",c:6,k:"pill",t:"④ 홍보 검토로 →"},
+   {id:"x4",c:3,y:"exc",k:"exc",t:"E4 충돌 표시 + 대체안",s:"예: 휴장 시설 → 관광지"}],
+  e:[["a","b"],["b","c"],["c","d"],["d","f","없음"],["f","g","확정"],["g","h"],
+     ["d","x4","있음","down"],["x4","c","대체안 받기","back"],["f","c","담당자가 직접 고친 뒤 다시 점검","top"]]},
+ {t:"④ 홍보 검토",s:"톤앤매너 · 캐릭터 선택 → 에이전트가 장면별 문구 · 번역 · 시안 → 담당자가 톤 · 원어민 검토",
+  n:[
+   {id:"a",c:0,k:"pill",t:"③ 확정 코스에서"},
+   {id:"b",c:1,k:"user",t:"톤앤매너 · 캐릭터 선택",s:"색상 · 분위기 · 밤탐이"},
+   {id:"c",c:2,k:"agent",t:"장면별 문구 · 번역 · 시안",s:"코스 장면마다"},
+   {id:"d",c:3,k:"dia",t:"검증 안 된 표현?"},
+   {id:"f",c:4,k:"dia",t:"담당자 검토 통과?"},
+   {id:"g",c:5,k:"res",t:"홍보안 확정",s:"장면 → 홍보물 대응표"},
+   {id:"h",c:6,k:"off",t:"⑤ 산출물",s:"이번 범위 제외"},
+   {id:"x6",c:3,y:"exc",k:"exc",t:"E5 표현 걸러 냄",s:"예: 순위 매기는 표현"},
+   {id:"x7",c:4,y:"exc",k:"exc",t:"E6 코스 수정 필요",s:"③에서 고친 뒤 바뀐 장면만 재검토"}],
+  e:[["a","b"],["b","c"],["c","d"],["d","f","없음"],["f","g","통과"],["g","h"],
+     ["d","x6","있음","down"],["x6","c","문구 고쳐 다시 생성","back"],["f","x7","코스 수정","down"]],
+  foot:"톤 · 원어민 검토에서 문구만 고칠 때는 에이전트 문구 생성으로 돌아갑니다."}
+];
+function box(n){const y=n.y==="exc"?EXC_Y:MAIN_Y,h=n.y==="exc"?EXC_H:MAIN_H;return{x:COLX(n.c),y,w:W,h}}
+const esc=t=>String(t).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
+function render(){
+  const host=document.getElementById("rows");
+  host.innerHTML=ROWS.map((r,ri)=>{
+    const B={}; r.n.forEach(n=>B[n.id]=box(n));
+    const nodes=r.n.map(n=>{const b=B[n.id];
+      if(n.k==="dia")return `<div class="node n-dia" style="left:${b.x+15}px;top:${b.y-12}px;width:${b.w-30}px;height:${b.h+24}px"><i></i><span>${esc(n.t)}</span></div>`;
+      return `<div class="node n-${n.k}" style="left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px">${esc(n.t)}${n.s?`<small>${esc(n.s)}</small>`:""}</div>`}).join("");
+    const mk=`m${ri}`;
+    const paths=r.e.map(([f,t,l,type])=>{const a=B[f],b=B[t];
+      let d,lx,ly,cls="main";
+      if(type==="down"){const x=a.x+a.w/2; d=`M${x},${a.y+a.h+12} L${x},${b.y-2}`; lx=x+6; ly=(a.y+a.h+b.y)/2+6; cls="exc"}
+      else if(type==="back"){const y=b.y+b.h; const sx=a.x, tx=b.x+b.w/2; d=`M${sx},${a.y+a.h/2} L${tx},${a.y+a.h/2} L${tx},${y+2}`; lx=Math.min(sx,tx)+8; ly=a.y+a.h/2-6; cls="back"}
+      else if(type==="top"){const ax=a.x+a.w/2, bx=b.x+b.w/2; d=`M${ax},${a.y-12} L${ax},16 L${bx},16 L${bx},${b.y-2}`; lx=(ax+bx)/2; ly=11; cls="back"}
+      else if(type==="fwd"){const sx=a.x+a.w, tx=b.x+b.w/2, y=a.y+a.h/2; d=`M${sx},${y} L${tx},${y} L${tx},${b.y+b.h+2}`; lx=sx+6; ly=y-6; cls="fwd"}
+      else{const y=a.y+a.h/2; d=`M${a.x+a.w},${y} L${b.x-2},${y}`; lx=(a.x+a.w+b.x)/2; ly=y-8}
+      const col=cls==="exc"||cls==="back"?"var(--exc)":cls==="fwd"?"var(--ok)":"var(--muted)";
+      const dash=cls==="back"||cls==="fwd"?' stroke-dasharray="5 4"':"";
+      return `<path d="${d}" fill="none" stroke="${col}" stroke-width="1.6"${dash} marker-end="url(#${mk}-${cls})"/>`+(l?`<text class="lbl" x="${lx}" y="${ly}" fill="${col}"${cls==="main"||type==="top"?' text-anchor="middle"':""}>${esc(l)}</text>`:"");
+    }).join("");
+    const mark=(id,c)=>`<marker id="${mk}-${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`;
+    return `<section class="row"><h2>${esc(r.t)} <small>${esc(r.s)}</small></h2><div class="scroll"><div class="canvas">
+      <svg aria-hidden="true"><defs>${mark("main","var(--muted)")}${mark("exc","var(--exc)")}${mark("back","var(--exc)")}${mark("fwd","var(--ok)")}</defs>${paths}</svg>${nodes}</div></div>${r.foot?`<p class="note" style="margin:4px 0 0">${esc(r.foot)}</p>`:""}</section>`;
+  }).join("");
+}
+render();
+// ?img 로 열면 그림만 보이게 (md에 넣을 이미지 캡처용)
+if(location.search.indexOf("img")>=0){document.querySelector(".tables").hidden=true}
+</script>
+</body>
+</html>
