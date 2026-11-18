@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>피치 구조 자료 위치</title>
+<style>
+:root{
+  --bg:#ffffff; --ink:#1f2a2a; --muted:#5f6b6b; --line:#e3e9e8;
+  --accent:#2a8c82; --accent-soft:#e3f1ef; --band:#1f5f5a; --band-ink:#ffffff; --band-hi:#ffe27a;
+  --ok:#1f7a4d; --ok-bg:#e2f4ea; --part:#8a5a00; --part-bg:#fff2d6; --none:#a12a2a; --none-bg:#fbe3e3;
+  --demo:#4a4f8c; --demo-bg:#e8e9f7; --code-bg:#f3f6f5;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121817; --ink:#e4ecea; --muted:#9aa8a6; --line:#2a3533;
+    --accent:#5cc2b6; --accent-soft:#1c2c2a; --band:#1b4a46; --band-ink:#eef6f5; --band-hi:#ffe27a;
+    --ok:#7fd6a6; --ok-bg:#183326; --part:#f0c46a; --part-bg:#3a2f15; --none:#f19a9a; --none-bg:#3a1b1b;
+    --demo:#b5b9f0; --demo-bg:#25264a; --code-bg:#1a2321;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121817; --ink:#e4ecea; --muted:#9aa8a6; --line:#2a3533;
+  --accent:#5cc2b6; --accent-soft:#1c2c2a; --band:#1b4a46; --band-ink:#eef6f5; --band-hi:#ffe27a;
+  --ok:#7fd6a6; --ok-bg:#183326; --part:#f0c46a; --part-bg:#3a2f15; --none:#f19a9a; --none-bg:#3a1b1b;
+  --demo:#b5b9f0; --demo-bg:#25264a; --code-bg:#1a2321;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;line-height:1.6;font-size:15px}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 16px 64px}
+.bar{width:44px;height:4px;background:var(--accent);border-radius:2px;margin-bottom:14px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+h1{margin:0;font-size:28px;letter-spacing:-.02em}
+h1 span{color:var(--accent)}
+.tag{background:var(--accent-soft);color:var(--accent);font-size:12px;padding:6px 14px;border-radius:999px;white-space:nowrap}
+.lead{color:var(--muted);margin:10px 0 0}
+.meta{margin:22px 0;padding:14px 16px;border:1px solid var(--line);border-radius:10px;font-size:13.5px;color:var(--muted)}
+.meta b{color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 0}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.ok{background:var(--ok-bg);color:var(--ok)}
+.part{background:var(--part-bg);color:var(--part)}
+.none{background:var(--none-bg);color:var(--none)}
+.demo{background:var(--demo-bg);color:var(--demo)}
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 26px}
+.summary div{border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.summary strong{display:block;font-size:26px}
+.summary small{color:var(--muted)}
+table.overview{width:100%;border-collapse:collapse;margin-bottom:34px;font-size:14px}
+.overview th{background:var(--accent-soft);text-align:left;padding:12px 14px;font-size:13px;color:var(--ink)}
+.overview td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.overview td:first-child{font-weight:700;white-space:nowrap}
+.overview ul.items{list-style:none;margin:0;padding:0}
+.overview ul.items li{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 5px}
+.overview ul.items li:last-child{margin-bottom:0}
+.overview td.st{white-space:nowrap;text-align:center}
+.overview td.st small{display:block;color:var(--muted);font-size:11.5px;margin-top:6px}
+.badge.big{font-size:13.5px;padding:5px 14px}
+section.ch{border:1px solid var(--line);border-radius:12px;margin:0 0 20px;overflow:hidden}
+.ch-head{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;padding:14px 18px;background:var(--accent-soft)}
+.ch-head h2{margin:0;font-size:18px}
+.ch-head .q{color:var(--muted);font-size:14px}
+.ch-head .crit{margin-left:auto;font-size:12.5px;color:var(--accent);font-weight:600}
+.item{display:grid;grid-template-columns:190px 1fr;gap:16px;padding:14px 18px;border-top:1px solid var(--line)}
+.item h3{margin:0 0 6px;font-size:15px}
+ul{margin:4px 0 0;padding-left:18px}
+li{margin:3px 0}
+code,.path{font-family:"D2Coding",Consolas,monospace;font-size:12.5px;background:var(--code-bg);padding:1px 6px;border-radius:4px;word-break:break-all}
+a.path{color:var(--ink);text-decoration:none;border-bottom:1px dashed var(--muted)}
+a.path:hover{color:var(--accent)}
+.note{color:var(--muted);font-size:13px;margin-top:6px}
+.rule{background:var(--band);color:var(--band-ink);border-radius:10px;padding:16px 20px;margin:30px 0 18px}
+.rule b{color:var(--band-hi)}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+@media (max-width:760px){
+  .summary{grid-template-columns:1fr}
+  .item{grid-template-columns:1fr;gap:6px}
+  .ch-head .crit{margin-left:0}
+  .overview-wrap{overflow-x:auto}
+  h1{font-size:23px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="bar"></div>
+<header>
+  <div>
+    <h1>피치 구조 — 일곱 장, <span>장마다 증명할 것 하나</span></h1>
+    <p class="lead">피치 = 짧은 시간에 '이 문제는 중요하고, 우리 해결책이 통하며, 다음 단계에 무엇이 필요한지'를 설득하는 발표. 장 순서가 곧 듣는 사람의 질문 순서다.</p>
+  </div>
+  <span class="tag">2교시 · 이론 · 프레임</span>
+</header>
+
+<div class="meta">
+  <b>이 문서는</b> 위 피치 프레임의 장별 근거 산출물이 우리 팀(haruharu) 자료 중 어디에 있는지 표시한 것이다.
+  자료가 없는 항목은 새로 만들지 않고 <span class="badge none">없음</span>으로 남겼다.<br>
+  <b>살펴본 범위</b> <code>1118.자료만들기/</code> 아래 <code>haruharu--민지</code> · <code>haruharu--예진</code> · <code>haruharu--밸류체인</code> 세 폴더 (2026-11-18 기준). 경로는 이 폴더 기준 상대 경로다.<br>
+  <b>폴더 겹침</b> <code>lifestyle/</code>는 민지 · 예진 폴더의 내용이 같다. 밸류체인 폴더의 <code>research/valuechain/</code>도 예진 폴더의 같은 경로와 같다. 그래서 대표 경로 하나만 적었다.
+  <div class="legend">
+    <span class="badge ok">충족</span> 우리 주제(대구 치킨 체류관광)로 만든 자료가 있음
+    <span class="badge part">부분충족</span> 관련 자료는 있으나 산출물 형식이 아님
+    <span class="badge none">없음</span> 해당 자료 없음
+    <span class="badge demo">수업 예시</span> 형식은 맞지만 수업 예시(야시장 매대판 · 가상 데이터)라서 우리 주제 자료는 아님
+  </div>
+</div>
+
+<div class="summary">
+  <div><strong>3</strong><small><span class="badge ok">충족</span> VOC 인용 · 고객 여정 · 밸류체인 병목</small></div>
+  <div><strong>5</strong><small><span class="badge part">부분충족</span> spec · 경쟁 비교표 · 역할 · 사용 도구 · 작업 흔적</small></div>
+  <div><strong>11</strong><small><span class="badge none">없음</span> AX 기회 정의 · As-Is→To-Be · 포지셔닝 맵 · SOM · BM 캔버스 · 단위 경제 · 시나리오 · v1 URL · 가설 판정 · results.md · 민감도 1위 가정</small></div>
+</div>
+
+<div class="overview-wrap">
+<table class="overview">
+  <thead><tr><th>장</th><th>증명할 것 — 듣는 사람의 질문</th><th>근거 산출물</th><th>평가 기준</th><th>상태</th></tr></thead>
+  <tbody>
+    <tr><td>1 문제</td><td>누가, 어떤 장면에서, 얼마나 불편한가 — "정말 있는 문제인가?"</td><td><ul class="items"><li><span class="iname">VOC 인용</span><span class="badge ok">충족</span></li><li><span class="iname">고객 여정</span><span class="badge ok">충족</span></li><li><span class="iname">밸류체인 병목</span><span class="badge ok">충족</span></li></ul></td><td>문제-해결 논리</td><td class="st"><span class="badge ok big">충족</span><small>충족 3</small></td></tr>
+    <tr><td>2 해결</td><td>AI로 무엇이 어떻게 달라지는가 — "왜 이 방법인가?"</td><td><ul class="items"><li><span class="iname">AX 기회 정의</span><span class="badge none">없음</span></li><li><span class="iname">spec.md</span><span class="badge part">부분충족</span></li><li><span class="iname">As-Is → To-Be</span><span class="badge none">없음</span></li></ul></td><td>문제-해결 논리</td><td class="st"><span class="badge part big">부분충족</span><small>부분충족 1 · 없음 2</small></td></tr>
+    <tr><td>3 시장</td><td>누가 이미 하고, 우리가 얻을 몫은 — "충분히 큰가?"</td><td><ul class="items"><li><span class="iname">경쟁 비교표</span><span class="badge part">부분충족</span></li><li><span class="iname">포지셔닝 맵</span><span class="badge none">없음</span></li><li><span class="iname">SOM</span><span class="badge none">없음</span></li></ul></td><td>시장·BM 근거</td><td class="st"><span class="badge part big">부분충족</span><small>부분충족 1 · 없음 2</small></td></tr>
+    <tr><td>4 BM</td><td>어떻게 돈이 남는가 — "지속 가능한가?"</td><td><ul class="items"><li><span class="iname">BM 캔버스</span><span class="badge none">없음</span></li><li><span class="iname">단위 경제</span><span class="badge none">없음</span></li><li><span class="iname">시나리오</span><span class="badge none">없음</span></li></ul></td><td>시장·BM 근거</td><td class="st"><span class="badge none big">없음</span><small>없음 3</small></td></tr>
+    <tr><td>5 MVP</td><td>실제로 동작하고 반응이 있는가 — "보여 줄 수 있나?"</td><td><ul class="items"><li><span class="iname">v1 URL 라이브 데모</span><span class="badge none">없음</span></li><li><span class="iname">가설 판정</span><span class="badge none">없음</span></li></ul></td><td>MVP 동작</td><td class="st"><span class="badge none big">없음</span><small>없음 2</small></td></tr>
+    <tr><td>6 팀</td><td>누가 무엇을 맡았고 어떤 AI로 했는가 — "이 팀이 할 수 있나?"</td><td><ul class="items"><li><span class="iname">역할</span><span class="badge part">부분충족</span></li><li><span class="iname">사용 도구</span><span class="badge part">부분충족</span></li><li><span class="iname">작업 흔적(저장소)</span><span class="badge part">부분충족</span></li></ul></td><td>발표·데모 완성도</td><td class="st"><span class="badge part big">부분충족</span><small>부분충족 3</small></td></tr>
+    <tr><td>7 요청사항</td><td>다음 단계와 필요한 것 — "그래서 무엇을 해 주면 되나?"</td><td><ul class="items"><li><span class="iname">results.md '계획' 칸</span><span class="badge none">없음</span></li><li><span class="iname">민감도 1위 가정</span><span class="badge none">없음</span></li></ul></td><td>문제-해결 논리</td><td class="st"><span class="badge none big">없음</span><small>없음 2</small></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- 1 문제 -->
+<section class="ch">
+  <div class="ch-head"><h2>1 문제</h2><span class="q">누가, 어떤 장면에서, 얼마나 불편한가 — "정말 있는 문제인가?"</span><span class="crit">평가: 문제-해결 논리</span></div>
+  <div class="item">
+    <div><h3>VOC 인용</h3><span class="badge ok">충족</span></div>
+    <div>
+      <ul>
+        <li><code>haruharu--예진/11월 9일/다시_자료/평화시장_VOC_통합표.md</code> — 평화시장 닭똥집골목. 블로그와 네이버 플레이스, 출처 2종</li>
+        <li><code>haruharu--예진/11월 9일/다시_자료/대구_중구·동구치킨관련_VOC_표.md</code> — 동성로 저녁 치킨집 3곳. 네이버 플레이스 방문자 리뷰</li>
+        <li><code>haruharu--예진/11.05_실습/research/company/review/review_Daegu.md</code> — Threads 반응 정리</li>
+        <li><code>haruharu--예진/11.05_실습/research/company/review/review_Daegu_2.md</code> — AI 개요 요약(2차 자료)이므로 원문을 확인하기 전에는 인용 근거로 쓰지 않는다</li>
+      </ul>
+      <p class="note"><span class="badge demo">수업 예시</span> <code>lifestyle/D12 페인포인트 실습/</code>의 VOC 300건은 야시장 가상 데이터다.</p>
+    </div>
+  </div>
+  <div class="item">
+    <div><h3>고객 여정</h3><span class="badge ok">충족</span></div>
+    <div>
+      <ul>
+        <li><code>haruharu--예진/lifestyle/D11 페인트 포인트/1109_근거리_고객여정지도_ver2.html</code> (ver1 · <code>1109_근거리_관광객_유형_CJ.md</code> 같은 폴더) — 근거리 관광객</li>
+        <li><code>haruharu--예진/11월 9일/daegu_chicken_stay_by_type_cj.html</code> · <code>daegu_chicken_remote_cj.html</code> · <code>daegu_chicken_remote_stay_cj.html</code> · <code>원거리_숙박형_유형별_치킨_여정_지도.md</code> · 여정지도 PNG 2장 — 원거리 · 숙박형 관광객</li>
+        <li><code>haruharu--예진/11월 9일/다시_자료/valuechain/고객여정지도.html</code> · <code>고객여정지도_층구조.html</code> · <code>고객여정지도_3사.html</code> — 평화시장 닭똥집골목 · 여행산업 3사</li>
+        <li><code>haruharu--예진/lifestyle/valuechain/고객여정지도_관광재단_v0.2.html</code> (v0 · v0.1 같은 폴더) — 공공 관광기관 담당자 기준</li>
+      </ul>
+    </div>
+  </div>
+  <div class="item">
+    <div><h3>밸류체인 병목</h3><span class="badge ok">충족</span></div>
+    <div>
+      <ul>
+        <li><code>haruharu--예진/inventory/밸류체인_v2.0.md</code> §6 마커(병목·비용·기회) — 외국어 홍보물 부족, 구별 외국인 숙박 위치 데이터 없음 (밸류체인 폴더에도 같은 파일)</li>
+        <li><code>haruharu--예진/research/valuechain/valuechain_v0.md</code> — 대구 체류 기획 도구 밸류체인 v0 (5단계)</li>
+        <li><code>haruharu--예진/lifestyle/valuechain/valuechain_관광재단.md</code> · <code>valuechain_하나투어ITC.md</code></li>
+        <li><code>haruharu--예진/11월 9일/다시_자료/valuechain/valuechain_통합.md</code> · <code>valuechain_3사_노랑풍선_코레일_롯데.md</code> · 치킨 브랜드별 4종</li>
+      </ul>
+      <p class="note">문제 수치 참고: <code>haruharu--예진/README.md</code> §1 "대구 평균 체류시간 2022→2025년 −17.2% (전국 평균 −9.3%), 한국관광데이터랩"</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 해결 -->
+<section class="ch">
+  <div class="ch-head"><h2>2 해결</h2><span class="q">AI로 무엇이 어떻게 달라지는가 — "왜 이 방법인가?"</span><span class="crit">평가: 문제-해결 논리</span></div>
+  <div class="item">
+    <div><h3>AX 기회 정의</h3><span class="badge none">없음</span></div>
+    <div>
+      <p>우리 주제로 AX 기회를 정의한 문서(기회 점수표 · 아이디어 순위)는 없다.</p>
+      <p class="note">관련 자료: <code>haruharu--예진/inventory/에이전트_구성_v2.md</code>에 AI 에이전트가 맡을 일이 적혀 있다(오케스트레이터 1개 + 전문 에이전트 6개).<br>
+      <span class="badge demo">수업 예시</span> <code>lifestyle/D13 BM설계/ax/</code>의 ideas_top3 · opportunity_matrix · jtbd</p>
+    </div>
+  </div>
+  <div class="item">
+    <div><h3>spec.md</h3><span class="badge part">부분충족</span></div>
+    <div>
+      <p>우리 주제의 <code>spec.md</code>(서비스 명세서)는 없다. 명세 역할을 나눠 맡는 문서는 아래와 같다.</p>
+      <ul>
+        <li><code>haruharu--예진/inventory/에이전트_구성_v2.md</code> — 서비스 · 구조 · MVP 범위(중구 · 외국인) · 산출물 묶음</li>
+        <li><code>haruharu--예진/inventory/유저플로우_v1.md</code> (.html · .png) · <code>haruharu--예진/발표/1113_유저플로우.md</code> — 화면 S1~S5, 예외 경로</li>
+        <li><code>haruharu--예진/지침/1_기획조건/</code> · <code>지침/2_수요근거/</code> · <code>지침서/3.코스_검토/</code> · <code>지침서/4.홍보_검토/</code> — 단계별 에이전트 지침</li>
+      </ul>
+      <p class="note"><span class="badge demo">수업 예시</span> <code>lifestyle/D14 서비스시나리오/spec/spec.md</code>는 야시장 매대판 명세서다.</p>
+    </div>
+  </div>
+  <div class="item">
+    <div><h3>As-Is → To-Be</h3><span class="badge none">없음</span></div>
+    <div>
+      <p>우리 주제의 As-Is → To-Be 비교는 아직 없다. <code>haruharu--예진/inventory/project_summary.md</code> §8 다음 단계 4번에 "고객여정지도 재작성 (As-Is → 감정·불편 → 페인포인트 → To-Be 유저플로우)"이 할 일로만 남아 있다.</p>
+      <p class="note"><span class="badge demo">수업 예시</span> <code>lifestyle/D14 서비스시나리오/spec/시나리오.md</code> §1 장면 비교</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 시장 -->
+<section class="ch">
+  <div class="ch-head"><h2>3 시장</h2><span class="q">누가 이미 하고, 우리가 얻을 몫은 — "충분히 큰가?"</span><span class="crit">평가: 시장·BM 근거</span></div>
+  <div class="item">
+    <div><h3>경쟁 비교표</h3><span class="badge part">부분충족</span></div>
+    <div>
+      <p>비교 사례 자료는 있지만, 경쟁자를 같은 기준으로 놓고 비교한 표는 없다.</p>
+      <ul>
+        <li><code>haruharu--예진/research/음식관련 사례.md</code> — 춘천 K-치킨벨트 계모임 열차, 대전, 구미 K-치킨벨트, 옥토버페스트 벤치마킹</li>
+        <li><code>haruharu--예진/research/valuechain/pages/index.html</code> · <code>pages/cases/</code> (스탬프로드20 · 비비드 동성로 투어)</li>
+        <li><code>haruharu--예진/11.05_실습/research/company/파트너_비교_원페이지.html</code> — 파트너 후보 비교(경쟁사 비교는 아님)</li>
+      </ul>
+      <p class="note"><code>project_summary.md</code> §8 다음 단계 3번 "차별점 후보 비교표"는 할 일로만 남아 있다.</p>
+    </div>
+  </div>
+  <div class="item">
+    <div><h3>포지셔닝 맵</h3><span class="badge none">없음</span></div>
+    <div><p>해당 자료 없음.</p></div>
+  </div>
+  <div class="item">
+    <div><h3>SOM</h3><span class="badge none">없음</span></div>
+    <div>
+      <p>TAM · SAM · SOM 같은 시장 규모 산출 자료는 없다.</p>
+      <p class="note">산출에 쓸 수 있는 재료: <code>haruharu--예진/research/data/</code>(관광데이터랩 · KOSIS 정리본), <code>research/대구관광현황.md</code>, <code>research/타겟분석/</code></p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 BM -->
+<section class="ch">
+  <div class="ch-head"><h2>4 BM</h2><span class="q">어떻게 돈이 남는가 — "지속 가능한가?"</span><span class="crit">평가: 시장·BM 근거</span></div>
+  <div class="item">
+    <div><h3>BM 캔버스</h3><span class="badge none">없음</span></div>
+    <div>
+      <p>우리 주제의 BM 캔버스는 없다.</p>
+      <p class="note">관련 자료: <code>haruharu--예진/11월 9일/다시_자료/수익모델_공공용역_초안_26.11.11.md</code>(공공 용역 수익 모델 초안) · <code>공공예산_용역발주_조사_2026.md</code> · <code>플랫폼_점유율_수수료_조사.md</code> · <code>inventory/역할분담_v2.md</code>(사업 주체별 역할)<br>
+      <span class="badge demo">수업 예시</span> <code>lifestyle/D13 BM설계/bm/bm_canvas.md</code> · <code>revenue_options.md</code></p>
+    </div>
+  </div>
+  <div class="item">
+    <div><h3>단위 경제</h3><span class="badge none">없음</span></div>
+    <div><p>해당 자료 없음. 수업 예시의 레드팀 로그(<code>lifestyle/D14 서비스시나리오/bm/redteam_log.md</code> 5번)에도 "단위 경제를 계산할 수 없다"고 적혀 있다.</p></div>
+  </div>
+  <div class="item">
+    <div><h3>시나리오</h3><span class="badge none">없음</span></div>
+    <div>
+      <p>수익 시나리오(가정별 결과) 자료는 없다.</p>
+      <p class="note">관련 자료: <code>haruharu--예진/inventory/프로젝트_정리_v2.md</code> §7 시기별 상품 구조 · §8 확장 로드맵</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 MVP -->
+<section class="ch">
+  <div class="ch-head"><h2>5 MVP</h2><span class="q">실제로 동작하고 반응이 있는가 — "보여 줄 수 있나?"</span><span class="crit">평가: MVP 동작</span></div>
+  <div class="item">
+    <div><h3>v1 URL 라이브 데모</h3><span class="badge none">없음</span></div>
+    <div>
+      <p>배포된 데모 URL은 없다. <code>프로젝트_정리_v2.md</code> §11 다음 단계 4번이 "MVP 입력과 출력 항목 확정"이다.</p>
+      <p class="note"><span class="badge demo">수업 예시</span> <code>lifestyle/D14 서비스시나리오/index.html</code>은 야시장 매대판 화면이고, 배포되지 않았다.</p>
+    </div>
+  </div>
+  <div class="item">
+    <div><h3>가설 판정</h3><span class="badge none">없음</span></div>
+    <div>
+      <p>가설을 검증한 결과는 없다. 검증 계획만 있다.</p>
+      <p class="note">검증 계획: <code>haruharu--예진/README.md</code> §1 · <code>CLAUDE.md</code> §1 — A/B 설문(낮 관광만 vs 낮 관광 + 치킨 저녁)</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 팀 -->
+<section class="ch">
+  <div class="ch-head"><h2>6 팀</h2><span class="q">누가 무엇을 맡았고 어떤 AI로 했는가 — "이 팀이 할 수 있나?"</span><span class="crit">평가: 발표·데모 완성도</span></div>
+  <div class="item">
+    <div><h3>역할</h3><span class="badge part">부분충족</span></div>
+    <div>
+      <p>팀원별 역할은 아직 정해지지 않았다. <code>haruharu--예진/CLAUDE.md</code> §1에 "역할: 리서치 ○○ · 기획·문서 ○○ · 스토리 ○○ · 발표 ○○ (팀 회의에서 확정 후 기입)"이라고 비어 있다.</p>
+      <p class="note">관련 자료: <code>haruharu--예진/inventory/역할분담_v2.md</code>는 사업 주체별 역할(중구청 · 여행사 · 우리 팀 · 운영 파트너)이고, 팀원별 역할은 아니다.</p>
+    </div>
+  </div>
+  <div class="item">
+    <div><h3>사용 도구</h3><span class="badge part">부분충족</span></div>
+    <div>
+      <p>사용 도구를 한곳에 모은 문서는 없다. 아래 문서에 나눠 적혀 있다.</p>
+      <ul>
+        <li><code>haruharu--예진/inventory/에이전트_구성_v2.md</code> — 에이전트 구조</li>
+        <li><code>haruharu--민지/.claude/agents/기획조건.md</code> · <code>수요근거.md</code> — Claude Code 서브에이전트 정의</li>
+        <li><code>haruharu--예진/CLAUDE.md</code> — 팀 공통 Claude Code 규칙</li>
+        <li><code>11.05_실습/research/company/review/review_Daegu.md</code> — 내장 브라우저 · Aside로 수집한 기록</li>
+      </ul>
+    </div>
+  </div>
+  <div class="item">
+    <div><h3>작업 흔적 (저장소)</h3><span class="badge part">부분충족</span></div>
+    <div>
+      <ul>
+        <li>팀 저장소: GitHub <code>k-1026/haruharu</code> (브랜치별 작업)</li>
+        <li>이 폴더의 사본 3개(<code>haruharu--민지</code> · <code>haruharu--예진</code> · <code>haruharu--밸류체인</code>)에는 <code>.git</code>이 없어서 커밋 기록은 원격 저장소에서 확인해야 한다.</li>
+        <li>작업 기록 문서: <code>haruharu--예진/inventory/데이터수집_결과.md</code>(2026-11-17 기준) · <code>README.md</code> 방향 문서 이력(ver3~ver5) · <code>발표/</code> 1030 · 1104 · 1109 · 1113 발표 자료 · <code>프로젝트_정리_v2.md</code> §2 · §10</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 7 요청사항 -->
+<section class="ch">
+  <div class="ch-head"><h2>7 요청사항</h2><span class="q">다음 단계와 필요한 것 — "그래서 무엇을 해 주면 되나?"</span><span class="crit">평가: 문제-해결 논리</span></div>
+  <div class="item">
+    <div><h3>results.md '계획' 칸</h3><span class="badge none">없음</span></div>
+    <div>
+      <p><code>results.md</code> 파일이 없다.</p>
+      <p class="note">관련 자료: <code>haruharu--예진/inventory/프로젝트_정리_v2.md</code> §11 다음 단계(중구청 관광과 인터뷰 · MVP 입출력 확정 등 7개)</p>
+    </div>
+  </div>
+  <div class="item">
+    <div><h3>민감도 1위 가정</h3><span class="badge none">없음</span></div>
+    <div><p>해당 자료 없음. 민감도 분석을 하지 않았다.</p></div>
+  </div>
+</section>
+
+<div class="rule"><b>구조의 규칙</b> — 표지 다음 바로 문제. 회사 · 팀 소개로 시작하지 않음. 마지막 장은 '감사합니다'가 아니라 요청사항 한 문장과 MVP URL</div>
+
+<footer>
+  작성 2026-11-18 · 기준: 수업 슬라이드 "피치 구조 — 일곱 장" + <code>1118.자료만들기/</code> 폴더 파일 검색과 본문 확인.
+  <span class="badge part">부분충족</span> · <span class="badge none">없음</span> 판정은 파일명과 본문 키워드로 찾은 결과다. 팀원이 이 폴더 밖에 둔 자료는 반영되지 않았다.
+</footer>
+
+</div>
+</body>
+</html>
