@@ -94,7 +94,7 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
 
 <h1>피치 구조 — <em>일곱 장, 장마다 증명할 것 하나</em> · 우리 자료 점검</h1>
 <p class="sub">발표 장 순서(문제 → 해결 → 시장 → BM → MVP → 팀 → 요청사항)에 맞춰, 각 장의 근거 산출물이 팀 자료 어디에 있는지 표시했습니다. 해당 자료가 없으면 새로 만들지 않고 <span class="badge none">자료없음</span>으로 적었습니다.</p>
-<p class="meta">점검 대상: GitHub <code>k-1026/haruharu</code> 브랜치(2026-11-18 17:40 기준)와 <code>C:\Users\Green\Desktop\haru v2\새 폴더</code> · 개정 2026-11-18 (v2: 이예진 · 밸류체인 브랜치의 11/18 초안 반영)<br>
+<p class="meta">점검 대상: GitHub <code>k-1026/haruharu</code> 브랜치(2026-11-19 17:15 기준)와 <code>C:\Users\Green\Desktop\haru v2\새 폴더</code> · 개정 2026-11-19 (v3: BM v1 · MVP 1·2단계 2회 실행 · 1119 피칭데이 발표자료 · 예진 3·4단계 지침 갱신 반영)<br>
 경로 앞 표시: <span class="br">예진</span> = <code>origin/이예진</code> · <span class="br">밸류체인</span> = <code>origin/밸류체인</code> · <span class="br">민지</span> = <code>origin/신민지</code> (이 파일이 있는 브랜치) · 표시 없음 = <code>새 폴더</code> 기준 상대 경로</p>
 
 <div class="legend">
@@ -102,7 +102,8 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
   <span class="badge prog">초안</span><span class="meta">산출물 초안이 있음. 팀 검토 전</span>
   <span class="badge part">부분</span><span class="meta">관련 자료는 있으나 산출물 형태가 아니거나 근거가 약함</span>
   <span class="badge none">자료없음</span><span class="meta">해당 자료를 찾지 못함</span>
-  <span class="new">11/18 갱신</span><span class="meta">v1(오전) 이후 상태가 바뀐 항목</span>
+  <span class="new">11/18 갱신</span><span class="meta">v1(11/18 오전) 이후 바뀐 항목</span>
+  <span class="new">11/19</span><span class="meta">v3(11/19)에서 바뀐 항목</span>
 </div>
 
 <div class="box note">
@@ -112,7 +113,8 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
     <li><b>에이전트 범위:</b> 1~5단계 (기획 조건 → 수요 근거 → 코스 검토 → 홍보 검토 → <b>산출물</b>). 5단계 = 결재 파일 · 제안서 · 홍보물 묶음, 1~4단계 결과를 묶기만 함 (11/18 사람1 결정, 팀 확인 전).</li>
     <li><b>치킨:</b> 저녁 선택 옵션이자 코스 요소입니다 (11/18 결정, <span class="br">밸류체인</span> <span class="path">valuechain_v3.md</span> "치킨 결정").</li>
     <li><b>수업 예시 제외:</b> lifestyle/D12~D14의 야시장 매대판 자료(가상 데이터)는 점검에 넣지 않았습니다.</li>
-    <li><b>BM:</b> 아직 하지 않은 작업(WBS P.6)이라 "자료없음"으로 두었습니다. 예산·발주·자격 자료는 BM에 연결할 참고 자료로만 적었습니다.</li>
+    <li><b>BM:</b> <span class="new">11/19</span> BM v1 초안이 나왔습니다 (<span class="br">민지</span> <span class="path">정리본/BM_v1_초안.md</span>, 팀 검토 전). 금액은 모두 [가정]입니다. 팀 결정(11/19): 시장 범위 = 중구(N=1) 메인, 단가 = 건당.</li>
+    <li><b>발표자료:</b> <span class="new">11/19</span> <span class="br">민지</span> <span class="path">발표/1119_피칭데이/1119_하루하루_신민지,이예진_발표자료.html</span> (PDF 같은 폴더), 원고·예상 질문 <span class="path">docs/pitch/</span>. 아래 장별 상세에 "덱 슬라이드"로 연결했습니다.</li>
     <li><b>"우리 팀이 증명할 것":</b> 공통 질문을 우리 주제 문장으로 바꾼 <b>초안</b>입니다. 팀이 문장을 확정해야 합니다.</li>
   </ul>
 </div>
@@ -122,13 +124,13 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
 <table class="summary">
 <thead><tr><th>장</th><th>증명할 것 (공통 질문 / 우리 팀 초안)</th><th>근거 산출물별 상태</th><th>판단</th></tr></thead>
 <tbody>
-<tr><td>1 문제</td><td><span class="cq">"정말 있는 문제인가?"</span>담당자가 체류형 사업의 자료 조사·코스 조율·번역·홍보를 사업마다 따로 처리해, 겹치거나 외국어 홍보가 부족한 사업이 나온다</td><td>VOC 인용 <span class="badge part">부분</span> · 고객 여정 <span class="badge part">부분</span> · 밸류체인 병목 <span class="badge prog">초안</span><span class="new">11/18 갱신</span></td><td>병목·페인포인트는 초안이 나옴. 담당자 목소리는 여전히 0건</td></tr>
+<tr><td>1 문제</td><td><span class="cq">"정말 있는 문제인가?"</span>담당자가 체류형 사업의 자료 조사·코스 조율·번역·홍보를 사업마다 따로 처리해, 겹치거나 외국어 홍보가 부족한 사업이 나온다</td><td>VOC 인용 <span class="badge part">부분</span> · 고객 여정 <span class="badge part">부분</span> · 밸류체인 병목 <span class="badge prog">초안</span><span class="new">11/18 갱신</span></td><td><span class="new">11/19</span> 덱 1장: 과업 문서 원문 인용 3개 + 비비드 투어(참여 2명은 단일 보도, 다른 기사와 상충 E-04). 담당자 발언 0건</td></tr>
 <tr><td>2 해결</td><td><span class="cq">"왜 이 방법인가?"</span>조건을 고르면 근거표·코스·다국어 홍보 초안이 경고와 함께 나오고 결재 파일·제안서·홍보물로 묶인다. 담당자는 단계마다 고르고 확인한다</td><td>AX 기획 정의 <span class="badge ok">있음</span> · spec.md <span class="badge part">부분</span><span class="new">11/18 갱신</span> · As-Is → To-Be <span class="badge prog">초안</span><span class="new">11/18 갱신</span></td><td>비교표 초안이 생김. spec은 여러 문서에 나뉘어 있음</td></tr>
 <tr><td>3 시장</td><td><span class="cq">"충분히 큰가?"</span>대구 구·기관은 이미 관광 홍보·축제 용역에 사업당 5,000만~3억 원을 쓰고, 근거를 붙여 기획→산출물을 잇는 자리가 비어 있다는 것은 <b>검증할 가설</b></td><td>경쟁 비교표 <span class="badge prog">초안</span> · 포지셔닝 맵 <span class="badge prog">초안</span> · SOM <span class="badge part">부분</span><span class="new">11/18 갱신</span></td><td><span class="new">11/19</span> 포지셔닝 가설 그림·발표용 비교표 (시장검증 v1.1 3장). 범위 = 중구, 단가 = 건당</td></tr>
 <tr><td>4 BM</td><td><span class="cq">"지속 가능한가?"</span>중구 담당자에게 기획안 건당으로 받고, 시범 사용 → 구독으로 넘어간다 (금액은 모두 [가정])</td><td>BM 캔버스 <span class="badge prog">초안</span> · 단위 경제 <span class="badge prog">초안</span> · 시나리오 <span class="badge prog">초안</span></td><td><span class="new">11/19</span> BM v1 초안: 캔버스 9칸 · 건당 공헌이익 식 · 시나리오 2개 (정리본/BM_v1_초안.md)</td></tr>
-<tr><td>5 MVP</td><td><span class="cq">"보여 줄 수 있나?"</span>전체 서비스는 1~5단계. 시연은 조건 세트 A로 <b>1·2단계를 1회 실행</b>한 결과 캡처. 가설 판정 = 계획 + 1회 실행 결과</td><td>v1 URL 라이브 데모 <span class="badge none">자료없음</span> · 가설 판정 <span class="badge none">자료없음</span></td><td>테스트 계획은 있음. 동작 화면·결과 없음</td></tr>
-<tr><td>6 팀</td><td><span class="cq">"이 팀이 할 수 있나?"</span>단계별 에이전트와 출처·교차검증 규칙으로 두 사람이 역할을 나눠 만들었다</td><td>역할 <span class="badge part">부분</span><span class="new">11/18 갱신</span> · 사용 도구 <span class="badge part">부분</span> · 작업 흔적(저장소) <span class="badge ok">있음</span></td><td><span class="new">11/19</span> 사람1 신민지 · 사람2 이예진, 도구 표 3줄 (기획서 부록 C)</td></tr>
-<tr><td>7 요청사항</td><td><span class="cq">"무엇을 해 주면 되나?"</span>[팀 결정] 후보: 채택률을 확인할 담당자 인터뷰·시범 사용 1건</td><td>results.md '계획' 칸 <span class="badge none">자료없음</span> · 민감도 1위 가정 <span class="badge part">부분</span><span class="new">11/18 갱신</span></td><td><span class="new">11/19</span> r 10·30·50% 민감도 표 (시장검증 5-2-1). 중구 연 150만~7,500만 원 [가정]. 요청: 중구 담당자 인터뷰·시범 사용 1건</td></tr>
+<tr><td>5 MVP</td><td><span class="cq">"보여 줄 수 있나?"</span>전체 서비스는 1~5단계. 시연은 조건 세트 A로 <b>1·2단계를 1회 실행</b>한 결과 캡처. 가설 판정 = 계획 + 1회 실행 결과</td><td>v1 URL 라이브 데모 <span class="badge part">부분</span><span class="new">11/19</span> · 가설 판정 <span class="badge prog">초안</span><span class="new">11/19</span></td><td>1·2단계 2회 실행: 원자료 대조 2/2 일치, 오류 1건 발견, 한계 알림 7건. 결과 화면(HTML·PDF)은 있으나 웹 URL은 없음</td></tr>
+<tr><td>6 팀</td><td><span class="cq">"이 팀이 할 수 있나?"</span>단계별 에이전트와 출처·교차검증 규칙으로 두 사람이 역할을 나눠 만들었다</td><td>역할 <span class="badge ok">있음</span><span class="new">11/19</span> · 사용 도구 <span class="badge ok">있음</span><span class="new">11/19</span> · 작업 흔적(저장소) <span class="badge ok">있음</span></td><td><span class="new">11/19</span> 사람1 신민지 · 사람2 이예진, 도구 표 3줄 (기획서 부록 C)</td></tr>
+<tr><td>7 요청사항</td><td><span class="cq">"무엇을 해 주면 되나?"</span>중구 담당 부서 확인과 시범 사용 1건으로 채택률 r을 확인한다</td><td>results.md '계획' 칸 <span class="badge none">자료없음</span> · 민감도 1위 가정 <span class="badge ok">있음</span><span class="new">11/19</span></td><td><span class="new">11/19</span> r 10·30·50% 민감도 표 (시장검증 5-2-1). 중구 연 150만~7,500만 원 [가정]. 요청: 중구 담당자 인터뷰·시범 사용 1건</td></tr>
 </tbody>
 </table>
 </div>
@@ -140,7 +142,8 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
   <div class="card-h"><h3>1 문제</h3><span class="q">누가, 어떤 장면에서, 얼마나 불편한가 — "정말 있는 문제인가?"</span><span class="crit">평가 기준: 문제-해결 논리</span></div>
   <div class="team"><span class="lbl">우리 팀이 증명할 것 (초안)</span>
     <p>대구 관광 담당자는 체류형 사업을 기획할 때 자료 조사·코스 조율·번역·홍보를 사업마다 따로 처리하거나 따로 발주합니다. 그래서 기존 상품과 겹치거나 외국어 홍보가 부족한 사업이 나옵니다.</p>
-    <div class="ev">받쳐 주는 근거: 비비드 동성로 투어 1회 운영·참여 2명, 원인은 홍보 부족·노선 중복 (언론) · 과업지시서의 "협의하여 최종 확정", "담당자의 검수 후" 문구 (원문) · 대구 평균 체류시간 2022→2025 −17.2% (원표 미대조) · 담당자 목소리 <b>0건</b></div>
+    <div class="ev"><span class="new">11/19</span> 덱 1장 반영본: 비비드 동성로 투어는 1회 운영. "참여 2명"은 <b>단일 보도</b>(대구일보 2026.06.11)이고 다른 기사(경북매일 2026.07.12)는 "호응"을 말해 <b>상충</b>합니다 → 교차검증 불일치(E-04), 구청 실적 미확보. 덱은 "보도에 따르면"으로 말하고 상충을 함께 표시합니다.</div>
+    <div class="ev">받쳐 주는 근거: 비비드 동성로 투어 1회 운영·참여 2명, 원인은 홍보 부족·노선 중복 (언론, 위 상충 참고) · 과업지시서의 "협의하여 최종 확정", "담당자의 검수 후" 문구 (원문) · 대구 평균 체류시간 2022→2025 −17.2% (원표 미대조) · 담당자 목소리 <b>0건</b></div>
     <div class="ev"><b>1장에 넣을 과업 문서 원문 인용 (11/19, 인터뷰 대신)</b> — 예진 As-Is 비교표 3-2에서 고름. 담당자 발언이 아니라 기관 문서에 적힌 담당자의 일이다.
       <ul>
         <li>"운영계획은 중구와 협의하여 최종 확정" — 2025 동성로 타임워프 페스타 과업요청서 → 코스는 담당자가 협의해 확정한다</li>
@@ -178,7 +181,8 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
     <ol>
       <li>담당자 목소리 — <b>11/19: 이번 발표는 과업 문서 원문 인용 3개로 간다</b>(위 인용 칸). 인터뷰는 7장 요청사항으로 넘김. 회의록은 시간 남을 때만 (WBS P.8). 인터뷰 질문은 <span class="path">painpoint_def.md</span> 8장에 있음.</li>
       <li>밸류체인 v3·페인포인트·페르소나 초안 팀 검토 후 확정 (P.4는 11/19~20).</li>
-      <li>체류시간 −17.2%를 피치에 쓰기 전 데이터랩 원표와 대조.</li>
+      <li>체류시간 −17.2%를 피치에 쓰기 전 데이터랩 원표와 대조. (11/19 덱 1장에는 이 수치를 넣지 않았습니다.)</li>
+      <li><span class="new">11/19</span> 비비드 투어 구청 실적(참여 인원) 확인 — E-04 상충을 풀 수 있는 유일한 근거입니다. 덱 마지막 장(다음 단계)의 "담당 부서 확인"과 함께 요청하면 됩니다.</li>
     </ol>
   </div>
 </div>
@@ -203,7 +207,9 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
         <li><code>spec.md</code>라는 하나의 명세 파일은 없습니다. 명세 역할이 아래에 나뉘어 있습니다.</li>
         <li><span class="br">민지</span> <span class="path">지침/1_기획조건/</span> · <span class="path">지침/2_수요근거/</span>, <span class="path">.claude/agents/기획조건.md</span> · <span class="path">수요근거.md</span></li>
         <li><span class="br">민지</span> <span class="path">지침/5_산출물/</span> (역할 · 입력 · 출력 · 예시), <span class="path">.claude/agents/산출물.md</span> <span class="new">11/18 갱신</span></li>
-        <li><span class="br">예진</span> <span class="path">지침서/3.코스_검토/</span> (9개 파일, 8_기존_상품_겹침 = E7 추가) · <span class="path">지침서/4.홍보_검토/</span> (10개 파일), <span class="path">.claude/agents/코스검토.md</span> · <span class="path">홍보검토.md</span></li>
+        <li><span class="br">예진</span> <span class="path">지침서/3.코스_검토/</span> (8_기존_상품_겹침 = E7) · <span class="path">지침서/4.홍보_검토/</span>, <span class="path">.claude/agents/코스검토.md</span> · <span class="path">홍보검토.md</span></li>
+        <li><span class="new">11/19</span> <span class="br">예진</span> 3단계: 10_대체 규칙 · 11_운영 주체 후보(운영 장치 B4 · 공항 연계) · 12_코스 체크리스트, 2_입력에 설정값(이동 상한 · 시작 시각 · 공항 구간 · 치킨 비중), 코스 틀을 기획서 6-3 칸으로 정리(B7 해설 · B8 저녁 후보), 이동 시간 판정 기준. 4단계: 금지 표현(B9), 출력에 5단계 넘김 항목 · 코스 카드(B6), 캐릭터 너구리 · 족제비 2인 1조 고정</li>
+        <li><span class="new">11/19</span> <span class="br">민지</span> 2단계 S2 → S3 넘김 형식(근거 ID R01… · 경고 ID W1… · 담당자 선택이 3단계 진입), 경고 시험값(표본 100명 미만 · 연도별 2배 이상) — <span class="path">지침/2_수요근거/</span>, <span class="path">inventory/유저플로우_v1.md</span> 5-1. MVP 1회 실행에서 나온 문제를 고친 것 (사람2 확인 전). 데모 코스 장소 운영 정보 · 이동시간 표(S67~S78)</li>
         <li>인수조건에 해당하는 것: <span class="br">민지</span> 기획서 v0.3 10-2 지표 (알림 누락 0건 · 근거 표기율 100% · 없는 값 0건 · 금지 표현 0건 · 세 파일 대조 0건)</li>
       </ul></td></tr>
     <tr><td>As-Is → To-Be</td><td><span class="badge prog">초안</span><span class="new">11/18 갱신</span></td><td>
@@ -258,15 +264,15 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
       <ul>
         <li><span class="br">예진</span> <span class="path">시장검증_v1_초안.md</span> 5장 — 식 <b>SOM = 발주처 수 N × 연간 기획 건수 n × 건당 단가 p × 채택률 r</b>. N = 1(중구) / 11(대구 전체), n·p는 가정, r은 근거 없음</li>
         <li>단가 기준점: 대구관광객 실태조사 용역 5,000만 원 (대구시 2026 본예산, 원문 대조) 등. 4장에 대구시 예산 원문 대조, 5-3장에 발주처 변화(관광과 → 관광산업과, 관광재단 분리 예정)</li>
-        <li>계산 예는 채택률 100%일 때의 상한뿐이라, SOM 값 자체는 아직 없음</li>
+        <li><span class="new">11/19</span> <span class="br">민지</span> <span class="path">정리본/시장검증_v1.1_초안.md</span> 5-2-1 채택률 민감도 — 중구(N=1) 기준 r 10·30·50%에서 연 150만~7,500만 원 [가정]. 대구 전체 11곳은 확장 상한으로만. SOM은 하나의 값이 아니라 r에 달린 범위로 제시</li>
+        <li>덱 3장 출처 표시: 12건 중 공고 원문 확인분 [원문], 진흥재단 발주 2건 미대조</li>
       </ul></td></tr>
     </tbody>
   </table>
   <div class="fix"><b>보완할 것</b>
     <ol>
-      <li>팀 결정: 포지셔닝 축, N의 범위(중구만 / 중구·동구 / 대구 전체), E(범용 AI) 행 유지 여부.</li>
-      <li>나머지 7개 구·군 관광 발주 조회로 n 보강.</li>
-      <li>p의 방식(건당 / 구독 / 용역 포함)은 BM(P.6)과 함께 정하기.</li>
+      <li><span class="new">11/19 결정됨</span> N = 중구 메인, p = 건당. 포지셔닝은 그림 대신 발표용 비교표(3-6)로. 남은 팀 결정: E(범용 AI) 행 유지 여부.</li>
+      <li>나머지 7개 구·군 관광 발주 조회로 n 보강, 진흥재단 2건 원문 대조.</li>
     </ol>
   </div>
   <div class="ev"><b>메모 (11/19) — 포지셔닝 그림 대신 비교표 1장</b> (<span class="path">정리본/시장검증_v1.1_초안.md</span> 3-6, 그림을 쓸 때는 3-4 정성 배치)<br>
@@ -278,16 +284,17 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
 <!-- 4 -->
 <div class="card">
   <div class="card-h"><h3>4 BM</h3><span class="q">어떻게 돈이 남는가 — "지속 가능한가?"</span><span class="crit">평가 기준: 시장-BM 근거</span></div>
-  <div class="team"><span class="lbl">우리 팀이 증명할 것</span>
-    <p>[팀 결정] 아직 작업 전입니다 (WBS P.6, 사람1). 지금 있는 것은 돈 흐름 화살표(밸류체인 v3)와 시장검증의 단가·진입 조건뿐입니다.</p>
+  <div class="team"><span class="lbl">우리 팀이 증명할 것 (초안)</span>
+    <p>돈은 공공 사업 예산에서만 나옵니다. 중구 담당자에게 기획안 <b>건당</b>으로 시작하고, 시범 사용으로 쓰임이 확인되면 <b>연 구독</b>으로 넘어갑니다. 입찰 자격·실적이 없으므로 대행사 협업(A) 또는 시범 사용(B)으로 들어갑니다.</p>
+    <div class="ev">받쳐 주는 근거: <span class="br">민지</span> <span class="path">정리본/BM_v1_초안.md</span> (11/19, 사람1, 팀 검토 전) · 덱 4장. 요금 · 비용 · 지불 의향은 모두 <b>[가정] / 미측정</b></div>
   </div>
   <table>
     <thead><tr><th>근거 산출물</th><th>상태</th><th>우리 자료 위치와 내용</th></tr></thead>
     <tbody>
-    <tr><td>BM 캔버스</td><td><span class="badge none">자료없음</span></td><td>아직 작업하지 않았습니다.</td></tr>
-    <tr><td>단위 경제</td><td><span class="badge none">자료없음</span></td><td>아직 작업하지 않았습니다.</td></tr>
-    <tr><td>시나리오</td><td><span class="badge none">자료없음</span></td><td>아직 작업하지 않았습니다.</td></tr>
-    <tr><td>BM 작업 때 연결할 참고 자료</td><td><span class="badge part">참고</span></td><td>
+    <tr><td>BM 캔버스</td><td><span class="badge prog">초안</span><span class="new">11/19</span></td><td>BM v1 1장 — 9칸 (고객: 대구 공공 관광 담당자, MVP 중구 · 채널: 대행사 협업 / 시범 사용 · 수익원: 건당 → 연 구독 · 핵심 자원: 출처 대장 S01~S78, 지침, 에이전트 5개 · 비용 구조: 금액 미정)</td></tr>
+    <tr><td>단위 경제</td><td><span class="badge prog">초안</span><span class="new">11/19</span></td><td>BM v1 3장 — <b>건당 공헌이익 = p − (c_AI + c_검토)</b>. p 기준점 1,500여만 원(보도) ~ 5,000만 원(대구시 본예산 원문)은 "담당자가 쓰는 사업 단위 크기"이지 우리 요금이 아님. <b>c_AI · c_검토는 미측정</b> — MVP 실행 기록에도 비용 측정은 없음</td></tr>
+    <tr><td>시나리오</td><td><span class="badge prog">초안</span><span class="new">11/19</span></td><td>BM v1 4장 — A 대행사 협업(용역 안에서 건당) / B 시범 사용 → 구독. 각 위험: 대행사 지불 의향 미확인, 구독 예산 항목 필요. 숫자 시나리오(매출·이익 추정)는 없음</td></tr>
+    <tr><td>BM 재료로 쓴 참고 자료</td><td><span class="badge part">참고</span></td><td>
       <ul>
         <li><span class="br">예진</span> <span class="path">시장검증_v1_초안.md</span> 5장(단가 p 기준점·방식 선택지) · 6장(입찰 자격: 소프트웨어사업자·대구 소재·3년 실적, 기존 업체 반복 수주 → "대행사 협업·시범 사용으로 진입" 해석) <span class="new">11/18 갱신</span></li>
         <li><span class="br">밸류체인</span> <span class="path">valuechain_v3.md</span> — 맵에는 돈 흐름 화살표만, "우리가 받을 수 있는 돈"은 BM으로 넘김</li>
@@ -298,9 +305,9 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
   </table>
   <div class="fix"><b>보완할 것</b> (WBS P.6)
     <ol>
-      <li>BM 캔버스 9칸 — 고객은 대구 관광 담당자 전반, 사례는 중구.</li>
-      <li>단위 경제 — 기획안 1건(또는 연 구독 1곳) 기준 매출 − 비용. 값이 없으면 가정값으로 표시.</li>
-      <li>시나리오 2~3개 — 시장검증 6장의 진입 경로(직접 입찰 / 대행사 협업 / 시범 사용)를 축으로 쓸 수 있음. 선택은 팀 몫.</li>
+      <li>BM v1 팀 검토 (사람2 확인).</li>
+      <li>c_AI 측정 — 조건 세트 A 실행 1회의 AI 사용량을 기록하면 단위 경제의 비용 칸을 처음 채울 수 있습니다.</li>
+      <li>대행사 1곳 · 중구 담당자 지불 의향 확인 (7장 요청과 같은 일).</li>
     </ol>
   </div>
 </div>
@@ -309,29 +316,32 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
 <div class="card">
   <div class="card-h"><h3>5 MVP</h3><span class="q">실제로 동작하고 반응이 있는가 — "보여 줄 수 있나?"</span><span class="crit">평가 기준: MVP 동작</span></div>
   <div class="team"><span class="lbl">우리 팀이 증명할 것 (초안)</span>
-    <p>중구 사례로 정한 조건 세트를 1~5단계에 돌리면, 나와야 할 알림이 빠짐없이 나오고 자료에 없는 값은 만들지 않습니다. 조건을 바꾸면 근거·코스·문구와 세 파일이 그에 맞게 바뀝니다.</p>
-    <div class="ev">받쳐 주는 근거: 기획서 v0.3 6-6 데모 장면, 10장 시나리오 테스트 계획. 실행 결과는 <b>아직 없음</b></div>
+    <p>봄 · 일본어 · 중구 · 1박2일 조건으로 1·2단계를 두 번 돌렸을 때, 에이전트는 수치보다 자료 한계를 먼저 알리고, 수치마다 출처·대상을 붙이며, 없는 값은 만들지 않았습니다. 3~5단계 연결과 정확도는 아직 말하지 않습니다.</p>
+    <div class="ev"><span class="new">11/19</span> 받쳐 주는 근거: 1회차 실행 기록 + 2회차 결과 화면 (덱 5장). 실행 2회라 정확도·오류율은 판정하지 않음 · 담당자 역할은 사람1이 대신함</div>
   </div>
   <table>
     <thead><tr><th>근거 산출물</th><th>상태</th><th>우리 자료 위치와 내용</th></tr></thead>
     <tbody>
-    <tr><td>v1 URL 라이브 데모</td><td><span class="badge none">자료없음</span></td><td>
+    <tr><td>v1 URL 라이브 데모</td><td><span class="badge part">부분</span><span class="new">11/19</span></td><td>
       <ul>
-        <li>배포된 URL이나 동작하는 화면은 찾지 못했습니다.</li>
+        <li><span class="br">민지</span> <span class="path">발표/1119_피칭데이/1119_MVP결과화면_2회차_사람1.html</span>, <span class="path">1119_하루하루_MVP실행결과.pdf</span> — 2회차 에이전트 출력을 화면으로 정리한 것 (수치는 고치지 않음). <b>배포된 웹 서비스 URL은 없음</b></li>
+        <li>로컬 <code>app/</code> 폴더(오케스트레이터 · 단계 실행 코드)는 저장소에 올라가 있지 않아 이번 점검에서 동작을 확인하지 않았습니다.</li>
         <li>데모 각본은 있음: <span class="br">민지</span> 기획서 v0.3 6-6 — "봄 · 일본어 · 중구 · 1박2일" → "여름 · 중국어 간체 · 중구 · 추천받기"로 바꾸면 1~5단계 결과가 어떻게 바뀌는지</li>
         <li>WBS상 웹 뼈대·1~2단계 화면·DB는 사람1, 3~4단계 화면은 사람2 (기획서 부록 C)</li>
       </ul></td></tr>
-    <tr><td>가설 판정</td><td><span class="badge none">자료없음</span></td><td>
+    <tr><td>가설 판정</td><td><span class="badge prog">초안</span><span class="new">11/19</span></td><td>
       <ul>
-        <li>판정 결과는 없습니다. 계획은 있음: <span class="br">민지</span> 기획서 v0.3 10장 — 조건 세트 A~D, 지표 6개(목표값은 가정), 한계("팀원이 담당자 역할을 대신 → 가능성 수준")</li>
+        <li><span class="br">민지</span> <span class="path">inventory/참고/1119_MVP실행_조건세트A_사람1.md</span> (1회차) + 덱 5장 (2회차) — <b>통과</b> 원자료 대조 2건 일치(일본 1박 83.4%, 2025 중구 일본 비율 12.0%) · <b>보완</b> 1단계가 있는 자료 행을 "없음"으로 안내한 오류 1건(2회차에 에이전트가 지침 문서를 원인으로 짚음), 2023년 3월 원본 누락 발견 · <b>보류</b> 3~5단계 연결, 정확도</li>
+        <li>실행에서 나온 개선: 근거표 29행 → 화면 접기, 근거 ID · 경고 ID 도입 (2장 spec 참고)</li>
+        <li>계획: <span class="br">민지</span> 기획서 v0.3 10장 — 조건 세트 A~D, 지표 6개(목표값은 가정), 한계("팀원이 담당자 역할을 대신 → 가능성 수준")</li>
         <li><span class="path">haruharu--/CLAUDE.md</span>의 A/B 설문은 예전 방향(치킨 저녁 유무)의 계획이라 지금 검증과 맞지 않습니다.</li>
       </ul></td></tr>
     </tbody>
   </table>
   <div class="fix"><b>보완할 것</b>
     <ol>
-      <li>1·2단계 화면부터 URL로 공개 (조건 세트 A만이라도).</li>
-      <li>시나리오 테스트(WBS 10일차)를 돌려 지표별 결과를 판정 표로 기록 → 7장 results.md로 연결.</li>
+      <li>결과 화면을 웹 URL로 공개 (덱 마지막 장 규칙: "요청사항 한 문장과 MVP URL").</li>
+      <li>나머지 수치 원표 대조, 조건 세트 B~D 실행 → 지표별 판정 표 → 7장 results.md로 연결.</li>
     </ol>
   </div>
 </div>
@@ -340,22 +350,22 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
 <div class="card">
   <div class="card-h"><h3>6 팀</h3><span class="q">누가 무엇을 맡았고 어떤 AI를 썼나 — "이 팀이 할 수 있나?"</span><span class="crit">평가 기준: 발표·데모 완성도</span></div>
   <div class="team"><span class="lbl">우리 팀이 증명할 것 (초안)</span>
-    <p>단계별 Claude Code 에이전트(기획조건·수요근거·코스검토·홍보검토)와 출처 대장·교차검증 규칙으로, 두 사람이 역할을 나눠 근거 있는 결과만 내도록 만들었습니다.</p>
-    <div class="ev">받쳐 주는 근거: <code>.claude/agents/</code> 4개, CLAUDE.md 규칙, 커밋 이력. 팀원 이름은 <b>[팀 결정]</b> (미기입)</div>
+    <p>두 사람이 단계를 나눠 맡고, 단계별 Claude Code 에이전트 5개와 출처 대장·교차검증 규칙으로 근거 있는 결과만 냅니다. AI 판정은 초안이고 원표 대조는 사람이 합니다.</p>
+    <div class="ev"><span class="new">11/19</span> 덱 6장: 사람1 신민지 (1·2·5단계, 데이터, 유저플로우, 밸류체인 v3, BM, 웹) · 사람2 이예진 (3·4단계, 페르소나, 페인포인트, As-Is, 시장 검증, 발표) · 도구 = 에이전트 5개, 출처 대장 S01~S78, 교차검증 표</div>
   </div>
   <table>
     <thead><tr><th>근거 산출물</th><th>상태</th><th>우리 자료 위치와 내용</th></tr></thead>
     <tbody>
-    <tr><td>역할</td><td><span class="badge part">부분</span><span class="new">11/18 갱신</span></td><td>
+    <tr><td>역할</td><td><span class="badge ok">있음</span><span class="new">11/19</span></td><td>
       <ul>
         <li><span class="br">민지</span> 기획서 v0.3 부록 C (WBS 11/17~12/1) — 사람1: 1·2·5단계 지침·5단계 산출물·데이터·유저플로우·밸류체인 v3·BM·웹 / 사람2: 3·4단계 지침·페르소나·페인포인트·As-Is·시장 검증·발표 / 공동: 기획 기준·레드팀·시나리오 테스트</li>
-        <li>한계: "사람1·사람2"로만 적혀 있고, <span class="path">CLAUDE.md</span> 역할 칸도 "○○"로 비어 있습니다.</li>
+        <li><span class="new">11/19</span> 덱 표지 · 6장에 사람1 신민지 · 사람2 이예진으로 이름이 들어갔습니다. <span class="path">CLAUDE.md</span> 역할 칸은 아직 "○○"입니다 (공용 파일이라 팀에 알리고 수정).</li>
       </ul></td></tr>
-    <tr><td>사용 도구</td><td><span class="badge part">부분</span></td><td>
+    <tr><td>사용 도구</td><td><span class="badge ok">있음</span><span class="new">11/19</span></td><td>
       <ul>
-        <li><span class="br">민지</span> <span class="path">.claude/agents/기획조건.md</span> · <span class="path">수요근거.md</span>, <span class="br">예진</span> <span class="path">.claude/agents/코스검토.md</span> · <span class="path">홍보검토.md</span></li>
+        <li>덱 6장 "AI를 이렇게 썼습니다" 3줄 + 각 장 "AI가 하는 일 / 사람이 정하는 일" 표시 (덱 2·4·5·6·7장)</li>
+        <li><span class="br">민지</span> <span class="path">.claude/agents/기획조건.md</span> · <span class="path">수요근거.md</span> · <span class="path">산출물.md</span>, <span class="br">예진</span> <span class="path">.claude/agents/코스검토.md</span> · <span class="path">홍보검토.md</span></li>
         <li><span class="path">CLAUDE.md</span> (팀 공통 Claude Code 규칙)</li>
-        <li>한계: "어떤 일에 어떤 AI를 썼고 사람이 무엇을 검토했는지" 정리 문서는 없습니다.</li>
       </ul></td></tr>
     <tr><td>작업 흔적 (저장소)</td><td><span class="badge ok">있음</span></td><td>
       <ul>
@@ -366,8 +376,7 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
   </table>
   <div class="fix"><b>보완할 것</b>
     <ol>
-      <li>사람1·사람2에 이름을 넣고 CLAUDE.md 역할 칸 채우기 (팀 결정).</li>
-      <li>"사용 도구 표" 한 장: 도구 · 맡긴 일 · 사람이 검토한 부분.</li>
+      <li>CLAUDE.md 역할 칸 채우기 (공용 파일, 팀에 알린 뒤).</li>
     </ol>
   </div>
 </div>
@@ -375,43 +384,44 @@ code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;backgrou
 <!-- 7 -->
 <div class="card">
   <div class="card-h"><h3>7 요청사항</h3><span class="q">다음 단계에 필요한 것 — "그래서 무엇을 해 주면 되나?"</span><span class="crit">평가 기준: 문제-해결 논리</span></div>
-  <div class="team"><span class="lbl">우리 팀이 증명할 것 (후보)</span>
-    <p>[팀 결정] 후보 ① MVP 사례인 중구 담당자와의 인터뷰·시범 사용 1건 — 시장 크기를 가장 크게 흔드는 채택률(r)을 확인하기 위해. 후보 ② 장소 운영 정보(운영시간·휴무)와 기존 상품 목록 제공 — 3단계 코스 검토의 1순위 공백.</p>
+  <div class="team"><span class="lbl">우리 팀이 증명할 것</span>
+    <p>다음은 <b>중구 담당 부서 확인과 시범 사용 1건</b>으로 채택률 r을 확인합니다. r에 따라 중구 연 SOM이 150만~7,500만 원으로 50배 달라지는데, 그 근거가 0건이기 때문입니다.</p>
+    <div class="ev"><span class="new">11/19</span> 덱 마지막 장: ① 담당 부서 확인 — 기획할 때 실제로 막히는 곳, 지불 의향 ② 시범 사용 — 1~5단계를 실제 사업 조건으로 한 번 ③ 함께 확보할 자료 — 장소 운영시간·휴무, 기존 상품 목록. 슬라이드에 r 슬라이더(10~50%) 있음</div>
   </div>
   <table>
     <thead><tr><th>근거 산출물</th><th>상태</th><th>우리 자료 위치와 내용</th></tr></thead>
     <tbody>
     <tr><td>results.md '계획' 칸</td><td><span class="badge none">자료없음</span></td><td>results.md 파일을 찾지 못했습니다. 5장 시나리오 테스트 결과가 나와야 채울 수 있습니다.</td></tr>
-    <tr><td>민감도 1위 가정</td><td><span class="badge part">부분</span><span class="new">11/18 갱신</span></td><td>
+    <tr><td>민감도 1위 가정</td><td><span class="badge ok">있음</span><span class="new">11/19</span></td><td>
       <ul>
-        <li><span class="br">예진</span> <span class="path">시장검증_v1_초안.md</span> 5-1 — 채택률 r을 "피치 7장 민감도 1위 가정 후보"로 지목, 5-2 — "가장 크게 흔드는 값은 r과 p"</li>
-        <li>한계: 실제 민감도 계산(값을 바꿔 결과가 얼마나 움직이는지)은 하지 않았고, BM이 없어 단가 p도 가정입니다.</li>
+        <li><span class="br">민지</span> <span class="path">정리본/시장검증_v1.1_초안.md</span> 5-2-1 — <b>1위 가정 = 채택률 r</b>. 중구(N=1) r 10% → 연 150만 원, 50% → 연 7,500만 원 (n 1~3건, p 1,500만~5,000만 원, 모두 [가정], 계산식 N × n × p × r)</li>
+        <li>한계: r 하나만 움직인 표입니다. p · n도 가정이라, r이 1위라는 판단은 "근거가 0건이고 폭이 가장 크다"는 뜻입니다.</li>
         <li>요청 후보 단서: <span class="path">painpoint_def.md</span> 8장 인터뷰 질문, <span class="path">역할분담_v2.md</span>(중구청이 장소 자산 제공), <span class="path">에이전트_구성_v2.md</span>(운영시간·휴무 자료가 1순위 공백)</li>
       </ul></td></tr>
     </tbody>
   </table>
   <div class="fix"><b>보완할 것</b>
     <ol>
-      <li>BM 후 r · p를 바꿔 SOM·단위 경제가 얼마나 움직이는지 표로 — 1위 가정을 숫자로 고르기.</li>
-      <li>results.md에 가설 · 결과 · 판정 · <b>계획</b> 칸 만들기 (5장과 연결).</li>
+      <li>results.md에 가설 · 결과 · 판정 · <b>계획</b> 칸 만들기 — MVP 1·2회차 판정(통과 2 · 보완 1 · 보류)과 덱 마지막 장 요청 3가지를 옮기면 됩니다.</li>
     </ol>
   </div>
 </div>
 
 <h2>보완 우선순위</h2>
 <ol class="prio">
-  <li><b>MVP 데모 URL</b> — "MVP 동작" 평가 기준을 채울 자료가 아직 하나도 없습니다. 1·2단계 화면과 조건 세트 A부터. <div class="who">영향: 5장 · 담당: 사람1(1~2단계), 사람2(3~4단계)</div></li>
-  <li><b>BM 캔버스 + 단위 경제 + 시나리오</b> — 유일하게 전부 비어 있는 장. 시장검증의 단가·진입 경로와 맞춰서. WBS P.6. <div class="who">영향: 4 · 7장</div></li>
-  <li><b>팀 검토로 초안 확정</b> — 밸류체인 v3, 페인포인트 v1, 페르소나 v1, As-Is 비교표 v1, 시장검증 v1 모두 "팀 검토 전". 포지셔닝 축·N 범위 결정 포함. <div class="who">영향: 1 · 2 · 3장</div></li>
-  <li><b>담당자 목소리</b> — 공개 문서 인용으로 갈지 인터뷰를 할지 결정. 인터뷰를 하면 채택률 r 근거도 함께 얻습니다. WBS P.8. <div class="who">영향: 1 · 3 · 7장</div></li>
-  <li><b>시나리오 테스트 → results.md · 민감도</b> <div class="who">영향: 5 · 7장</div></li>
-  <li><b>팀 역할 이름 · 사용 도구 표 · 원표 대조(−17.2%)</b> <div class="who">영향: 1 · 6장</div></li>
+  <li><b>MVP 웹 URL</b> — 결과 화면(HTML · PDF)은 생겼지만 배포된 URL이 없습니다. 2회차 결과 화면이라도 공개 링크로. <div class="who">영향: 5장 · 담당: 사람1</div></li>
+  <li><b>3~5단계 1회 실행</b> — 덱이 "3~5단계는 지침 준비 · 검증 전"이라고 말하는 부분. S2 → S3 넘김 형식(근거 ID · 경고 ID)을 사람2가 확인한 뒤 연결. <div class="who">영향: 2 · 5장 · 담당: 사람2(3·4), 사람1(5)</div></li>
+  <li><b>팀 검토로 초안 확정</b> — 밸류체인 v3, 페인포인트 v1, 페르소나 v1, As-Is 비교표 v1, 시장검증 v1.1, BM v1 모두 "팀 검토 전". <div class="who">영향: 1 · 2 · 3 · 4장</div></li>
+  <li><b>results.md</b> — MVP 판정과 다음 단계 요청을 한 파일로. <div class="who">영향: 5 · 7장</div></li>
+  <li><b>남은 사실 확인</b> — 비비드 투어 구청 실적(E-04 상충), 진흥재단 발주 2건 원문, 체류시간 −17.2% 원표, 나머지 MVP 수치 원표 대조. <div class="who">영향: 1 · 3 · 5장</div></li>
+  <li><b>c_AI 측정 · 지불 의향</b> — 단위 경제 비용 칸과 r 근거. 지불 의향은 7장 요청(담당 부서 확인)으로. <div class="who">영향: 4 · 7장</div></li>
 </ol>
 
 <div class="box note">
   <b>점검 방법과 한계</b>
   <ul>
     <li>v1(11/18 오전)은 <code>새 폴더</code>만 봤습니다. v2는 원격 저장소를 가져와 11/17 이후 커밋을 확인하고, 피치와 관련된 새 문서(시장검증·As-Is·페르소나·페인포인트 v1, 밸류체인 v3, 기획서 v0.2)의 목차와 핵심 장을 읽었습니다. 나라장터 PDF 원문은 읽지 않았습니다.</li>
+    <li>v3(11/19)는 11/18 17:30 이후 커밋을 확인하고 BM v1, MVP 1회차 실행 기록, 시장검증 v1.1 5-2-1, 1119 피칭데이 발표자료(HTML 슬라이드 본문)를 읽었습니다. 2회차 결과 화면 HTML · PDF는 덱에 적힌 내용으로만 반영했고, 로컬 <code>app/</code> 코드는 실행하지 않았습니다. 예진 브랜치 11/19 커밋은 커밋 메시지와 파일 목록 기준이며, 캐릭터 이미지 · 버스 배차 정리본은 피치 근거와 직접 관계가 없어 넣지 않았습니다.</li>
     <li>같은 목적의 점검이 <span class="br">예진</span> <span class="path">피치구조/피치구조_팀자료_위치.md</span>(11/18 10:21)에도 있습니다. 그 뒤에 올라온 초안은 그쪽에 아직 반영되지 않았습니다. 판정이 다른 곳: VOC · 고객 여정을 그쪽은 "충족", 여기는 "부분"으로 봤습니다 — 고객이 관광객이 아니라 담당자라서, 관광객 리뷰와 관광객 여정은 1장 근거로 약하다고 판단했습니다.</li>
     <li>"우리 팀이 증명할 것"과 "보완할 것"은 이 페이지가 정리한 제안입니다. 문장과 결정 사항은 팀이 확정합니다.</li>
     <li>"자료없음"은 이번 점검에서 찾지 못했다는 뜻입니다. 팀원 PC에만 있는 자료가 있으면 알려 주세요.</li>
