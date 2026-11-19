@@ -11,6 +11,7 @@ from pathlib import Path
 
 from run_stage import 단계_실행
 from stages import STAGES
+from upload import 파일_받기
 
 실행_폴더_기준 = Path(__file__).resolve().parent / "runs"
 
@@ -50,12 +51,30 @@ async def 메인() -> None:
             break
 
     # 2단계: 수요 근거
-    기관 = 묻기("기관 데이터가 있나요?", ["없음 (우리 자료만 사용)", "있음 (파일 올리기는 아직 연결 전)"])
+    기관 = 묻기("기관 데이터가 있나요?", ["없음 (우리 자료만 사용)", "있음 (CSV · XLSX 파일 올리기)"])
+    기관_안내 = "기관 데이터: 없음"
     if 기관 == 2:
-        print("기관 데이터 올리기는 아직 연결되지 않았습니다. '없음'으로 진행합니다.")
+        while True:
+            경로 = input("파일 경로 (CSV 또는 XLSX): ")
+            try:
+                csv목록 = 파일_받기(경로, 실행)
+                break
+            except ValueError as 오류:
+                print(오류)
+        출처 = input("출처 (기관 · 조사 이름, 모르면 엔터): ").strip() or "미확인"
+        기간 = input("기간 (모르면 엔터): ").strip() or "미확인"
+        대상 = input("대상 (모르면 엔터): ").strip() or "미확인"
+        지역 = input("지역 (모르면 엔터): ").strip() or "미확인"
+        단위 = input("단위 (모르면 엔터): ").strip() or "미확인"
+        기관_안내 = (
+            "기관 데이터: 있음\n"
+            + "파일(CSV): " + ", ".join(str(p) for p in csv목록)
+            + f"\n담당자가 적은 것: 출처 {출처} · 기간 {기간} · 대상 {대상} · 지역 {지역} · 단위 {단위}"
+            + "\n지침/2_수요근거/입력_형식.md 5장대로 읽은 내용을 먼저 보이고, 담당자 확인 전에는 근거표에 넣지 않는다."
+        )
     입력2 = (
         "1단계 결과:\n" + 결과1
-        + "\n\n담당자 선택: 알림을 남기고 진행\n기관 데이터: 없음"
+        + "\n\n담당자 선택: 알림을 남기고 진행\n" + 기관_안내
     )
     print(f"\n[2단계 {STAGES[2]['이름']}] 실행 중...")
     결과2 = await 단계_실행(STAGES[2]["에이전트"], 입력2)
