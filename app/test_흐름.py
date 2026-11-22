@@ -17,16 +17,19 @@ sys.modules.setdefault("claude_agent_sdk", types.SimpleNamespace(
     AssistantMessage=object, ClaudeAgentOptions=object, TextBlock=object, query=None))
 
 import orchestrator  # noqa: E402
-from 흐름 import 빠진_조건, 확정체류기간_정하기, 전달_준비, 전달_검사, 근거_경고_추출  # noqa: E402
+from 흐름 import 빠진_조건, 확정체류기간_정하기, 전달_준비, 전달_검사, 근거표_읽기, 경고_읽기  # noqa: E402
 
-결과2_정상 = """## 근거표
-| ID | 항목 | 수치 |
-|---|---|---|
-| R01 | 숙박 | 59.5% |
-| R02 | 음식 | 1.7% |
+결과2_정상 = """## 수요 분석 요약
+- 숙박: 1박 59.5% (KOSIS 2024, n=1,010)
+
+## 근거표
+| ID | 항목 | 원자료 항목명 | 수치 | 파일 · 행 위치 | 출처 | 연도 | 표본 · 대상 | 한계 | 경고 |
+|---|---|---|---|---|---|---|---|---|---|
+| R01 | 숙박 | 전체 / 1박 | 59.5% | 외국인/대구_외국인숙박기간_2024.csv, category=전체 | KOSIS | 2024 | n=1,010 | 대구 전체 | W1 |
+| R02 | 음식 | 닭튀김/치킨 | 1.7% | 외국인/대구_외국인추천음식상위20_2024.csv, item=닭튀김/치킨 | KOSIS | 2024 | n=1,010 | [자료 필요: 구 구분] | W1 |
 
 ## 경고 (E3)
-- [W1 간접 근거] 영어권은 미주로만 봅니다 (적용 근거: R01 · R02)
+- [W1 간접 근거] 구 구분이 없습니다 (적용 근거: R01 · R02)
 """
 
 조건_정상 = {"계절": "봄", "언어권": ["일본어"], "지역": ["중구"], "체류기간": "1박2일"}
@@ -45,14 +48,41 @@ class 순수함수(unittest.TestCase):
     def test_추천받기_선택(self):
         self.assertEqual(확정체류기간_정하기({**조건_정상, "체류기간": "추천받기"}, "당일"), "당일")
 
-    def test_추출(self):
-        r, w = 근거_경고_추출(결과2_정상)
-        self.assertEqual(r, {"R01", "R02"})
-        self.assertEqual(w, {"W1": {"R01", "R02"}})
+    def test_근거표_구조화(self):
+        행 = 근거표_읽기(결과2_정상)
+        self.assertEqual([r["근거ID"] for r in 행], ["R01", "R02"])
+        self.assertEqual(행[0]["수치"], 59.5)
+        self.assertEqual(행[1]["원자료항목명"], "닭튀김/치킨")
+        self.assertIn("파일_행위치", 행[0])
+
+    def test_경고_읽기(self):
+        self.assertEqual(경고_읽기(결과2_정상)[0]["적용근거ID"], ["R01", "R02"])
+
+    def 검사(self, 글):
+        return 전달_검사(전달_준비(조건_정상, "1박2일", "경고를남기고진행", 글, ""))
+
+    def test_적용근거_없는_경고도_잡음(self):
+        글 = 결과2_정상.replace(" (적용 근거: R01 · R02)", "")
+        self.assertTrue(any("W1" in m and "연결 누락" in m for m in self.검사(글)))
+
+    def test_근거ID_중복(self):
+        글 = 결과2_정상.replace("| R02 |", "| R01 |")
+        self.assertTrue(any("근거 ID 중복: R01" in m for m in self.검사(글)))
+
+    def test_경고ID_중복(self):
+        글 = 결과2_정상 + "- [W1 기간 다름] 다른 경고 (적용 근거: R01)\n"
+        self.assertTrue(any("경고 ID 중복: W1" in m for m in self.검사(글)))
+
+    def test_미확인사항_구조화(self):
+        전달 = 전달_준비(조건_정상, "1박2일", "경고를남기고진행", 결과2_정상, "기관 데이터: 없음")
+        self.assertIn("기관 데이터 없음", 전달["미확인사항"])
+        self.assertTrue(any("자료 필요" in m for m in 전달["미확인사항"]))
+        self.assertIn("59.5%", 전달["요약"])
 
     def test_정상_통과(self):
         전달 = 전달_준비(조건_정상, "1박2일", "경고를남기고진행", 결과2_정상, "기관 데이터: 없음")
         self.assertEqual(전달_검사(전달), [])
+        self.assertEqual(len(전달["근거목록"]), 2)
         self.assertEqual(전달["조건"]["지역"], ["중구"])
 
     def test_체류기간_미선택_막음(self):
@@ -86,7 +116,7 @@ class 흐름시험(unittest.TestCase):
     def test_정상_진행(self):
         # 계절 봄, 언어권 일본어, 지역 중구, 1박2일 → 1단계 진행 → 기관 없음 → E3 진행
         실행, 호출 = self.돌리기(["1", "2", "1", "2", "1", "1", "1"])
-        전달 = json.loads((실행 / "3단계_전달_준비.json").read_text(encoding="utf-8"))
+        전달 = json.loads(next(실행.rglob("3단계_전달_준비.json")).read_text(encoding="utf-8"))
         self.assertEqual(전달["검사결과"], ["통과"])
         self.assertEqual(전달["확정체류기간"], "1박2일")
         self.assertEqual(len(호출), 2)
@@ -100,7 +130,8 @@ class 흐름시험(unittest.TestCase):
         # 1단계에서 조건 바꾸기 → 새 조건(여름) → 다시 1단계 → 진행
         실행, 호출 = self.돌리기(["1", "2", "1", "2", "2", "2", "2", "1", "2", "1", "1", "1"])
         self.assertIn("계절: 여름", 호출[1])
-        self.assertTrue((실행 / "1단계_선택_1.json").exists())
+        self.assertTrue((실행 / "01회차" / "1단계_선택.json").exists())
+        self.assertTrue((실행 / "02회차" / "1단계_결과.md").exists())
 
     def test_2단계_조건_바꾸기(self):
         # 2단계 E3에서 조건 바꾸기 → 새 조건 → 1단계부터 다시
@@ -108,10 +139,12 @@ class 흐름시험(unittest.TestCase):
                                  "3", "2", "1", "2", "1", "1", "1"])
         self.assertEqual(len(호출), 4)
         self.assertIn("계절: 가을", 호출[2])
+        self.assertTrue((실행 / "01회차" / "2단계_결과.md").exists())
+        self.assertTrue((실행 / "02회차" / "2단계_결과.md").exists())
 
     def test_추천받기_미선택이면_전달_안함(self):
         실행, _ = self.돌리기(["1", "2", "1", "3", "1", "1", "1", "3"])
-        전달 = json.loads((실행 / "3단계_전달_준비.json").read_text(encoding="utf-8"))
+        전달 = json.loads(next(실행.rglob("3단계_전달_준비.json")).read_text(encoding="utf-8"))
         self.assertTrue(any("미선택" in m for m in 전달["검사결과"]))
 
 
