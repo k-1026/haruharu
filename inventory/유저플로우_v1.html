@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>유저플로우 v1.2</title>
+<style>
+/* 단계별 가로 흐름: 행 = 단계, 왼쪽 → 오른쪽 정상 진행, 아래 빨간 상자 = 예외 */
+:root{
+  --bg:#F6F7F9; --surface:#FFFFFF; --line:#D5DAE1; --ink:#1F2933; --muted:#5F6B7A;
+  --user:#2F6FDB; --user-bg:#EEF4FE; --agent:#64748B; --agent-bg:#F1F4F8;
+  --dia:#C98A00; --dia-bg:#FFF8E6; --res:#2F6FDB; --res-ink:#FFFFFF;
+  --exc:#D43F5E; --exc-bg:#FDEEF1; --ok:#1E8E5A; --off:#9AA4B2; --lane:#EEF1F5;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#14171C; --surface:#1D2128; --line:#353C47; --ink:#E6E9EE; --muted:#9AA4B2;
+  --user:#7FA8F0; --user-bg:#1C2738; --agent:#9AA4B2; --agent-bg:#232830;
+  --dia:#E5B04A; --dia-bg:#2E2717; --res:#4B7FE0; --res-ink:#FFFFFF;
+  --exc:#F0849A; --exc-bg:#3A1F27; --ok:#5CC892; --off:#6B7584; --lane:#1A1E24; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:14px;line-height:1.45;padding:24px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:1280px;margin:0 auto;display:grid;gap:18px}
+h1{margin:0;font-size:24px}
+.sub{margin:4px 0 0;color:var(--muted);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted);align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:18px;height:12px;border-radius:3px;border:1.5px solid}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px 10px}
+.row h2{margin:0 0 6px;font-size:15px;display:flex;gap:8px;align-items:baseline}
+.row h2 small{font-weight:400;color:var(--muted);font-size:12.5px}
+.scroll{overflow-x:auto}
+.canvas{position:relative;width:1290px;height:240px}
+.canvas svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.node{word-break:keep-all;position:absolute;display:grid;place-content:center;text-align:center;padding:6px 8px;border-radius:9px;border:1.5px solid;font-size:13px;font-weight:700;line-height:1.3}
+.node small{display:block;font-weight:400;font-size:11.5px;color:var(--muted);margin-top:2px}
+.n-term{background:var(--user-bg);border-color:var(--user);border-radius:999px;color:var(--user)}
+.n-user{background:var(--surface);border-color:var(--user)}
+.n-user::before{content:"담당자";position:absolute;top:-9px;left:8px;font-size:10px;font-weight:700;background:var(--user);color:#fff;padding:0 6px;border-radius:999px}
+.n-agent{background:var(--agent-bg);border-color:var(--agent)}
+.n-agent::before{content:"에이전트";position:absolute;top:-9px;left:8px;font-size:10px;font-weight:700;background:var(--agent);color:#fff;padding:0 6px;border-radius:999px}
+.n-res{background:var(--res);border-color:var(--res);color:var(--res-ink)}
+.n-res small{color:rgba(255,255,255,.85)}
+.n-exc{background:var(--exc-bg);border-color:var(--exc);color:var(--exc);font-size:12px}
+.n-exc small{color:var(--ink)}
+.n-pill{background:var(--lane);border-color:var(--line);border-radius:999px;font-size:12px;color:var(--muted)}
+.n-off{background:var(--surface);border-color:var(--off);border-style:dashed;color:var(--muted)}
+.n-dia{border:0;background:none;padding:0}
+.n-dia i{position:absolute;inset:0;margin:auto;width:76%;height:76%;transform:rotate(45deg);background:var(--dia-bg);border:1.5px solid var(--dia);border-radius:6px}
+.n-dia span{position:relative;font-size:11.5px;font-weight:700;max-width:92px;margin:0 auto;word-break:keep-all}
+.lbl{font-size:11.5px;font-weight:700}
+.tables{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.tables{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--surface)}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--lane);font-size:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;min-width:0}
+.card h3{margin:0;font-size:14px}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>유저플로우 v1.2 — 담당자용 체류 기획 에이전트</h1>
+    <p class="sub">기준: 담당자 · 에이전트 역할표 · 2026-11-17 초안, 11-18 v1.1 5단계 추가, 11-22 v1.2 보완안 반영(팀 검토 전) · 규칙은 유저플로우_v1.md 기준 · 한 줄 = 한 단계, 왼쪽에서 오른쪽으로 진행 · 빨간 상자는 예외</p>
+  </header>
+
+  <div class="legend">
+    <span><i class="sw" style="border-color:var(--user);background:var(--surface)"></i>담당자가 하는 일</span>
+    <span><i class="sw" style="border-color:var(--agent);background:var(--agent-bg)"></i>에이전트가 하는 일</span>
+    <span><i class="sw" style="border-color:var(--dia);background:var(--dia-bg);transform:rotate(45deg);width:12px"></i>판정 · 선택</span>
+    <span><i class="sw" style="border-color:var(--res);background:var(--res)"></i>화면에 나오는 결과</span>
+    <span><i class="sw" style="border-color:var(--exc);background:var(--exc-bg)"></i>예외</span>
+    <span><svg width="34" height="10" aria-hidden="true"><line x1="0" y1="5" x2="34" y2="5" stroke="var(--exc)" stroke-width="2" stroke-dasharray="5 4"/></svg>되돌아가기</span>
+  </div>
+
+  <div id="rows" style="display:grid;gap:14px"></div>
+
+  <div class="tables">
+    <div class="card">
+      <h3>단계 사이에 넘기는 것</h3>
+      <table>
+        <tr><th>넘김</th><th>내용</th></tr>
+        <tr><td>① → ②</td><td>조건(계절 · 대상 언어권 · 지역 · 체류 기간(당일 / 1박2일 / 추천받기)), 골라 둔 데이터 목록, E1 알림 여부</td></tr>
+        <tr><td>② → ③</td><td>조건 + 확정 체류 기간, 담당자 선택(E3), 수요 분석 요약, 근거표 전체(근거 ID R), 경고 목록(경고 ID W + 적용 근거 ID), 대구 도착 · 출발 지점 참고자료(없으면 "미확보")</td></tr>
+        <tr><td>③ → ④</td><td>확정 코스(시간표 · 장소 · 순서, 시작 · 종료 장소와 시각 포함, 가정값 표시), 식사 구성(식사시간 · 권역 · 식당 후보, 고정 메뉴 / 자유식), 장소별 근거 · 운영 주체 후보, 대체 이력, 겹침 이력(E7), 남은 경고</td></tr>
+        <tr><td>④ → ⑤</td><td>코스 카드(홍보물 묶음 맨 앞), 확정 문구 · 번역(AI 초안 / 검토 중 / 검토 완료(검토자 · 날짜)), 장면 → 홍보물 대응표, 톤앤매너 · 시안, E5 · E6 기록</td></tr>
+        <tr><td>①~③ → ⑤</td><td>① 조건 요약 · E1, ② 근거표 · E2 · E3, ③ 확정 코스(④와 같은 확정 시작 · 종료 포함) · 장소별 근거 · 운영 주체 후보 · E4 대체 이력 · E7 겹침 이력 (⑤는 1~4단계 결과를 모두 받음)</td></tr>
+        <tr><td>③ ↔ ④ (E6)</td><td>바뀐 장소 · 시간, 영향받는 장면 번호</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>원칙과 미정 항목</h3>
+      <p class="note">에이전트는 표시와 제안만 하고, 진행할지는 담당자가 정합니다. 경고 · 충돌 자체만으로 차단하지 않지만, 이미 합의한 담당자 선택과 확정 조건(② 담당자 선택, ③ 시작 · 종료 · 노선 겹침 선택)은 충족해야 합니다. 경고는 다음 단계까지 따라갑니다.</p>
+      <p class="note"><b>미정 [팀 확정 전]:</b> 기관 데이터 세부 처리(CSV · XLSX는 제안, 열 맞추기 방법 미정) · 진행 · 대기 구분 확정 · "다시 확인 필요" MVP 포함 여부 · "근거 약함" 기준값 · ② → ③ 넘김 형식과 3 · 4 → 5 JSON 필드 이름 · 시안 도구와 캐릭터 사용 범위 · 언어권과 번역 언어 범위 · 4단계 통계 사용 방식(G5 · G17) · 치킨 시식권 · 쿠폰(향후 검토) · 톤앤매너 · 홍보물 종류 선택지 · ⑤ 파일 형식 · 결재 기본 양식 · E8 번호</p>
+      <p class="note"><b>정리됨 (11/20 합의):</b> R · W 전달과 ③ 진입 조건 · 코스 시작 · 종료 · 캐릭터 너구리 · 족제비 고정 · 번역 상태 3종과 담당자 검토</p>
+      <p class="note">⑤ 산출물은 1~4단계 결과를 <b>묶기만</b> 합니다. 새 수치 · 장소 · 문구를 만들지 않고, E1~E7 경고와 [미확인] 표시는 세 파일에 그대로 따라갑니다.</p>
+      <p class="note"><b>확인 필요:</b> E1 · E4 · E5의 예시(겨울 당일형 무박 비율, 월요일 휴장, 순위 표현)는 역할표의 예시이며 원자료로 아직 확인하지 않았습니다.</p>
+    </div>
+    <div class="card">
+      <h3>변경 후 다시 확인 <small style="font-weight:400;color:var(--muted)">업무 규칙 · 앱 미구현</small></h3>
+      <table>
+        <tr><th>바뀐 내용</th><th>"다시 확인 필요"가 되는 곳</th></tr>
+        <tr><td>① 조건</td><td>② · ③ · ④ · ⑤</td></tr>
+        <tr><td>② 근거 · 확정 체류 기간</td><td>③ · ④ · ⑤</td></tr>
+        <tr><td>③ 코스 · 시작 · 종료</td><td>관련 ④ 장면 · 안내와 ⑤</td></tr>
+        <tr><td>④ 문구 · 번역</td><td>⑤</td></tr>
+      </table>
+      <p class="note">변경된 장면의 번역은 검토 완료 상태를 유지하지 않고 AI 초안으로 되돌립니다.</p>
+    </div>
+    <div class="card">
+      <h3>진행 · 대기 구분 <small style="font-weight:400;color:var(--muted)">[제안 · 팀 확정 전]</small></h3>
+      <table>
+        <tr><th>상황</th><th>처리</th></tr>
+        <tr><td>(a) 필요한 입력이 빠짐</td><td>입력 요청 (③ 시작 · 종료는 초안 전 미정 가능)</td></tr>
+        <tr><td>(b) 자료가 없거나 약함</td><td>멈추지 않음. [자료 필요] · 경고 달고 진행</td></tr>
+        <tr><td>(c) 앞 단계 미확정</td><td>다음 단계를 시작하지 않고 돌려보냄</td></tr>
+        <tr><td>(d) 결과가 서로 다름</td><td>저장 허용, "남은 경고"에 적음</td></tr>
+      </table>
+    </div>
+    <div class="card" style="grid-column:1/-1">
+      <h3>⑤ 산출물 형태 후보 <small style="font-weight:400;color:var(--muted)">[팀 확정 전]</small></h3>
+      <table>
+        <tr><th>파일</th><th>받는 쪽</th><th>형태 후보 [팀 확정 전]</th><th>비고</th></tr>
+        <tr><td>결재 파일</td><td>기관 내부 보고</td><td>기관 양식(HWP 등)에 옮겨 쓰는 초안. MVP는 복사해 붙이기 쉬운 문서 · 표 형태</td><td>담당자가 "기관 양식 올리기 / 기본 양식"을 고름</td></tr>
+        <tr><td>제안서</td><td>여행사 · 운영 주체 후보</td><td>PDF</td><td>가격 · 수수료 칸은 두지 않음. 받는 쪽은 ③ 운영 주체 후보 중에서 고름</td></tr>
+        <tr><td>홍보물 묶음</td><td>(홍보 담당 · 대행사)</td><td>언어별 문구표 + 시안 이미지</td><td>홍보물 종류는 ④와 같이 팀 확정</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// x: 칸 번호(0~7), y: "main" 또는 "exc"
+const COLX=c=>14+c*160, MAIN_Y=40, MAIN_H=70, EXC_Y=160, EXC_H=72, W=132;
+const ROWS=[
+ {t:"① 기획 조건",s:"담당자가 조건을 고르면, 에이전트가 맞는 데이터를 골라 두고 안 맞으면 알림",
+  n:[
+   {id:"a",c:0,k:"term",t:"시작",s:"새 기획"},
+   {id:"b",c:1,k:"user",t:"조건 선택",s:"계절 · 언어권 · 지역 · 당일/1박2일/추천받기"},
+   {id:"m",c:2,k:"dia",t:"필수 조건 다 골랐나?"},
+   {id:"c",c:3,k:"dia",t:"맞는 데이터 충분?"},
+   {id:"d",c:4,k:"res",t:"조건 요약",s:"조건별 참고 문구"},
+   {id:"e",c:5,k:"pill",t:"② 수요 근거로 →"},
+   {id:"x0",c:2,y:"exc",k:"exc",t:"조건 누락 알림",s:"빠진 항목 표시 · 지역 기본값(중구) 없음"},
+   {id:"x1",c:3,y:"exc",k:"exc",t:"E1 조건·데이터 안 맞음",s:"예: 수요 적은 조합"}],
+  e:[["a","b"],["b","m"],["m","c","예"],["c","d","예"],["d","e"],["m","x0","아니오","down"],["x0","b","조건 채우기","back"],
+     ["c","x1","아니오","down"],["x1","d","알림 남기고 진행","fwd"]],
+  foot:"E1에서 \"조건 바꾸기\"를 고르면 조건 선택으로 돌아갑니다. 조건을 바꾸면 ② · ③ · ④ · ⑤ 결과는 모두 \"다시 확인 필요\"가 됩니다."},
+ {t:"② 수요 근거",s:"기관 데이터를 올리거나 '없음' 체크 → 에이전트가 비교 · 근거표 · 경고",
+  n:[
+   {id:"a",c:0,k:"pill",t:"① 조건 요약에서"},
+   {id:"b",c:1,k:"user",t:"기관 데이터 올리기",s:"없으면 '없음' 체크 → 바로 근거표"},
+   {id:"c",c:2,k:"dia",t:"비교 가능한가?"},
+   {id:"d",c:3,k:"agent",t:"근거표 작성",s:"수치마다 출처 · 연도 · 표본 · 한계"},
+   {id:"f",c:4,k:"dia",t:"근거가 약한가?"},
+   {id:"g",c:5,k:"res",t:"수요 분석 요약",s:"근거표(R) + 경고(W) · 체류 기간 확정"},
+   {id:"h",c:6,k:"pill",t:"③ 코스 검토로 →"},
+   {id:"x2",c:2,y:"exc",k:"exc",t:"E2 비교 불가",s:"출처 · 기간 · 단위 다름"},
+   {id:"x3",c:4,y:"exc",k:"exc",t:"E3 근거 약함 경고",s:"표본 작음 · 간접 근거 · 기간 다름"}],
+  e:[["a","b"],["b","c"],["c","d","예"],["d","f"],["f","g","아니오"],["g","h"],
+     ["c","x2","아니오","down"],["x2","b","다시 올리기","back"],["x2","d","경고 달고 쓰기","fwd"],
+     ["f","x3","예","down"],["x3","g","경고 남기고 진행","fwd"]],
+  foot:"E3에서 \"조건 바꾸기\"를 고르면 ① 기획 조건으로 돌아갑니다. 담당자 선택이나 확정 체류 기간(추천받기였을 때)이 비어 있으면 ③을 시작하지 않고 되묻습니다. 대구 도착 · 출발 지점 자료는 참고로만 넘깁니다. ② 근거가 바뀌면 ③ · ④ · ⑤는 \"다시 확인 필요\"."},
+ {t:"③ 코스 검토",s:"코스 생성 → 에이전트가 조건에 맞는 코스 초안과 충돌 · 겹침 · 대체안 · 장소별 근거 → 담당자가 시작 · 종료를 확인하고 확정",
+  n:[
+   {id:"a",c:0,k:"pill",t:"② 수요 분석에서"},
+   {id:"b",c:1,k:"user",t:"코스 생성",s:"버튼 누르기"},
+   {id:"c",c:2,k:"agent",t:"코스 초안 작성",s:"가정값 표시 · 식당 후보"},
+   {id:"d",c:3,k:"dia",t:"운영 충돌 있나?"},
+   {id:"f",c:4,k:"dia",t:"기존 상품 노선 겹침?"},
+   {id:"g",c:5,k:"dia",t:"확정 항목 확인?"},
+   {id:"r",c:6,k:"res",t:"확정 코스",s:"시작 · 종료 · 식사 구성 포함"},
+   {id:"h",c:7,k:"pill",t:"④ 홍보 검토로 →"},
+   {id:"x4",c:3,y:"exc",k:"exc",t:"E4 충돌 표시 + 대체안",s:"예: 휴장 → 관광지"},
+   {id:"x7",c:4,y:"exc",k:"exc",t:"E7 기존 상품 겹침",s:"노선 겹침: 선택 필수 · 장소 겹침: 미선택=그대로 두기"},
+   {id:"x9",c:5,y:"exc",k:"exc",t:"시작 · 종료 미확인",s:"지정하거나 후보 확인 · 공항 · 역 기본값 없음"}],
+  e:[["a","b"],["b","c"],["c","d"],["d","f","없음"],["f","g","아니오"],["g","r","예"],["r","h"],
+     ["d","x4","있음","down"],["x4","c","대체안 받기","back"],
+     ["f","x7","예","down"],["x7","g","","fwd"],
+     ["g","x9","아니오","down"],
+     ["g","c","담당자가 직접 고친 뒤 다시 점검","top"]],
+  foot:"체류시간 · 저녁 시작 시각은 가정값으로 표시하고 담당자가 확인 · 수정합니다. 2일차 오전이 미정이면 임의로 채우지 않고 담당자가 일정 추가 / 자유시간 / 종료 장소로 이동 중에서 고릅니다. 식사는 1 · 2일차 식사시간 · 권역과 여러 식당 후보로 구성하고, 고정 메뉴만 같은 날 중복을 확인합니다(자유식은 후보 다양성만). 자유식은 식당을 지정하지 않아도 확정할 수 있습니다. 노선 겹침 판정 불가면 초안으로 유지합니다. 시작 · 종료가 미정이어도 초안은 만들고, 확정 전에 확인합니다. 당일형에는 숙박을 넣지 않고, 픽업 · 교통편 제공은 넣지 않습니다. E7에서 \"피하기\"를 고르면 담당자가 코스를 고치고, 다시 점검합니다. \"연결하기\"는 4단계 문구에서 기존 상품을 언급할 수 있다는 뜻이며, 운영 주체와 협의된 것처럼 쓰지 않습니다. ③ 코스 · 시작 · 종료가 바뀌면 관련 ④ 장면 · 안내와 ⑤는 \"다시 확인 필요\"."},
+ {t:"④ 홍보 검토",s:"톤앤매너 선택 → 에이전트가 장면별 문구 · 번역 초안 · 시안 → 담당자가 번역 검토를 맡기고 확정",
+  n:[
+   {id:"a",c:0,k:"pill",t:"③ 확정 코스에서"},
+   {id:"b",c:1,k:"user",t:"톤앤매너 선택",s:"색상 · 분위기 · 홍보물 종류 [팀 확정 전]"},
+   {id:"c",c:2,k:"agent",t:"문구 · 번역 · 시안",s:"번역 AI 초안 · 캐릭터 자동 배치"},
+   {id:"d",c:3,k:"dia",t:"검증 안 된 표현?"},
+   {id:"u",c:4,k:"user",t:"번역 검토 맡기기",s:"AI 초안 / 검토 중 / 검토 완료"},
+   {id:"f",c:5,k:"dia",t:"담당자 확정?"},
+   {id:"g",c:6,k:"res",t:"홍보안 확정",s:"코스 카드 · 장면 → 홍보물"},
+   {id:"h",c:7,k:"pill",t:"⑤ 산출물로 →"},
+   {id:"x6",c:3,y:"exc",k:"exc",t:"E5 표현 걸러 냄",s:"고침 / 그대로 둠(기록) / 미처리"},
+   {id:"x7",c:5,y:"exc",k:"exc",t:"E6 코스 수정 필요",s:"③에서 고친 뒤 바뀐 장면만 다시 확인"}],
+  e:[["a","b"],["b","c"],["c","d"],["d","u","없음"],["u","f"],["f","g","예"],["g","h"],
+     ["d","x6","있음","down"],["x6","c","고침","back"],["x6","u","그대로 둠","fwd"],["f","x7","코스 수정","down"]],
+  foot:"식당 후보는 필수 방문처럼 쓰지 않고 \"추천 후보 참고, 다른 식당도 선택 가능\"으로 안내합니다. 수요 근거가 없어도 공식 운영정보는 출처 · 확인일과 \"수요 근거 없음\" 경고를 달고 이용 안내로 씁니다. 번역 검토는 담당자가 업체 · 재단 · 본인에게 맡깁니다. 역번역은 참고용이며 그것만으로 \"검토 완료\"로 바꾸지 않습니다. 장면이 바뀌면 그 번역은 AI 초안으로 돌아갑니다. 시작 · 종료 안내는 ③ 확정값만 쓰고 픽업 · 교통편 문구는 거릅니다."},
+ {t:"⑤ 산출물",s:"만들 파일 · 양식 선택 → 에이전트가 1~4단계 결과를 세 파일로 묶고 대조 → 담당자가 저장",
+  n:[
+   {id:"a",c:0,k:"pill",t:"④ 홍보안 확정에서"},
+   {id:"b",c:1,k:"user",t:"파일 · 양식 선택",s:"결재 양식 · 받는 쪽"},
+   {id:"c",c:2,k:"dia",t:"1~4단계 확정 · 재확인 끝?"},
+   {id:"d",c:3,k:"agent",t:"결과 묶기",s:"새 값 없이, 경고 · [미확인] 그대로"},
+   {id:"e",c:4,k:"agent",t:"세 파일 대조",s:"일정 · 수치 · 경고 · 자유식 · 식비 포함"},
+   {id:"f",c:5,k:"dia",t:"세 파일이 같은가?"},
+   {id:"g",c:6,k:"res",t:"파일 3종 + 대조",s:"결재 · 제안서 · 홍보물"},
+   {id:"h",c:7,k:"user",t:"저장",s:"결재 · 발주는 담당자가"},
+   {id:"x0",c:2,y:"exc",k:"exc",t:"앞 단계 미확정",s:"다시 확인 필요 포함 · 만들지 않음"},
+   {id:"x8",c:5,y:"exc",k:"exc",t:"E8 대조 불일치",s:"후보(팀 확정 전) · 고칠 단계 표시"}],
+  e:[["a","b"],["b","c"],["c","d","예"],["d","e"],["e","f"],["f","g","예"],["g","h"],
+     ["c","x0","아니오","down"],["x0","a","해당 단계로 돌아가 확정","back"],
+     ["f","x8","아니오","down"],["x8","d","해당 단계에서 고친 뒤 다시 묶기","back"],["x8","g","불일치를 남기고 저장","fwd"]],
+  foot:"수치는 2단계, 장소 · 시간은 3단계, 문구 · 번역은 4단계에서만 고칩니다. 5단계에서 직접 고치면 세 파일과 앞 단계 결과가 서로 달라집니다."}
+];
+function box(n){const y=n.y==="exc"?EXC_Y:MAIN_Y,h=n.y==="exc"?EXC_H:MAIN_H;return{x:COLX(n.c),y,w:W,h}}
+const esc=t=>String(t).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
+function render(){
+  const host=document.getElementById("rows");
+  host.innerHTML=ROWS.map((r,ri)=>{
+    const B={}; r.n.forEach(n=>B[n.id]=box(n));
+    const nodes=r.n.map(n=>{const b=B[n.id];
+      if(n.k==="dia")return `<div class="node n-dia" style="left:${b.x+15}px;top:${b.y-12}px;width:${b.w-30}px;height:${b.h+24}px"><i></i><span>${esc(n.t)}</span></div>`;
+      return `<div class="node n-${n.k}" style="left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px">${esc(n.t)}${n.s?`<small>${esc(n.s)}</small>`:""}</div>`}).join("");
+    const mk=`m${ri}`;
+    const paths=r.e.map(([f,t,l,type])=>{const a=B[f],b=B[t];
+      let d,lx,ly,cls="main";
+      if(type==="down"){const x=a.x+a.w/2; d=`M${x},${a.y+a.h+12} L${x},${b.y-2}`; lx=x+6; ly=(a.y+a.h+b.y)/2+6; cls="exc"}
+      else if(type==="back"){const y=b.y+b.h; const sx=a.x, tx=b.x+b.w/2; d=`M${sx},${a.y+a.h/2} L${tx},${a.y+a.h/2} L${tx},${y+2}`; lx=Math.min(sx,tx)+8; ly=a.y+a.h/2-6; cls="back"}
+      else if(type==="top"){const ax=a.x+a.w/2, bx=b.x+b.w/2; d=`M${ax},${a.y-12} L${ax},16 L${bx},16 L${bx},${b.y-2}`; lx=(ax+bx)/2; ly=11; cls="back"}
+      else if(type==="fwd"){const sx=a.x+a.w, tx=b.x+b.w/2, y=a.y+a.h/2; d=`M${sx},${y} L${tx},${y} L${tx},${b.y+b.h+2}`; lx=sx+6; ly=y+16; cls="fwd"}
+      else{const y=a.y+a.h/2; d=`M${a.x+a.w},${y} L${b.x-2},${y}`; lx=(a.x+a.w+b.x)/2; ly=y-8}
+      const col=cls==="exc"||cls==="back"?"var(--exc)":cls==="fwd"?"var(--ok)":"var(--muted)";
+      const dash=cls==="back"||cls==="fwd"?' stroke-dasharray="5 4"':"";
+      return `<path d="${d}" fill="none" stroke="${col}" stroke-width="1.6"${dash} marker-end="url(#${mk}-${cls})"/>`+(l?`<text class="lbl" x="${lx}" y="${ly}" fill="${col}"${cls==="main"||type==="top"?' text-anchor="middle"':""}>${esc(l)}</text>`:"");
+    }).join("");
+    const mark=(id,c)=>`<marker id="${mk}-${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`;
+    return `<section class="row"><h2>${esc(r.t)} <small>${esc(r.s)}</small></h2><div class="scroll"><div class="canvas">
+      <svg aria-hidden="true"><defs>${mark("main","var(--muted)")}${mark("exc","var(--exc)")}${mark("back","var(--exc)")}${mark("fwd","var(--ok)")}</defs>${paths}</svg>${nodes}</div></div>${r.foot?`<p class="note" style="margin:4px 0 0">${esc(r.foot)}</p>`:""}</section>`;
+  }).join("");
+}
+render();
+// ?img 로 열면 그림만 보이게 (md에 넣을 이미지 캡처용)
+if(location.search.indexOf("img")>=0){document.querySelector(".tables").hidden=true}
+</script>
+</body>
+</html>
