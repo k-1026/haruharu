@@ -38,7 +38,8 @@ class 장소정보시험(unittest.TestCase):
         checked=검토입력_검사(d,c,s)
         self.assertEqual(checked['운영조건'],d['운영조건'])
         self.assertEqual(checked['운영기준'],'상시기획')
-        self.assertTrue(any('출발일' in x for x in 준비_검사(검토_반영(c,checked),s,checked)['확인필요']))
+        # 상시 상품은 출발일 대신 정기휴무로 요일을 계산한다. 휴무 자료가 없으면 자동 통과하지 않는다.
+        self.assertTrue(any('출발 가능 요일' in x for x in 준비_검사(검토_반영(c,checked),s,checked)['확인필요']))
 
 
 if __name__=='__main__':unittest.main()

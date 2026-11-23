@@ -35,6 +35,48 @@ def _bool(v):
     return v
 
 
+요일='월화수목금토일'
+재확인기간_일=90  # 제안서의 '3개월' 예시값. 팀이 숫자를 정하면 바꾼다.
+
+
+def 휴무요일(text):
+    """정기휴무 문구 → (매주 쉬는 요일 번호 집합 또는 None(미확인), 요일로 계산하지 않는 안내 문구 목록)."""
+    text=(text or '').strip()
+    if not text:return None,[]
+    closed=set()
+    for m in re.finditer(r'매주\s*([월화수목금토일])요일',text):closed.add(요일.index(m.group(1)))
+    for m in re.finditer(r'([월화수목금토일])\s*[~\-–]\s*([월화수목금토일])(?:요일)?\s*(?:운영하지\s*않음|휴무|휴관|휴점)',text):
+        a,b=요일.index(m.group(1)),요일.index(m.group(2))
+        closed.update(range(a,b+1) if a<=b else [*range(a,7),*range(0,b+1)])
+    notes=[]
+    if re.search(r'번째|째\s*[월화수목금토일]|1월\s*1일|설|추석|명절|공휴일',text):notes.append(text)
+    return closed,notes
+
+
+def 출발가능요일(코스,검토,휴무조회=None):
+    """상시 상품: 월~일 출발마다 각 일정의 방문 요일(1박2일이면 2일차=다음 요일)을 정기휴무와 대조."""
+    if 휴무조회 is None:
+        from 장소정보 import 장소찾기
+        휴무조회=lambda name:(장소찾기(name) or {}).get('정기휴무','')
+    excluded={(_key(r),r['대상명']) for r in 검토.get('운영확인',[]) if r.get('처리')=='제외'}
+    slots={};unknown=[];notes=[]
+    for t in 운영대상(코스):
+        if (_key(t),t['대상명']) in excluded:continue
+        closed,extra=휴무요일(휴무조회(t['대상명']))
+        notes+=[f"{t['대상명']}: {x}" for x in extra]
+        if closed is None or type(t['일차']) is not int:unknown.append(t['대상명']);continue
+        slots.setdefault(_key(t),[]).append((t['일차'],closed))
+    plans=sorted({k[0] for k in slots if k[0]!='공통'}) or ['공통']
+    result={}
+    for plan in plans:
+        ok=[]
+        for d in range(7):
+            # 같은 칸에 자유식 후보가 여럿이면 하나라도 열려 있으면 된다.
+            if all(any((d+day-1)%7 not in closed for day,closed in cands) for k,cands in slots.items() if k[0] in ['공통',plan]):ok.append(요일[d])
+        result[plan]=ok
+    return {'안별':result,'미확인':list(dict.fromkeys(unknown)),'안내':list(dict.fromkeys(notes))}
+
+
 def 운영대상(코스):
     result=[]
     for row in 코스.get('칸목록',[]):
@@ -157,17 +199,24 @@ def 검토_반영(기존,검토):
     return course
 
 
-def 준비_검사(코스,입력,검토,형식문제=None):
-    missing=list(형식문제 or []);warnings=[]
+def 준비_검사(코스,입력,검토,형식문제=None,휴무조회=None,오늘=None):
+    missing=list(형식문제 or []);warnings=[];days=None
+    오늘=오늘 or datetime.now().astimezone().date()
     조건=입력.get('코스작성조건',{});체류=입력.get('확정체류기간','당일')
     for p in ['시작','종료']:
         if type(조건.get(p+'일차')) is not int:missing.append(p+' 일차 확인 필요')
         if 조건.get(p+'지점') in [None,'','미확인','미정']:missing.append(p+' 장소 확인 필요')
         if _분(조건.get(p+'시각')) is None:missing.append(p+' 시각 확인 필요')
     if 체류=='1박2일' and 조건.get('2일차오전구성') not in ['후보일정추가','자유시간','종료장소로바로']:missing.append('2일차 오전 선택 필요')
-    if not 검토.get('방문시작일'):
-        missing.append('상시 상품 기획 초안: 실제 출발일별 운영 검증은 대기 중. 현재 4단계 확정 준비 기준은 출발일 확인이 필요함')
-        if not 검토.get('운영조건'):warnings.append('상시 상품의 운영 요일·계절 조건을 정리하세요. 최종 확정 기준은 팀 논의가 필요합니다.')
+    상시=not 검토.get('방문시작일')
+    if 상시:
+        days=출발가능요일(코스,검토,휴무조회)
+        for name in days['미확인']:missing.append(name+': 정기휴무 미확인 (출발 가능 요일 계산 불가)')
+        for plan,ok in days['안별'].items():
+            label='' if plan=='공통' else f'({plan}) '
+            if ok:warnings.append(f"출발 가능 요일 {label}: {' · '.join(ok)}")
+            else:missing.append(f'E4 운영 충돌 {label}: 모든 요일에 휴무인 장소가 있어 출발 가능한 요일이 없음')
+        for note in days['안내']:warnings.append('요일로 계산하지 않은 휴무 · '+note)
     times=시간표_검사(코스,조건,체류);missing+=times['충돌']+times['확인대기']
     for row in 코스.get('칸목록',[]):
         name=f"{row.get('안','공통')} · {row['칸ID']}"
@@ -182,8 +231,10 @@ def 준비_검사(코스,입력,검토,형식문제=None):
         op=next((r for r in 검토['운영확인'] if _key(r)==_key(target) and r['대상명']==name),None)
         if not op:missing.append(name+': 운영 확인 입력 필요');continue
         if op['운영상태']!='운영':missing.append(name+': 운영 여부 미확인 또는 휴무')
-        if not op['방문일운영확인']:missing.append(name+': 방문일 휴무·운영 확인 필요')
+        if op.get('처리')=='제외':continue
+        if not 상시 and not op['방문일운영확인']:missing.append(name+': 방문일 휴무·운영 확인 필요')
         if not op['출처명'] or not op['확인일'] or op['출처등급'] not in ['공식','운영주체']:missing.append(name+': 공식·운영주체 출처와 확인일 필요')
+        elif (오늘-date.fromisoformat(op['확인일'])).days>재확인기간_일:missing.append(f"{name}: 확인일 {op['확인일']}이 {재확인기간_일}일을 넘어 다시 확인 필요")
         if op.get('마감구분') not in ['확인','해당없음'] or (op.get('마감구분')=='확인' and not op['마감시각']):missing.append(name+': 주문·입장 마감 확인 또는 해당없음 선택 필요')
         opening=_분(op['영업시작']);closing=_분(op['영업종료']);start=_분(row.get('시각',{}).get('값'));length=row.get('머무는시간')
         if opening is None or closing is None:missing.append(name+': 영업시간 입력 필요');continue
@@ -205,4 +256,5 @@ def 준비_검사(코스,입력,검토,형식문제=None):
     if not 검토.get('담당자최종확인'):missing.append('담당자 최종 검토 확인 필요')
     missing=list(dict.fromkeys(missing))
     return {'진행가능':not missing,'상태':'준비 완료' if not missing else '확인 필요','확인필요':missing,'유지경고':warnings,
+            '출발가능요일':days['안별'] if days else None,
             '검사범위':'입력한 운영·시간·담당자 확인의 일관성 검사. 실제 출처 진위·현장 운영을 자동 검증하지 않음. 4단계 AI 미실행.'}

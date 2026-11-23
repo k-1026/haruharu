@@ -38,6 +38,11 @@ def 장소찾기(name):
     return matches[0] if len(matches)==1 else None
 
 
+def 상시개방(data):
+    """운영시간이 '상시 개방'이고 출처ID가 있을 때만 참. 출처 없는 상시는 미확인으로 둔다."""
+    return str(data.get('운영시간','')).replace(' ','').startswith('상시개방') and bool(str(data.get('출처ID','')).strip())
+
+
 def 운영정보_제안(name):
     data=장소찾기(name) or {}
     hours=data.get('운영시간','')
@@ -48,11 +53,15 @@ def 운영정보_제안(name):
     deadline=re.fullmatch(r'\d{2}:\d{2}',last)
     lo=re.search(r'라스트오더\s*(\d{2}:\d{2})',hours)
     limit=last if deadline else lo.group(1) if lo else ''
+    always=상시개방(data)
+    if always:
+        # data_spec 11-1 규칙: 출처가 있는 '상시 개방'만 하루 전체(00:00~다음 날 00:00)로 보고 마감은 해당 없음.
+        opening,closing,limit='00:00','00:00',''
     return {'영업시작':opening,'영업종료':closing,'마감시각':limit,
-            '마감구분':'확인' if limit else '해당없음' if last=='해당없음' else '미확인',
+            '마감구분':'해당없음' if always or last.replace(' ','')=='해당없음' else '확인' if limit else '미확인',
             '출처명':data.get('출처ID',''),'출처URL':data.get('출처URL','') if data.get('출처URL','').startswith(('http://','https://')) else '',
             '출처등급':data.get('출처등급','') if data.get('출처등급') in ['공식','운영주체'] else '기타' if data.get('출처등급') else '',
-            '확인일':data.get('확인일',''),'운영상태':'미확인','처리':'유지','익일종료':False,
+            '확인일':data.get('확인일',''),'운영상태':'미확인','처리':'유지','익일종료':always,
             '방문일운영확인':False,'메모':' / '.join(data.get(k,'') for k in ['정기휴무','비고'] if data.get(k)),
             '보유자료':data}
 

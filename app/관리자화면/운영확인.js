@@ -48,7 +48,7 @@ function buildReview(info){
     add('출처명','확인한 자료·운영 주체');add('출처등급','출처 구분','',[['','미확인'],['공식','공식 안내'],['운영주체','운영 주체 직접 확인'],['기타','기타 · 재확인 필요']]);add('확인일','자료 확인일','date');
     knownGrid.append(courseInput(`ro-${i}-출처URL`,'출처 URL (있는 경우)','url'),courseInput(`ro-${i}-메모`,'요일·휴무·예외 운영 등 확인 내용'));
     known.append(reviewCheck(`ro-${i}-익일종료`,'영업 종료가 다음 날입니다.',old.익일종료));
-    card.append(grid,known,reviewCheck(`ro-${i}-방문일운영확인`,'특정 출발일의 요일·휴무·예외 운영을 출처로 확인했습니다. (상시 기획 중에는 비워 두세요)',old.방문일운영확인));operations.append(card);
+    card.append(grid,known,reviewCheck(`ro-${i}-방문일운영확인`,'특정 출발일의 요일·휴무·예외 운영을 출처로 확인했습니다. (상시 기획은 앱이 정기휴무로 요일을 계산하므로 비워 두세요)',old.방문일운영확인));operations.append(card);
     for(const key of ['운영상태','처리','영업시작','영업종료','마감시각','마감구분','출처명','출처URL','출처등급','확인일','메모'])reviewSet(`ro-${i}-${key}`,old[key] ?? (key==='처리'?'유지':key==='마감구분'?(old.마감시각?'확인':'미확인'):''));
   });
   reviewSet('방문시작일',saved.방문시작일);reviewSet('겹침처리',saved.겹침처리);reviewSet('겹침메모',saved.겹침메모);
@@ -140,7 +140,7 @@ function updateReviewMode(){
   const dated=reviewValue('운영기준')==='출발일시험';
   $('reviewDateField').classList.toggle('hidden',!dated);
   document.getElementById('reviewForm').elements.namedItem('방문시작일').disabled=!dated;
-  $('reviewModeHelp').textContent=dated?'이 출발일을 기준으로 요일·휴무·계절 예외를 확인합니다.':'상시 상품의 기본 코스를 기획합니다. 운영 요일·계절 조건을 남기고, 실제 출발일 검증은 추후 진행합니다. 날짜 없이 초안 저장 가능 · 4단계 확정 준비 기준은 별도 확인 필요.';
+  $('reviewModeHelp').textContent=dated?'이 출발일을 기준으로 요일·휴무·계절 예외를 확인합니다.':'상시 상품은 출발일을 받지 않습니다. 앱이 월~일 출발을 장소별 정기휴무와 대조해 ‘출발 가능 요일’을 보여 줍니다(1박2일은 2일차를 다음 요일로 계산). 가능한 요일이 없으면 E4 운영 충돌로 막습니다. 1월 1일·명절·n번째 일요일 같은 휴무는 계산하지 않고 안내로만 붙입니다.';
 }
 document.getElementById('reviewForm').addEventListener('submit',saveReview);
 function reviewChanged(event){

@@ -1,6 +1,7 @@
 import copy
 import unittest
-from 운영검토 import 검토입력_검사, 검토_반영, 준비_검사, 화면정보
+from datetime import date
+from 운영검토 import 검토입력_검사, 검토_반영, 준비_검사, 화면정보, 휴무요일, 출발가능요일
 
 
 def example():
@@ -81,6 +82,55 @@ class 운영검토시험(unittest.TestCase):
         self.assertTrue(any('근거 없음' in w['문구'] and w['칸ID']=='관광' for w in revised['남은경고']))
         self.assertTrue(any('재확인 필요' in w for w in ready['유지경고']))
         self.assertEqual(c['칸목록'][0]['근거ID'],['R19'])
+
+
+class 상시요일시험(unittest.TestCase):
+    def check(self,휴무,확인일='2026-11-23'):
+        c,s,d=example();d['방문시작일']='';d['운영확인'][0].update({'방문일운영확인':False,'확인일':확인일})
+        checked=검토입력_검사(d,c,s)
+        return 준비_검사(검토_반영(c,checked),s,checked,휴무조회=lambda n:휴무,오늘=date(2026,11,23))
+
+    def test_휴무문구_해석(self):
+        self.assertEqual(휴무요일('월~목 운영하지 않음')[0],{0,1,2,3})
+        self.assertEqual(휴무요일('매주 월요일(공휴일이면 정상 개관), 1월 1일')[0],{0})
+        self.assertTrue(휴무요일('매주 월요일, 1월 1일')[1])
+        self.assertEqual(휴무요일('없음 (상시 개방)'),(set(),[]))
+        self.assertIsNone(휴무요일('')[0])
+
+    def test_상시상품은_출발일없이_요일로_통과(self):
+        ready=self.check('매주 일요일')
+        self.assertTrue(ready['진행가능'],ready['확인필요'])
+        self.assertEqual(ready['출발가능요일']['공통'],list('월화수목금토'))
+
+    def test_모든요일_휴무면_E4(self):
+        ready=self.check('월~일 휴무')
+        self.assertFalse(ready['진행가능'])
+        self.assertTrue(any('E4' in m for m in ready['확인필요']))
+
+    def test_정기휴무_빈칸은_미확인(self):
+        self.assertTrue(any('정기휴무 미확인' in m for m in self.check('')['확인필요']))
+
+    def test_확인일이_오래되면_재확인(self):
+        self.assertTrue(any('다시 확인' in m for m in self.check('없음','2026-07-01')['확인필요']))
+
+    def test_1박2일_2일차는_다음요일(self):
+        c,s,d=example();d['방문시작일']=''
+        c['칸목록'][2].update({'시간칸':'낮','장소명':'장소C'})
+        c['2일차오전구성']='후보일정추가'
+        d['일정확인'][2]['장소권역']='장소C';d['운영확인'][0]['방문일운영확인']=False
+        extra=dict(d['운영확인'][0],칸ID='자유',대상명='장소C');d['운영확인'].append(extra)
+        checked=검토입력_검사(d,c,s)
+        days=출발가능요일(검토_반영(c,checked),checked,lambda n:'매주 월요일' if n=='장소C' else '없음')
+        self.assertNotIn('일',days['안별']['공통'])  # 일요일 출발 → 2일차 월요일 휴무
+        self.assertIn('월',days['안별']['공통'])
+
+
+class 상시개방시험(unittest.TestCase):
+    def test_출처있는_상시개방만_하루전체(self):
+        from 장소정보 import 상시개방
+        self.assertTrue(상시개방({'운영시간':'상시 개방 (운영시간 없음)','출처ID':'S99'}))
+        self.assertFalse(상시개방({'운영시간':'상시 개방 (운영시간 없음)','출처ID':''}))
+        self.assertFalse(상시개방({'운영시간':'','출처ID':'S99'}))
 
 
 if __name__=='__main__':unittest.main()
