@@ -53,4 +53,24 @@ class 기록시험(unittest.TestCase):
             self.assertEqual(p.read_text(encoding='utf-8'),before)
 
 
+class 한도시험(unittest.TestCase):
+    def test_같은일_실패2번이면_재시도_한도(self):
+        r=new()
+        for _ in range(2):기록모듈.실행_기록(r,'에이전트:수집','수집','평일 밤','빈칸','실패',AI호출=1)
+        ok,why=기록모듈.한도_확인(r,'에이전트:수집','수집','평일 밤')
+        self.assertFalse(ok);self.assertIn('재시도',why)
+        self.assertTrue(기록모듈.한도_확인(r,'에이전트:수집','수집','주말 밤')[0])
+
+    def test_AI호출_합이_한도면_멈춤(self):
+        r=new();기록모듈.실행_기록(r,'에이전트:코스','코스','A','첫 생성','성공',AI호출=30)
+        ok,why=기록모듈.한도_확인(r,'에이전트:검증','검증','A')
+        self.assertFalse(ok);self.assertIn('AI 호출',why)
+
+    def test_실행기록은_결과값검사와_이력(self):
+        r=new()
+        with self.assertRaises(ValueError):기록모듈.실행_기록(r,'에이전트:수집','수집','x','y','이상함')
+        i=기록모듈.실행_기록(r,'코드:점검','점검','A','요일 검사','성공')
+        self.assertEqual(r['실행'][0]['id'],i);self.assertEqual(r['결정이력'][-1]['행동'],'실행')
+
+
 if __name__=='__main__':unittest.main()
