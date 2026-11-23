@@ -132,13 +132,23 @@ def 핸들러(저장소, 실행서비스=None):
                     return self.응답(200, 실행서비스.상태(인자.get('id', [''])[0]))
                 if 경로.path == '/api/course/review':
                     return self.응답(200, 실행서비스.검토정보(인자.get('id',[''])[0]))
+                if 경로.path == '/api/plan/course':
+                    from 담당자요약 import 요약_불러오기
+                    키 = 인자.get('id', [''])[0]
+                    저장소._경로(키)  # 잘못된 경로는 ValueError → 400
+                    return self.응답(200, 요약_불러오기(실행서비스, 키))
+                if 경로.path in ['/', '/plan', '/plan/', '/plan/plan.js', '/plan/plan.css']:
+                    이름, 타입 = {'/plan.js': ('plan.js', 'text/javascript; charset=utf-8'),
+                               '/plan.css': ('plan.css', 'text/css; charset=utf-8')}.get(
+                        경로.path.removeprefix('/plan'), ('index.html', 'text/html; charset=utf-8'))
+                    return self.응답(200, (기준 / '담당자화면' / 이름).read_bytes(), 타입)
                 if 경로.path == '/api/runs':
                     return self.응답(200, 저장소.목록())
                 if 경로.path == '/api/run':
                     return self.응답(200, 저장소.상세(인자.get('id', [''])[0]))
                 if 경로.path == '/api/file':
                     return self.응답(200, 저장소.파일(인자.get('path', [''])[0]))
-                자산 = {'/': ('index.html', 'text/html; charset=utf-8'), '/admin': ('index.html', 'text/html; charset=utf-8'),
+                자산 = {'/admin': ('index.html', 'text/html; charset=utf-8'),
                       '/admin/': ('index.html', 'text/html; charset=utf-8'), '/admin/app.js': ('app.js', 'text/javascript; charset=utf-8'),
                       '/admin/course.js': ('코스조건.js', 'text/javascript; charset=utf-8'),
                       '/admin/course.css': ('코스조건.css', 'text/css; charset=utf-8'),

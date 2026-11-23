@@ -121,6 +121,20 @@ class HTTP시험(unittest.TestCase):
                                      {'Origin': 'https://elsewhere.invalid', 'X-Admin-Token': token})[0], 403)
         self.assertEqual(self.calls, [])
 
+    def raw(self, url):
+        conn = http.client.HTTPConnection('127.0.0.1', self.port, timeout=5)
+        conn.request('GET', url);r = conn.getresponse();body = r.read().decode();conn.close()
+        return r.status, body
+
+    def test_담당자화면과_관리자창_경로분리(self):
+        code, body = self.raw('/')
+        self.assertEqual(code, 200);self.assertIn('담당자', body)
+        self.assertEqual(self.raw('/plan/')[1], body)
+        self.assertIn('관리자', self.raw('/admin/')[1])
+        self.assertEqual(self.request('GET', '/api/plan/course?id=' + quote('../x'))[0], 400)
+        code, summary = self.request('GET', '/api/plan/course?id=' + quote(self.key))
+        self.assertEqual(code, 200);self.assertFalse(summary['코스있음'])
+
     def test_읽기와_오류응답_유지(self):
         self.assertEqual(self.request('GET', '/api/runs')[0], 200)
         self.assertEqual(self.request('PUT', '/api/course/start', {})[0], 405)
