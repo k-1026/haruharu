@@ -178,6 +178,24 @@ class 정리사항시험(unittest.TestCase):
         self.assertEqual(등급('공식'),'공식');self.assertEqual(등급('미정'),'기타');self.assertEqual(등급(''),'')
 
 
+class 지점요일시험(unittest.TestCase):
+    def test_종료지점이_관람장소면_요일검사에_포함(self):
+        c,s,d=example();d['방문시작일']=''
+        조건={'시작지점':'동대구역','시작일차':1,'종료지점':'국채보상운동기념관','종료일차':2}
+        지점=lambda n:'매주 월요일, 1월 1일' if n=='국채보상운동기념관' else None
+        days=출발가능요일(c,d,lambda n:'없음',조건,지점)
+        self.assertNotIn('일',days['안별']['공통'])  # 일요일 출발 → 2일차 월요일 휴관
+        self.assertIn('토',days['안별']['공통'])
+        self.assertTrue(any('종료 지점' in x for x in days['안내']))
+
+    def test_CSV에_없는_지점은_넘어가고_빈칸휴무는_미확인(self):
+        c,s,d=example()
+        days=출발가능요일(c,d,lambda n:'없음',{'시작지점':'동대구역','시작일차':1},lambda n:None)
+        self.assertEqual(days['미확인'],[])
+        days=출발가능요일(c,d,lambda n:'없음',{'종료지점':'김광석길','종료일차':1},lambda n:'')
+        self.assertTrue(days['미확인'])
+
+
 class 상시개방시험(unittest.TestCase):
     def test_출처있는_상시개방만_하루전체(self):
         from 장소정보 import 상시개방

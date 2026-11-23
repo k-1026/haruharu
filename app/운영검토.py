@@ -53,7 +53,7 @@ def 휴무요일(text):
     return closed,notes
 
 
-def 출발가능요일(코스,검토,휴무조회=None):
+def 출발가능요일(코스,검토,휴무조회=None,조건=None,지점조회=None):
     """상시 상품: 월~일 출발마다 각 일정의 방문 요일(1박2일이면 2일차=다음 요일)을 정기휴무와 대조."""
     if 휴무조회 is None:
         from 장소정보 import 장소찾기
@@ -66,6 +66,20 @@ def 출발가능요일(코스,검토,휴무조회=None):
         notes+=[f"{t['대상명']}: {x}" for x in extra]
         if closed is None or type(t['일차']) is not int:unknown.append(t['대상명']);continue
         slots.setdefault(_key(t),[]).append((t['일차'],closed))
+    # 시작·종료 지점이 장소 CSV에 있는 관람 장소면 같이 대조한다(지침 2_입력.md 2장). CSV에 없는 역·숙소 등은 넘어간다.
+    if 지점조회 is None:
+        from 장소정보 import 장소찾기
+        지점조회=lambda name:(lambda d:None if d is None else d.get('정기휴무',''))(장소찾기(name))
+    조건=조건 if 조건 is not None else 코스.get('코스시작종료',{})
+    for p in ['시작','종료']:
+        name=조건.get(p+'지점');day=조건.get(p+'일차')
+        if name in [None,'','미확인','미정']:continue
+        text=지점조회(name)
+        if text is None:continue
+        closed,extra=휴무요일(text);label=f'{p} 지점 {name}'
+        notes+=[f'{label}: {x}' for x in extra]
+        if closed is None or type(day) is not int:unknown.append(label);continue
+        slots.setdefault(('공통','지점-'+p),[]).append((day,closed))
     plans=sorted({k[0] for k in slots if k[0]!='공통'}) or ['공통']
     result={}
     for plan in plans:
@@ -235,7 +249,7 @@ def 준비_검사(코스,입력,검토,형식문제=None,휴무조회=None,오�
     if 체류=='1박2일' and 조건.get('2일차오전구성') not in ['후보일정추가','자유시간','종료장소로바로']:missing.append('2일차 오전 선택 필요')
     상시=not 검토.get('방문시작일')
     if 상시:
-        days=출발가능요일(코스,검토,휴무조회)
+        days=출발가능요일(코스,검토,휴무조회,조건)
         for name in days['미확인']:missing.append(name+': 정기휴무 미확인 (출발 가능 요일 계산 불가)')
         for plan,ok in days['안별'].items():
             label='' if plan=='공통' else f'({plan}) '
