@@ -1,16 +1,16 @@
-"""단계 하나를 실행한다: 에이전트 파일을 지시문으로 넣고 Claude Agent SDK로 한 번 호출한다.
+"""단계 하나를 실행한다: 에이전트 지침을 설정한 AI 제공자에 전달한다.
 
-에이전트 파일 맨 위 --- 구간(name, description, tools)은 Claude Code용 설정이다.
-여기서는 본문을 지시문으로 쓰고, tools 값은 읽어서 SDK 옵션에 넘긴다.
+에이전트 파일의 본문은 지시문이다. Read/Grep/Glob은 Gemini에서 제한된 조회 도구로 대응한다.
 """
 
 import re
+import asyncio
 from pathlib import Path
 
-from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, TextBlock, query
+from 설정 import 설정_읽기
+from 제미나이자료 import 저장소도구
 
 저장소 = Path(__file__).resolve().parent.parent  # haruharu/ (에이전트가 지침/ 과 research/ 를 읽는 기준)
-모델 = "claude-sonnet-5-5"
 
 
 def 에이전트_읽기(상대경로: str) -> tuple[str, list[str]]:
@@ -26,10 +26,25 @@ def 에이전트_읽기(상대경로: str) -> tuple[str, list[str]]:
 
 
 async def 단계_실행(에이전트_경로: str, 입력: str) -> str:
-    """에이전트를 한 번 호출해 결과 텍스트를 돌려준다."""
+    """설정한 AI 제공자로 에이전트를 한 번 호출한다."""
     본문, 도구 = 에이전트_읽기(에이전트_경로)
+    config=설정_읽기(저장소)
+    provider=(config.get('AI_PROVIDER') or 'claude').strip().lower()
+    if provider=='gemini':
+        key=(config.get('GEMINI_API_KEY') or '').strip()
+        model=(config.get('GEMINI_MODEL') or '').strip()
+        if not key:raise ValueError('GEMINI_API_KEY가 없습니다. 프로젝트 .env에 각자의 키를 넣으세요.')
+        if not model:raise ValueError('GEMINI_MODEL을 .env에서 지정하세요.')
+        return await _제미나이_실행(본문,입력,model,key,도구)
+    if provider=='claude':
+        return await _클로드_실행(본문,입력,(config.get('CLAUDE_MODEL') or 'claude-sonnet-5-5').strip(),도구)
+    raise ValueError('AI_PROVIDER는 gemini 또는 claude만 선택할 수 있습니다.')
+
+
+async def _클로드_실행(본문,입력,model,도구):
+    from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, TextBlock, query
     옵션 = ClaudeAgentOptions(
-        model=모델,
+        model=model,
         system_prompt=본문,
         tools=도구,
         allowed_tools=도구,
@@ -44,3 +59,26 @@ async def 단계_실행(에이전트_경로: str, 입력: str) -> str:
                 if isinstance(블록, TextBlock):
                     조각.append(블록.text)
     return "\n".join(조각).strip()
+
+
+async def _제미나이_실행(본문,입력,model,key,도구):
+    try:
+        from google import genai
+        from google.genai import types
+    except ImportError as error:
+        raise RuntimeError('Gemini SDK가 없습니다. app/requirements.txt의 패키지를 설치하세요.') from error
+    available={'Read':0,'Grep':1,'Glob':2}
+    file_tools=저장소도구(저장소)
+    tools=[file_tools[available[name]] for name in 도구 if name in available]
+    options=types.GenerateContentConfig(
+        system_instruction=본문,
+        tools=tools or None,
+        automatic_function_calling=types.AutomaticFunctionCallingConfig(maximum_remote_calls=21) if tools else None,
+    )
+    client=genai.Client(api_key=key)
+    try:
+        response=await asyncio.to_thread(client.models.generate_content,model=model,contents=입력,config=options)
+    finally:
+        client.close()
+    if not response.text:raise ValueError('Gemini가 텍스트 결과를 반환하지 않았습니다. 원본·사용량은 별도 확인이 필요합니다.')
+    return response.text.strip()

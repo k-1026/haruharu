@@ -1,9 +1,10 @@
 """저장소의 장소·이동 자료 읽기 전용 조회. 웹 조회 및 AI 호출 없음."""
 import csv
-from pathlib import Path
 import re
+from 설정 import 설정_읽기, 자료_파일
 
-자료 = Path(__file__).resolve().parent.parent / 'research' / 'data'
+장소_기본파일='장소운영정보_중구동구_데모코스_2026.csv'
+이동_기본파일='이동시간_중구동구_데모코스_2026.csv'
 
 
 def _이름(name):
@@ -15,16 +16,19 @@ def _이름(name):
 
 
 def 장소목록():
-    with (자료/'장소운영정보_중구동구_데모코스_2026.csv').open(encoding='utf-8-sig',newline='') as f:
-        rows=[dict(r,자료파일='research/data/장소운영정보_중구동구_데모코스_2026.csv') for r in csv.DictReader(f)]
+    config=설정_읽기()
+    placefile=자료_파일(config,'HARUHARU_PLACES_FILE',장소_기본파일)
+    travelfile=자료_파일(config,'HARUHARU_TRAVEL_FILE',이동_기본파일)
+    with placefile.open(encoding='utf-8-sig',newline='') as f:
+        rows=[dict(r,자료파일=placefile.name) for r in csv.DictReader(f)]
     names={_이름(r['장소명']) for r in rows}
-    with (자료/'이동시간_중구동구_데모코스_2026.csv').open(encoding='utf-8-sig',newline='') as f:
+    with travelfile.open(encoding='utf-8-sig',newline='') as f:
         for r in csv.DictReader(f):
             for key in ['출발장소','도착장소']:
                 name=r[key]
                 if _이름(name) not in names:
                     rows.append({'장소명':name,'장소유형':'이동 기준점','운영시간':'','상태':'운영정보 없음',
-                                 '자료파일':'research/data/이동시간_중구동구_데모코스_2026.csv'})
+                                 '자료파일':travelfile.name})
                     names.add(_이름(name))
     return rows
 
