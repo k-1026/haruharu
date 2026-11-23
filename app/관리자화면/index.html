@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>하루하루 · 코스 기획</title>
+<link rel="stylesheet" href="/admin/style.css"><link rel="stylesheet" href="/admin/course.css?v=20261123-6"><link rel="stylesheet" href="/admin/review.css?v=20261123-6">
+<script defer src="/admin/places.js?v=20261123-6"></script><script defer src="/admin/review.js?v=20261123-7"></script><script defer src="/admin/course.js?v=20261123-6"></script><script defer src="/admin/app.js?v=20261123-6"></script>
+</head><body>
+<aside class="sidebar">
+<a class="brand" href="/admin/"><span class="brandmark">하</span><span>하루하루<small>체류관광 코스 기획</small></span></a>
+<div class="navlabel">워크스페이스</div><div class="navactive">코스 기획 <span class="navcount" id="runCount">0</span></div>
+<div class="sidebarbody"><div class="listhead"><h2>저장된 기획</h2><button id="refresh" class="iconbutton" title="목록 새로고침" aria-label="실행 목록 새로고침">↻</button></div><label class="searchbox"><span>⌕</span><input id="runSearch" placeholder="조건 또는 날짜 검색" aria-label="실행 검색"></label><div id="runList" class="runlist" aria-label="실행 목록"></div></div>
+<footer class="sidebarfoot"><span class="localdot"></span> 저장된 코스 수정 <small>코스 수정·저장은 AI를 호출하지 않습니다.</small></footer>
+</aside><main>
+<header class="topbar"><span>하루하루 <b>/</b> 코스 기획</span><span class="mode">초안 검토</span></header>
+<section class="workspace">
+<div class="pagehead"><div><p class="eyebrow">PLAN YOUR COURSE</p><h1>코스 기획</h1><p class="description">기본 조건을 확인하고, 제안된 코스에서 바꾸고 싶은 부분만 수정하세요.</p></div><span class="tag">기획자</span></div>
+<div id="notice" role="status" aria-live="polite"></div><div id="empty" class="empty hidden"><h2>저장된 기획이 없습니다</h2><p>1·2단계의 조건과 결과를 저장하면 이어서 코스를 검토할 수 있습니다.</p></div>
+<div id="record" class="hidden">
+<section class="coursecard" aria-label="기본 조건">
+<p class="sectionlabel">1. 기본 조건</p><h2>어떤 여행을 기획하나요?</h2><div id="conditions" class="conditions"></div>
+<p class="footnote">1·2단계에서 선택한 조건을 이어받았습니다. 대상·지역·체류기간을 바꾸면 수요 근거와 코스를 다시 검토해야 합니다.</p>
+<details id="courseDetails" class="planneroptional"><summary>꼭 지켜야 할 시작·종료 조건 수정하기</summary>
+<div id="courseMessage" role="status" aria-live="polite"></div>
+<form id="courseForm" class="hidden"><p class="footnote">전체 여행의 시작·종료입니다. 1일차 숙박 도착은 아래 코스의 숙박 구간에서 수정하세요. 모르는 값은 미정으로 보관할 수 있습니다.</p>
+<fieldset id="courseFields"><legend class="sr-only">코스 조건</legend><div id="courseInputs" class="coursegrid"></div><div id="mealInputs" class="hidden"></div></fieldset>
+<div class="courseactions"><button id="courseApply" type="button" class="secondarybutton" disabled>시작·종료 변경 반영</button></div><p id="courseActionMessage" class="help" aria-live="polite"></p></form>
+</details></section>
+<section class="coursecard" aria-label="제안 코스">
+<p class="sectionlabel">2. 제안 코스</p><h2>이 코스는 어떤가요?</h2><p class="description">일정을 펼쳐 바꾸고 싶은 장소나 시간만 수정하세요. 미정인 부분은 나중에 보완할 수 있습니다.</p>
+<p id="plannerRevision" class="footnote"></p><div id="plannerIssues" aria-live="polite"></div>
+<div id="reviewDetails"><div id="reviewMessage" role="status" aria-live="polite">코스가 있는 저장본을 선택하면 제안된 일정이 표시됩니다.</div>
+<form id="reviewForm" class="hidden"><div id="reviewPeriods"></div>
+<div class="plannersave"><div><strong>3. 필요한 부분만 수정하고 저장</strong><p class="footnote">이전 코스를 보존하고 새 초안으로 저장합니다. 저장만으로 코스를 확정하지 않습니다.</p></div><button type="submit" id="reviewSave" class="primarybutton">수정한 코스 저장</button></div>
+</form></div></section>
+<details id="adminDetails" class="coursecard adminpanel"><summary>관리자 상세 · 운영정보와 검사 기록</summary>
+<p class="help">자료 보완·출처·실행 시험을 위한 상세 화면입니다. 운영 점검이 남아 있어도 기획 초안을 저장할 수 있습니다. 앱 추가점검은 지침의 코스 확정 조건과 구분합니다.</p>
+<p id="recordTitle" class="footnote"></p><span id="recordBadge" class="badge"></span>
+<section class="metrics" aria-label="기록 요약"><article><span>구조화된 근거</span><strong id="evidenceCount">—</strong></article><article><span>이어받은 경고</span><strong id="warningCount">—</strong></article><article><span>생성된 결과</span><strong id="fileCount">—</strong></article><article><span>시간 · 비용</span><strong class="uncollected">미수집</strong></article></section>
+<details class="reviewitem"><summary>운영정보 보완 · 출발일 시험</summary>
+<p id="reviewOverview" class="selectionsummary"></p><label class="coursefield"><span>검토 기준</span><select name="운영기준" form="reviewForm"><option value="상시기획">상시 상품 기획 · 날짜 미정</option><option value="출발일시험">특정 출발일 시험</option></select></label><p id="reviewModeHelp" class="help"></p>
+<label id="reviewDateField" class="coursefield hidden"><span>시험할 출발일</span><input type="date" name="방문시작일" form="reviewForm"></label>
+<label class="coursefield"><span>운영 요일·계절·예외</span><input name="운영조건" form="reviewForm" maxlength="1000"></label><div id="reviewOperations"></div>
+</details>
+<details class="reviewitem"><summary>이동 연결·겹침·확정 검토</summary>
+<label class="coursefield"><span>전체 일정의 이동·연결 검토 메모</span><input name="전체연결메모" form="reviewForm" maxlength="1000"></label><label class="reviewcheck"><input type="checkbox" name="전체연결확인" form="reviewForm"><span>표시된 모든 일정의 기간과 다음 장소까지 이동 연결을 검토했습니다.</span></label>
+<label class="coursefield"><span>기존 상품과 노선 겹침 처리</span><select name="겹침처리" form="reviewForm"><option value="">미확인</option><option value="노선겹침없음">노선 겹침 없음</option><option value="피하기">피하기</option><option value="연결하기">연결하기</option><option value="그대로두기">그대로 두기</option></select></label>
+<label class="coursefield"><span>겹침 판정·처리 메모</span><input name="겹침메모" form="reviewForm" maxlength="1000"></label><label class="reviewcheck"><input type="checkbox" name="담당자최종확인" form="reviewForm"><span>시작·종료, 식사·숙박·자유시간, 이동 연결, 운영정보와 남은 경고를 검토했습니다.</span></label>
+<p class="footnote">지침의 주요 확정 조건: 시작·종료 담당자 확인 / 노선 겹침 처리 / 1박2일 오전 구성 선택. 현재 앱의 추가 운영점검은 이보다 엄격하며, 상시 상품의 확정 기준은 별도 논의가 필요합니다. 이 화면에서 4단계를 실행하지 않습니다.</p><button type="submit" form="reviewForm" class="secondarybutton">상세 확인 내용 함께 저장</button>
+</details>
+<details class="reviewitem"><summary>저장본·추가 점검·새 AI 시험</summary>
+<p id="courseCurrent" class="selectionsummary"></p><p id="courseSaved" class="savedsummary"></p><div id="courseHistory" class="coursehistory"></div><p id="courseRevision" class="help revisionmeta"></p><div id="courseStatus" role="status" aria-live="polite"></div><div id="adminCourseOptions"></div><div id="adminMealOptions"></div>
+<div class="courseactions"><button id="courseSave" type="submit" form="courseForm" class="secondarybutton">새 AI 시험용 조건 저장</button><button id="courseStart" type="button" class="secondarybutton" disabled>3단계 AI 시험 시작</button></div><p class="footnote">AI 시험 시작 버튼을 누를 때만 3단계 AI를 호출합니다. 현재 저장된 코스의 수정·저장에는 사용하지 않습니다.</p>
+</details>
+<section class="contentcard"><div class="stagebar" id="stages" role="group" aria-label="단계 선택"></div><p id="revisionMeta" class="help revisionmeta" hidden></p>
+<div class="toolbar"><div class="tabs" role="tablist" aria-label="결과 보기"><button role="tab" data-view="result" aria-selected="true">결과 보기</button><button role="tab" data-view="checks" aria-selected="false">전달 검사 <span id="errorCount"></span></button><button role="tab" data-view="raw" aria-selected="false">원문 · JSON</button></div><label class="filelabel"><span class="sr-only">파일 선택</span><select id="fileSelect" aria-label="결과 파일 선택"></select></label></div><div id="panel" class="panel" role="tabpanel" aria-live="polite"></div>
+</section></details>
+</div></section></main></body></html>

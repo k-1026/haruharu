@@ -32,6 +32,34 @@ def 홍보():
 
 
 class 경계시험(unittest.TestCase):
+    def test_미확인사항_대상칸ID_별칭과_실제없는칸_구분(self):
+        value = 코스()
+        value['미확인사항'] = [{'대상 칸ID': '낮-1', '내용': '확인 필요'}]
+        self.assertEqual(코스_검사(value, 입력2), [])
+        value['미확인사항'][0]['대상 칸ID'] = '없는칸'
+        self.assertTrue(any('없는 안·칸ID' in p for p in 코스_검사(value, 입력2)))
+
+    def test_담당자선택_자유시간은_관광지_수요근거_요구안함(self):
+        value = 코스()
+        value['2일차오전구성'] = '자유시간'
+        value['칸목록'].append({'칸ID': '오전', '일차': 2, '시간칸': '2일차오전',
+                              '장소명': '자유시간 (담당자 선택)', '시각': {'값': '', '종류': '미정'}, '근거ID': []})
+        source = {**입력2, '확정체류기간': '1박2일', '코스작성조건': {'2일차오전구성': '자유시간'}}
+        self.assertFalse(any('근거 없음' in p for p in 코스_검사(value, source)))
+        value['칸목록'][-1]['장소명'] = '새 관광지'
+        self.assertTrue(any('근거 없음' in p for p in 코스_검사(value, source)))
+
+    def test_설명뒤_단일JSON블록_읽기(self):
+        self.assertEqual(JSON_읽기('지침을 읽었습니다.\n```json\n{"칸목록": []}\n```\n결과입니다.'), {'칸목록': []})
+
+    def test_복수블록과_설명속_불완전JSON은_추측하지않음(self):
+        for text in ['```json\n{}\n```\n```json\n{}\n```',
+                     '설명 {"a":1} 뒤 설명',
+                     '설명\n```json\n{"a":1,"a":2}\n```',
+                     '설명\n```json\n{"a":NaN}\n```']:
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                JSON_읽기(text)
+
     def test_JSON은_객체만(self):
         self.assertEqual(JSON_읽기('```json\n{"a":1}\n```'), {'a': 1})
         for 원문 in ['[]', '설명만 있음', '{"a": NaN}']:

@@ -17,11 +17,13 @@ from stages import STAGES
 
 def JSON_읽기(원문: str) -> dict:
     글 = 원문.strip()
-    if 글.startswith('```'):
-        m = re.fullmatch(r'```(?:json)?\s*\n(.*?)\n```', 글, re.S)
-        if not m:
+    # SDK의 진행 설명이 최종 JSON 앞뒤에 붙을 수 있다. 단일 코드 블록만
+    # 허용하며, 여러 후보 중 하나를 임의 선택하거나 중괄호 조각을 추측하지 않는다.
+    if re.search(r'^\s*```', 글, re.M):
+        블록 = list(re.finditer(r'^\s*```(?:json)?[^\S\n]*\r?\n(.*?)^\s*```[^\S\n]*$', 글, re.M | re.S))
+        if len(블록) != 1 or len(re.findall(r'^\s*```', 글, re.M)) != 2:
             raise ValueError('JSON 코드 블록 하나만 필요합니다.')
-        글 = m.group(1)
+        글 = 블록[0].group(1).strip()
 
     def 상수오류(값):
         raise ValueError('JSON 숫자 상수 오류: ' + 값)
@@ -54,7 +56,7 @@ def _필드(값, 객체필드, 목록필드):
 
 
 def _키(행, 필드='칸ID'):
-    return 행.get('안', '공통'), 행.get(필드)
+    return 행.get('안', '공통'), 행.get(필드, 행.get('대상 칸ID') if 필드 == '칸ID' else None)
 
 
 def _시각(값):
@@ -111,11 +113,15 @@ def 코스_검사(값, 입력2):
         for r in ids:
             if not isinstance(r, str) or r not in 근거들:
                 문제.append(f'{키}: 없는 근거ID {r}')
-        if not ids and 행.get('시간칸') not in ['점심', '저녁', '숙박']:
+        선택한자유시간 = (담당자오전 == '자유시간' and 행.get('일차') == 2
+                       and 행.get('시간칸') == '2일차오전' and str(행.get('장소명', '')).startswith('자유시간'))
+        if not ids and 행.get('시간칸') not in ['점심', '저녁', '숙박'] and not 선택한자유시간:
             if not any(_키(w) == 키 and '근거 없음' in w.get('문구', '') for w in 값['남은경고']):
                 문제.append(f'{키}: 수요 근거 없음 경고 필요')
     for 칸 in ['식사목록', '미확인사항']:
         for 행 in 값[칸]:
+            if '칸ID' in 행 and '대상 칸ID' in 행 and 행['칸ID'] != 행['대상 칸ID']:
+                문제.append(f'{칸}: 칸ID와 대상 칸ID가 서로 다름')
             if _키(행) not in 키들:
                 문제.append(f'{칸}: 없는 안·칸ID {_키(행)}')
     for 행 in 값['식사목록']:
