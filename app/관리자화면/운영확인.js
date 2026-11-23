@@ -45,7 +45,7 @@ function buildReview(info){
     for(const [key,label] of [['영업시작','영업 시작'],['영업종료','영업 종료'],['마감시각','주문·입장 마감 (해당 시)']]){
       if(key==='마감시각')knownGrid.append(courseInput(`ro-${i}-${key}`,label,'time'));else add(key,label,'time');
     }
-    add('출처명','확인한 자료·운영 주체');add('출처등급','출처 구분','',[['','미확인'],['공식','공식 안내'],['운영주체','운영 주체 직접 확인'],['기타','기타 · 재확인 필요']]);add('확인일','자료 확인일','date');
+    add('출처명','확인한 자료·운영 주체');add('출처등급','출처 구분','',[['','미확인'],['공식','공식 안내'],['운영주체','운영 주체 직접 확인'],['개인','개인 (지도앱·블로그 · 시험에서만 인정)'],['기타','기타 · 재확인 필요']]);add('확인일','자료 확인일','date');
     knownGrid.append(courseInput(`ro-${i}-출처URL`,'출처 URL (있는 경우)','url'),courseInput(`ro-${i}-메모`,'요일·휴무·예외 운영 등 확인 내용'));
     known.append(reviewCheck(`ro-${i}-익일종료`,'영업 종료가 다음 날입니다.',old.익일종료));
     card.append(grid,known,reviewCheck(`ro-${i}-방문일운영확인`,'특정 출발일의 요일·휴무·예외 운영을 출처로 확인했습니다. (상시 기획은 앱이 정기휴무로 요일을 계산하므로 비워 두세요)',old.방문일운영확인));operations.append(card);

@@ -226,7 +226,7 @@ class 코스시험:
         return 화면정보(course,self._읽기(키,'3단계_입력.json'))
 
     def 검토반영(self, 키, 값):
-        from 운영검토 import 검토입력_검사,검토_반영
+        from 운영검토 import 검토입력_검사,검토_반영,노선겹침없음
         with self.잠금:
             old=self.상태(키)
             if old.get('상태')=='실행중':raise ValueError('실행이 끝난 저장본을 선택하세요.')
@@ -236,7 +236,7 @@ class 코스시험:
                 raise ValueError('2단계 결과가 바뀌어 이 초안을 그대로 확인할 수 없습니다.')
             checked=검토입력_검사(값,course,source)
             revised=검토_반영(course,checked)
-            revised.setdefault('확정조건',{})['겹침처리']=bool(checked['겹침처리'] not in ['', '미확인'] and checked['겹침메모'])
+            revised.setdefault('확정조건',{})['겹침처리']=bool(checked['겹침처리'] not in ['', '미확인'] and checked['겹침메모']) or (checked['겹침처리'] in ['', '미확인'] and 노선겹침없음(course))
             conditions={k:('' if v=='미확인' else v) for k,v in source['코스작성조건'].items()}
             status=self.저장(old['원본id'],conditions)
             newkey=status['시험id'];folder=self._시험(newkey)

@@ -77,6 +77,12 @@ def 출발가능요일(코스,검토,휴무조회=None):
     return {'안별':result,'미확인':list(dict.fromkeys(unknown)),'안내':list(dict.fromkeys(notes))}
 
 
+def 노선겹침없음(코스):
+    """3단계 AI가 겹침이력에 '노선 겹침 · 상품ID 없음'을 남겼으면 참. 지침 2_입력.md 3장: 노선 겹침이 없으면 ②를 채운 것으로 본다."""
+    return any(str(x.get('장소','')).replace(' ','')=='노선겹침' and str(x.get('상품ID','')).strip() in ['없음','해당 없음','']
+               for x in 코스.get('겹침이력',[]) if isinstance(x,dict))
+
+
 def 운영대상(코스):
     result=[]
     for row in 코스.get('칸목록',[]):
@@ -233,8 +239,9 @@ def 준비_검사(코스,입력,검토,형식문제=None,휴무조회=None,오�
         if op['운영상태']!='운영':missing.append(name+': 운영 여부 미확인 또는 휴무')
         if op.get('처리')=='제외':continue
         if not 상시 and not op['방문일운영확인']:missing.append(name+': 방문일 휴무·운영 확인 필요')
-        if not op['출처명'] or not op['확인일'] or op['출처등급'] not in ['공식','운영주체']:missing.append(name+': 공식·운영주체 출처와 확인일 필요')
+        if not op['출처명'] or not op['확인일'] or op['출처등급'] not in ['공식','운영주체','개인']:missing.append(name+': 출처(공식·운영주체·개인)와 확인일 필요')
         elif (오늘-date.fromisoformat(op['확인일'])).days>재확인기간_일:missing.append(f"{name}: 확인일 {op['확인일']}이 {재확인기간_일}일을 넘어 다시 확인 필요")
+        elif op['출처등급']=='개인':warnings.append(f"{name}: 개인 출처(확인일 {op['확인일']}) — 시험에서만 인정. 판매 확정 전 공식·운영주체 확인 필요")
         if op.get('마감구분') not in ['확인','해당없음'] or (op.get('마감구분')=='확인' and not op['마감시각']):missing.append(name+': 주문·입장 마감 확인 또는 해당없음 선택 필요')
         opening=_분(op['영업시작']);closing=_분(op['영업종료']);start=_분(row.get('시각',{}).get('값'));length=row.get('머무는시간')
         if opening is None or closing is None:missing.append(name+': 영업시간 입력 필요');continue
@@ -252,7 +259,9 @@ def 준비_검사(코스,입력,검토,형식문제=None,휴무조회=None,오�
     for row in 코스.get('칸목록',[]):
         if any(w.get('칸ID')==row.get('칸ID') and str(w.get('경고ID','')).startswith('C-장소변경-') for w in 코스.get('남은경고',[])):
             warnings.append(f"{row.get('장소명','')}: 장소 변경 후 수요 근거·운영정보 재확인 필요")
-    if 검토.get('겹침처리') not in ['노선겹침없음','피하기','연결하기','그대로두기'] or not 검토.get('겹침메모'):missing.append('E7 겹침 처리 선택과 확인 메모 필요')
+    if 검토.get('겹침처리') in ['', None, '미확인'] and 노선겹침없음(코스):
+        warnings.append('E7: 3단계 판정 노선 겹침 없음 → 지침대로 ② 충족으로 봄. 장소 단위 겹침은 그대로 두기로 처리')
+    elif 검토.get('겹침처리') not in ['노선겹침없음','피하기','연결하기','그대로두기'] or not 검토.get('겹침메모'):missing.append('E7 겹침 처리 선택과 확인 메모 필요')
     if not 검토.get('담당자최종확인'):missing.append('담당자 최종 검토 확인 필요')
     missing=list(dict.fromkeys(missing))
     return {'진행가능':not missing,'상태':'준비 완료' if not missing else '확인 필요','확인필요':missing,'유지경고':warnings,

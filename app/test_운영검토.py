@@ -125,6 +125,37 @@ class 상시요일시험(unittest.TestCase):
         self.assertIn('월',days['안별']['공통'])
 
 
+class 정리사항시험(unittest.TestCase):
+    def ready(self,c,s,d):
+        checked=검토입력_검사(d,c,s);return 준비_검사(검토_반영(c,checked),s,checked)
+
+    def test_AI가_노선겹침없음이면_E7_충족(self):
+        c,s,d=example();d.update({'겹침처리':'','겹침메모':''})
+        self.assertFalse(self.ready(c,s,d)['진행가능'])
+        c['겹침이력']=[{'장소':'노선 겹침','상품ID':'없음','선택':'해당 없음'}]
+        r=self.ready(c,s,d)
+        self.assertTrue(r['진행가능'],r['확인필요'])
+        self.assertTrue(any('E7' in w for w in r['유지경고']))
+
+    def test_개인출처는_시험인정_경고유지_오래되면_막음(self):
+        c,s,d=example();d['운영확인'][0]['출처등급']='개인'
+        r=self.ready(c,s,d)
+        self.assertTrue(r['진행가능'],r['확인필요'])
+        self.assertTrue(any('개인 출처' in w for w in r['유지경고']))
+        d['운영확인'][0]['출처등급']='기타'
+        self.assertFalse(self.ready(c,s,d)['진행가능'])
+
+    def test_공휴일_예외는_안내로만(self):
+        for text in ['매주 월요일(월요일이 공휴일이면 다음 날 휴무), 1월 1일','매주 월요일(공휴일이면 정상 개관), 1월 1일, 설날·추석 당일. 휴관일이 법정공휴일이면 대체 휴관일은 공휴일 다음 첫 평일']:
+            closed,notes=휴무요일(text)
+            self.assertEqual(closed,{0});self.assertEqual(notes,[text])
+
+    def test_CSV_등급_변환(self):
+        from 장소정보 import 등급
+        self.assertEqual(등급('개인'),'개인');self.assertEqual(등급('공식(S70); 개인(S71)'),'개인')
+        self.assertEqual(등급('공식'),'공식');self.assertEqual(등급('미정'),'기타');self.assertEqual(등급(''),'')
+
+
 class 상시개방시험(unittest.TestCase):
     def test_출처있는_상시개방만_하루전체(self):
         from 장소정보 import 상시개방
