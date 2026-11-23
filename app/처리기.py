@@ -3,7 +3,38 @@ import 기획기록 as 기록모듈
 from 에이전트실행 import 호출
 
 수집지침='.claude/agents/자료수집.md'
+코스지침='.claude/agents/코스검토.md'
+검증지침='.claude/agents/검증.md'
 허용등급=['공식','통계','언론','개인','운영주체']
+
+
+def _원본입력(runs루트,출처시험id):
+    import json
+    from pathlib import Path
+    if not 출처시험id:return None
+    조각=출처시험id.split('/')
+    if any(p in ['','.','..'] for p in 조각):return None
+    try:
+        v=json.loads((Path(runs루트).joinpath(*조각)/'3단계_입력.json').read_text(encoding='utf-8'))
+        return v if isinstance(v,dict) else None
+    except (OSError,ValueError):
+        return None
+
+
+def 코스짜기(기록,안id,runs루트,보완요청,실행함수=None):
+    같은안=[x for x in 기록['코스안'] if x.get('안id')==안id]
+    처음=next((x for x in 기록['코스안'] if x.get('출처시험id')),None)
+    입력=_원본입력(runs루트,처음.get('출처시험id') if 처음 else '') or {'조건':기록['조건'],'근거목록':기록['근거']}
+    입력={**입력,'보완요청':list(보완요청),'후보':[x for x in 기록['후보'] if x.get('상태') in ['후보','승인']]}
+    if 같은안:입력['이전코스']=같은안[-1]['코스']
+    값=호출(기록,'에이전트:코스',코스지침,'코스',안id,입력,'코스안 작성' if not 보완요청 else '보완 요청 반영',실행함수)
+    if 값 is None:return False
+    if not isinstance(값.get('칸목록'),list):
+        기록모듈.실행_기록(기록,'에이전트:코스','코스',안id,'응답에 칸목록 없음','실패')
+        return False
+    버전=max([x.get('버전',1) for x in 같은안],default=0)+1
+    기록모듈.추가(기록,'코스안',{'안id':안id,'코스':값,'버전':버전,'보완요청':list(보완요청)},'에이전트:코스','; '.join(보완요청))
+    return True
 
 
 def 수집하기(기록,요청,실행함수=None):

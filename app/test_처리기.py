@@ -20,4 +20,24 @@ class 수집시험(unittest.TestCase):
         self.assertEqual(len(r['경고']),2);self.assertTrue(all(x['종류']=='수집' for x in r['경고']))
 
 
+class 코스시험(unittest.TestCase):
+    def test_새버전_코스안과_입력에_보완요청_후보(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);t=root/'r'/'01회차'/'통합시험_1';t.mkdir(parents=True)
+            (t/'3단계_입력.json').write_text(json.dumps({'조건':{'계절':'봄'},'근거목록':[]},ensure_ascii=False),encoding='utf-8')
+            r=rec();기록모듈.추가(r,'코스안',{'안id':'A','코스':{'칸목록':[]},'출처시험id':'r/01회차/통합시험_1'},'코드:가져오기')
+            기록모듈.추가(r,'후보',{'이름':'향촌문화관'},'에이전트:수집');seen={}
+            def fn(p,i):seen['p']=p;seen['i']=json.loads(i);return '{"칸목록":[{"칸ID":"낮"}]}'
+            self.assertTrue(처리기.코스짜기(r,'A',root,['야시장 월~목 휴무'],실행함수=fn))
+            self.assertEqual(len(r['코스안']),2);self.assertEqual(r['코스안'][-1]['버전'],2)
+            self.assertEqual(seen['p'],'.claude/agents/코스검토.md')
+            self.assertEqual(seen['i']['보완요청'],['야시장 월~목 휴무']);self.assertEqual(seen['i']['후보'][0]['이름'],'향촌문화관')
+            self.assertEqual(seen['i']['조건'],{'계절':'봄'})
+
+    def test_칸목록_없으면_실패(self):
+        r=rec()
+        self.assertFalse(처리기.코스짜기(r,'A',Path('.'),[],실행함수=lambda p,i:'{"설명":"x"}'))
+        self.assertEqual(r['코스안'],[]);self.assertEqual(r['실행'][-1]['결과'],'실패')
+
+
 if __name__=='__main__':unittest.main()
