@@ -225,6 +225,21 @@ class 코스시험:
         course=JSON_읽기(self.저장소.파일(키+'/3단계_결과.md')['본문'])
         return 화면정보(course,self._읽기(키,'3단계_입력.json'))
 
+    def _이전칸(self, 키, 최대=50):
+        """기준시험id를 따라 이전 저장본을 거슬러 올라가며 칸별 장소·근거 이력을 모은다(최근 순). 읽기 전용."""
+        이력={};본=set();현재=키
+        while 현재 and 현재 not in 본 and len(본)<최대:
+            본.add(현재)
+            try:
+                course=JSON_읽기(self.저장소.파일(현재+'/3단계_결과.md')['본문'])
+                for r in course.get('칸목록',[]):
+                    이력.setdefault((r.get('안','공통'),r.get('칸ID')),[]).append(
+                        {'장소명':r.get('장소명',''),'근거ID':r.get('근거ID') or [],'운영주체후보':r.get('운영주체후보') or [],'시험id':현재})
+                현재=self.상태(현재).get('기준시험id')
+            except Exception:
+                break
+        return lambda k:이력.get(k,[])
+
     def 검토반영(self, 키, 값):
         from 운영검토 import 검토입력_검사,검토_반영,노선겹침없음
         with self.잠금:
@@ -235,7 +250,7 @@ class 코스시험:
             if {k:v for k,v in source.items() if k!='코스작성조건'}!={k:v for k,v in self._전달(old['원본id']).items() if k!='코스작성조건'}:
                 raise ValueError('2단계 결과가 바뀌어 이 초안을 그대로 확인할 수 없습니다.')
             checked=검토입력_검사(값,course,source)
-            revised=검토_반영(course,checked)
+            revised=검토_반영(course,checked,self._이전칸(키))
             revised.setdefault('확정조건',{})['겹침처리']=bool(checked['겹침처리'] not in ['', '미확인'] and checked['겹침메모']) or (checked['겹침처리'] in ['', '미확인'] and 노선겹침없음(course))
             conditions={k:('' if v=='미확인' else v) for k,v in source['코스작성조건'].items()}
             status=self.저장(old['원본id'],conditions)

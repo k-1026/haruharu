@@ -170,10 +170,27 @@ def 검토입력_검사(값,코스,입력):
     return result
 
 
-def 검토_반영(기존,검토):
+def _근거복원(course,row,이력):
+    """이전 저장본에서 같은 칸·같은 장소(이름 정규화)에 붙어 있던 근거를 되살린다. 복원하면 참."""
+    from 장소정보 import _이름
+    if row.get('근거ID') or row.get('시간칸') in ['점심','저녁','숙박','2일차오전']:return False
+    match=next((h for h in 이력 if h.get('근거ID') and _이름(h.get('장소명',''))==_이름(row.get('장소명',''))),None)
+    if not match:return False
+    row['근거ID']=list(match['근거ID']);row['운영주체후보']=list(match.get('운영주체후보') or [])
+    course['남은경고']=[w for w in course.get('남은경고',[]) if w.get('경고ID')!=f"C-장소변경-{row['칸ID']}"]
+    course.setdefault('미확인사항',[]).append({'종류':'근거복원','대상 칸ID':row['칸ID'],
+        '내용':f"{row['장소명']}로 되돌려 이전 저장본({match.get('시험id','')})의 근거 {', '.join(row['근거ID'])}를 복원함."})
+    return True
+
+
+def 검토_반영(기존,검토,이전칸=None):
+    """이전칸: 칸 키(안,칸ID) → 이전 저장본들의 [{'장소명','근거ID','운영주체후보','시험id'}] (최근 순)."""
     course=copy.deepcopy(기존)
     for confirm in 검토['일정확인']:
         row=next(r for r in course['칸목록'] if _key(r)==_key(confirm))
+        이력=(이전칸 or (lambda k:[]))(_key(row))
+        if confirm['장소권역'] and confirm['장소권역']!=row.get('장소명'):
+            이력=[{'장소명':row.get('장소명',''),'근거ID':row.get('근거ID',[]),'운영주체후보':row.get('운영주체후보',[]),'시험id':'직전'}]+이력
         day=confirm['시작일차'];start=confirm['시작시각'];endday=confirm['종료일차'];end=confirm['종료시각']
         if type(day) is int:row['일차']=day
         kind='확정' if confirm['연결확인'] else '가정'
@@ -192,6 +209,8 @@ def 검토_반영(기존,검토):
                 course['남은경고'].append(warning)
                 course.setdefault('미확인사항',[]).append({'종류':'장소변경','대상 칸ID':row['칸ID'],
                     '내용':f"{old_place} → {row['장소명']} 수동 변경. 이전 관광지의 근거·운영정보는 새 장소에 적용하지 않음."})
+        # 장소를 근거가 있던 원래 장소로 되돌린 경우(또는 이미 되돌렸는데 근거가 비어 있는 경우) 근거를 복원한다.
+        _근거복원(course,row,이력)
         for meal in course.get('식사목록',[]):
             if _key(meal)==_key(row):
                 meal['시각']=copy.deepcopy(row['시각']);meal['이후연결']=confirm['이후연결']

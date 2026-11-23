@@ -125,6 +125,28 @@ class 상시요일시험(unittest.TestCase):
         self.assertIn('월',days['안별']['공통'])
 
 
+class 근거복원시험(unittest.TestCase):
+    def test_원래장소로_되돌리면_근거복원(self):
+        c,s,d=example();c['칸목록'][0].update({'장소명':'향촌문화관','근거ID':['R19']})
+        이력=lambda k:[{'장소명':'대구광역시 중구 장소A','근거ID':['R19','R91'],'운영주체후보':['구청'],'시험id':'옛'}] if k==('공통','관광') else []
+        d['일정확인'][0]['장소권역']='장소A';d['운영확인'][0]['대상명']='향촌문화관'
+        revised=검토_반영(c,검토입력_검사(d,c,s),이력)
+        first=revised['칸목록'][0]
+        self.assertEqual(first['근거ID'],['R19','R91'])
+        self.assertFalse(any(str(w.get('경고ID','')).startswith('C-장소변경-') for w in revised['남은경고']))
+
+    def test_이미되돌렸는데_근거가_비었으면_저장할때_복원(self):
+        c,s,d=example();c['칸목록'][0]['근거ID']=[]
+        c['남은경고']=[{'경고ID':'C-장소변경-관광','칸ID':'관광','문구':'수요 근거 없음'}]
+        revised=검토_반영(c,검토입력_검사(d,c,s),lambda k:[{'장소명':'장소A','근거ID':['R19'],'시험id':'옛'}])
+        self.assertEqual(revised['칸목록'][0]['근거ID'],['R19']);self.assertEqual(revised['남은경고'],[])
+
+    def test_다른장소면_근거를_붙이지_않음(self):
+        c,s,d=example();d['일정확인'][0]['장소권역']='향촌문화관'
+        revised=검토_반영(c,검토입력_검사(d,c,s),lambda k:[{'장소명':'장소A','근거ID':['R19'],'시험id':'옛'}])
+        self.assertEqual(revised['칸목록'][0]['근거ID'],[])
+
+
 class 정리사항시험(unittest.TestCase):
     def ready(self,c,s,d):
         checked=검토입력_검사(d,c,s);return 준비_검사(검토_반영(c,checked),s,checked)
