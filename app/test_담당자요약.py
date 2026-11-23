@@ -31,7 +31,17 @@ class 담당자요약시험(unittest.TestCase):
         s=self.summary()
         self.assertEqual(s['일정'][1]['표시명'],'자유식 · 서문시장')
         self.assertIsNone(s['일정'][1]['좌표'])
-        self.assertTrue(any('좌표 미확인' in x for x in s['확인할것']))
+        # 자유식은 권역이라 좌표 확인 대상이 아니다.
+        self.assertFalse(any('좌표 미확인' in x for x in s['확인할것']))
+
+    def test_장소명이_자유식이면_식사목록없어도_자유식_괄호설명은_뺌(self):
+        c={'칸목록':[{'칸ID':'저녁','일차':1,'시간칸':'저녁','장소명':'자유식 · 대구광역시 중구 (추천 후보: 가게A)','시각':{'값':'19:00'}},
+                   {'칸ID':'밤','일차':1,'시간칸':'밤','장소명':'대구광역시 중구 서문시장 야시장 (금·토·일만)','시각':{'값':'20:00'}}]}
+        with mock.patch.object(담당자요약,'좌표',return_value=None):
+            s=담당자요약.코스요약(c,{})
+        self.assertEqual(s['일정'][0]['표시명'],'자유식 · 중구')
+        self.assertEqual(s['일정'][1]['표시명'],'중구 서문시장 야시장')
+        self.assertFalse(any('자유식' in x for x in s['확인할것']))
 
     def test_시각미정_칸은_확인할것(self):
         s=self.summary()
