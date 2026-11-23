@@ -18,6 +18,10 @@ class 도구시험(unittest.TestCase):
         self.assertEqual(len(r['경고']),n+1);self.assertEqual(r['경고'][-1]['종류'],'코드점검')
         self.assertEqual(r['실행'][-1]['에이전트'],'코드:점검');self.assertEqual(r['실행'][-1]['AI호출'],0)
 
+    def test_최신버전을_점검하고_버전표시(self):
+        r=record();기록모듈.추가(r,'코스안',{'안id':'A','코스':{'칸목록':[],'식사목록':[]},'버전':2},'에이전트:코스')
+        기록도구.코스_점검(r,'A');self.assertEqual(r['경고'][-1]['버전'],2)
+
     def test_없는_안id(self):
         with self.assertRaises(ValueError):기록도구.코스_점검(record(),'Z')
 
