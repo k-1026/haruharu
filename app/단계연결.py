@@ -114,7 +114,7 @@ def 코스_검사(값, 입력2):
             if not isinstance(r, str) or r not in 근거들:
                 문제.append(f'{키}: 없는 근거ID {r}')
         선택한자유시간 = (담당자오전 == '자유시간' and 행.get('일차') == 2
-                       and 행.get('시간칸') == '2일차오전' and str(행.get('장소명', '')).startswith('자유시간'))
+                       and 행.get('시간칸') == '2일차오전' and '자유시간' in str(행.get('장소명', '')))  # 예: '2일차 자유시간 (담당자 선택)'
         if not ids and 행.get('시간칸') not in ['점심', '저녁', '숙박'] and not 선택한자유시간:
             if not any(_키(w) == 키 and '근거 없음' in w.get('문구', '') for w in 값['남은경고']):
                 문제.append(f'{키}: 수요 근거 없음 경고 필요')

@@ -112,6 +112,8 @@
 | S90 | 외국어 표기 | 네이버 사전 검색 '찜갈비' (항목 출처 "웹수집(한국관광용어)") | https://dict.naver.com/dict.search?query=찜갈비 | 개인 | 사전 검색 결과 | 해당 없음 | 확인일 기준 | 2026-11-20 (사람2 열람) | 검색 결과 항목 | 해당 없음(웹) | 원 출처 미확인 | 용어집 약어 NV. 참고 표기로만 사용, 공식 표기 근거로 쓰지 않음 |
 | S91 | 외국어 표기 | 국채보상운동 아카이브 영 · 일 · 중 페이지 | https://www.gukchae-archive.org/ge/memorial/location · https://www.gukchae-archive.org/gjpn/program/project · https://www.gukchae-archive.org/gchn/memorial/floorPlan | 확인 필요 | 웹 안내 | 미상 | 확인일 기준 | 2026-11-20 사람2 열람 · 2026-11-20 사람1 접속 실패(연결 거부) | 국채보상운동기념관 외국어 표기 (사람2 열람 범위) | 해당 없음(웹) | 운영 기관 미확인. S74(국채보상운동기념관 공식 사이트)와의 관계 미확인 | 용어집 약어 GA. 운영 기관 확인 후 등급 결정. 참고 표기로만 사용 |
 | S92 | 외국어 표기 | 한국관광공사 ODII 스마트 관광 해설 스토리 페이지 (sid=3245, lang=ja · chs) | https://odii.kr/smarttour_web/story/detail?sid=3245 | 공식(운영 주체 확인) | 웹 안내 | 미상 | 확인일 기준 | 2026-11-20 (사람1 열람: 하단 저작권 KOREA TOURISM ORGANIZATION 확인) | 운영 주체만, 스토리 본문 미확인 | 해당 없음(웹) | 용어집 표기는 Google 검색 결과 제목에서 나온 것 | 용어집 약어 ODII. 참고 표기로만 사용, 공식 표기로 올리지 않음. 본문은 웹에서 비어 있음(앱 확인 필요) |
+| S93 | 장소운영정보 | 대한민국 구석구석 '근대골목' 상세 | https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=af55f079-93b5-4f2d-bc46-0848e95de04b | 공식 | 웹 안내 | 미상 | 확인일 기준 | 2026-11-23 (사람2 열람) | 운영시간 상시 개방 · 휴무 연중무휴 | 해당 없음(웹) | 한국관광공사 운영 | 장소 CSV 1행 근거. 사람1은 원문 미열람 |
+| S94 | 장소운영정보 | 열린관광 모두의 여행 '김광석길' 상세 | https://access.visitkorea.or.kr/ms/detail.do?cotId=0c6fc97d-6421-4b2c-a51b-7d0ad55a8745 | 공식 | 웹 안내 | 미상 | 확인일 기준 | 2026-11-23 (사람2 열람) | 운영시간 상시 개방 · 휴무 연중무휴 | 해당 없음(웹) | 한국관광공사 운영 | 장소 CSV 3행 근거. 사람1은 원문 미열람 |
 
 ## S04 로컬 보관 원본
 

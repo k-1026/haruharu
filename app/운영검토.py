@@ -97,6 +97,12 @@ def 노선겹침없음(코스):
                for x in 코스.get('겹침이력',[]) if isinstance(x,dict))
 
 
+def 권역자유식칸(코스):
+    """운영 확인에서 뺀 칸(추천 후보·식당 없이 CSV에 없는 권역만 있는 자유식)의 (안, 칸ID) 집합."""
+    targets={_key(t) for t in 운영대상(코스)}
+    return {_key(m) for m in 코스.get('식사목록',[]) if m.get('방식')=='자유식' and _key(m) not in targets}
+
+
 def 운영대상(코스):
     result=[]
     for row in 코스.get('칸목록',[]):
@@ -105,6 +111,11 @@ def 운영대상(코스):
         meal=next((m for m in 코스.get('식사목록',[]) if _key(m)==_key(row)),{})
         candidates=meal.get('추천후보',[]) if meal.get('방식')=='자유식' else []
         names=candidates or [meal.get('식당') or row.get('장소명') or row['칸ID']]
+        if meal.get('방식')=='자유식' and not candidates and not meal.get('식당'):
+            # 추천 후보 없이 권역만 있는 자유식: 장소 CSV에 있는 권역(예: 서문시장)만 운영 확인하고,
+            # CSV에 없는 권역(예: 중구 도심 반월당역 주변)은 출처를 붙일 장소가 없으므로 운영 확인 대상에서 뺀다.
+            from 장소정보 import 장소찾기
+            if 장소찾기(names[0]) is None:continue
         for name in names:
             result.append({'안':row.get('안','공통'),'칸ID':row['칸ID'],'일차':row.get('일차'),
                            '대상명':str(name),'후보제외가능':bool(candidates)})
@@ -162,6 +173,8 @@ def 검토입력_검사(값,코스,입력):
     for r in operations:
         if not isinstance(r,dict) or not isinstance(r.get('대상명'),str):raise ValueError('운영 대상명 형식을 확인하세요.')
         k=(_key(r),r['대상명'])
+        # 권역만 있는 자유식은 운영 확인 대상에서 빠졌다. 예전 저장본이 보낸 그 칸의 입력은 오류 대신 버린다.
+        if k not in allowed_ops and k[0] in 권역자유식칸(코스):continue
         if k not in allowed_ops or k in seen:raise ValueError('없는 대상 또는 중복된 운영 확인입니다.')
         seen.add(k);row={'안':k[0][0],'칸ID':k[0][1],'대상명':k[1]}
         for f in ['처리','운영상태','출처명','출처URL','출처등급','메모']:row[f]=_text(r.get(f))

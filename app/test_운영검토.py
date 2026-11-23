@@ -196,6 +196,19 @@ class 지점요일시험(unittest.TestCase):
         self.assertTrue(days['미확인'])
 
 
+class 권역자유식시험(unittest.TestCase):
+    def test_CSV에_없는_권역만_있는_자유식은_운영확인_제외(self):
+        from 운영검토 import 운영대상
+        c,s,d=example()
+        c['칸목록'].append({'안':'공통','칸ID':'점심2','일차':2,'시간칸':'점심','장소명':'자유식 · 중구 도심 (반월당역 주변)'})
+        c['칸목록'].append({'안':'공통','칸ID':'점심1','일차':1,'시간칸':'점심','장소명':'자유식 · 대구광역시 중구 서문시장 권역'})
+        c['식사목록']=[{'안':'공통','칸ID':'점심2','방식':'자유식','추천후보':[],'식당':''},
+                     {'안':'공통','칸ID':'점심1','방식':'자유식','추천후보':[],'식당':''}]
+        ids=[t['칸ID'] for t in 운영대상(c)]
+        self.assertNotIn('점심2',ids)
+        self.assertIn('점심1',ids)
+
+
 class 상시개방시험(unittest.TestCase):
     def test_출처있는_상시개방만_하루전체(self):
         from 장소정보 import 상시개방
