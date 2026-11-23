@@ -1,4 +1,5 @@
 import unittest
+import unittest.mock
 import 기획기록 as 기록모듈
 import 에이전트실행 as 실행
 
@@ -26,6 +27,29 @@ class 호출시험(unittest.TestCase):
         def boom(p,i):raise RuntimeError('네트워크')
         r=rec();self.assertIsNone(self.call(r,boom));self.assertEqual(r['실행'][-1]['결과'],'실패')
         self.assertEqual(r['실행'][-1]['AI호출'],1)
+
+    def test_혼잡오류는_기다렸다_재시도(self):
+        waits=[];calls=[]
+        def fn(p,i):
+            calls.append(1)
+            if len(calls)<3:raise RuntimeError('503 UNAVAILABLE. The model is overloaded.')
+            return '{"ok":1}'
+        r=rec()
+        with unittest.mock.patch.object(실행.time,'sleep',waits.append):
+            self.assertEqual(self.call(r,fn),{'ok':1})
+        self.assertEqual(len(calls),3);self.assertEqual(waits,[5,15])
+        self.assertEqual(r['실행'][-1]['결과'],'성공');self.assertEqual(r['실행'][-1]['AI호출'],3)
+        self.assertIn('혼잡 재시도 2회',r['실행'][-1]['이유'])
+
+    def test_혼잡이_계속되면_실패_그외오류는_재시도안함(self):
+        r=rec();calls=[]
+        def busy(p,i):calls.append(1);raise RuntimeError('429 RESOURCE_EXHAUSTED')
+        with unittest.mock.patch.object(실행.time,'sleep',lambda s:None):
+            self.assertIsNone(self.call(r,busy))
+        self.assertEqual(len(calls),4);self.assertEqual(r['실행'][-1]['결과'],'실패')
+        calls.clear()
+        def bad(p,i):calls.append(1);raise ValueError('API key not valid')
+        self.assertIsNone(self.call(rec(),bad));self.assertEqual(len(calls),1)
 
     def test_한도넘으면_호출안함_보류(self):
         r=rec();기록모듈.실행_기록(r,'에이전트:코스','코스','A','x','성공',AI호출=30);calls=[]
