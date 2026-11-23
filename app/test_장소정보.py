@@ -41,5 +41,14 @@ class 장소정보시험(unittest.TestCase):
         # 상시 상품은 출발일 대신 정기휴무로 요일을 계산한다. 휴무 자료가 없으면 자동 통과하지 않는다.
         self.assertTrue(any('출발 가능 요일' in x for x in 준비_검사(검토_반영(c,checked),s,checked)['확인필요']))
 
+    def test_좌표는_빈칸이면_None_값있으면_실수쌍(self):
+        from unittest import mock
+        import 장소정보
+        rows=[{'장소명':'김광석길','위도':'35.86','경도':'128.6'},{'장소명':'근대골목','위도':'','경도':''}]
+        with mock.patch.object(장소정보,'장소목록',return_value=rows):
+            self.assertEqual(장소정보.좌표('대구광역시 중구 김광석길'),(35.86,128.6))
+            self.assertIsNone(장소정보.좌표('근대골목'))
+            self.assertIsNone(장소정보.좌표('없는 장소'))
+
 
 if __name__=='__main__':unittest.main()

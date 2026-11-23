@@ -38,6 +38,14 @@ def 장소찾기(name):
     return matches[0] if len(matches)==1 else None
 
 
+def 좌표(name):
+    """장소 CSV의 위도·경도. 빈칸·숫자 아님·없는 장소는 None(추정하지 않음)."""
+    matches=[r for r in 장소목록() if _이름(r['장소명'])==_이름(name)]
+    if len(matches)!=1:return None
+    try:return float(matches[0].get('위도','')),float(matches[0].get('경도',''))
+    except (TypeError,ValueError):return None
+
+
 def 등급(text):
     """CSV 출처등급 → 화면 선택지. 공식·운영주체는 정확히 그 값일 때만, 개인이 섞이면 개인(시험 인정), 나머지는 기타."""
     text=(text or '').strip()
