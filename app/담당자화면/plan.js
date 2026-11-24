@@ -102,7 +102,7 @@ async function post(url,body){
   const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Token':token},body:JSON.stringify(body)});
   const d=await r.json();if(!r.ok)throw new Error(d.오류||'요청 실패');return d;
 }
-const guide=n=>`<ol class="guide">${['조건 고르기','AI가 코스 만들기','코스 확인'].map((t,i)=>`<li class="${i+1===n?'on':''}"><b>${i+1}</b>${t}</li>`).join('')}</ol>`;
+const guide=n=>`<ol class="guide">${['조건 고르기','AI가 코스 만들기','코스 확인','홍보물 · 번역','최종 산출물'].map((t,i)=>`<li class="${i+1===n?'on':''}"><b>${i+1}</b>${t}</li>`).join('')}</ol>`;
 const 칸색=s=>s.일차===2&&s.시간칸==='2일차오전'?'day':['저녁'].includes(s.시간칸)?'eve':['밤','숙박'].includes(s.시간칸)?'night':'day';
 
 // ---------- 지난 코스 목록 ----------
@@ -147,7 +147,7 @@ function newForm(){
       <div class="sec">바라는 점 <span class="note">(선택 · 지키기 어려우면 AI가 이유를 남기고 조정할 수 있어요)</span></div>
       <label class="q"><span>목표</span><input name="목표" maxlength="300" placeholder="예: 필수 대상은 일본인 커플, 중구에서 저녁과 숙박으로 연결"></label>
       <label class="q"><span>희망 사항<small>한 줄에 하나</small></span><textarea name="희망" rows="3" placeholder="예: 저녁 이후 야경을 넣고 싶어요&#10;이동을 줄이고 여유롭게 식사하고 싶어요"></textarea></label>
-      <p class="agree">시작하면 중간 알림·경고는 기록에 남기고 <b>코스 초안까지 자동으로 진행</b>해요. 기관 데이터는 '없음'으로 진행하고, 코스 확정·홍보·문서는 하지 않아요.</p>
+      <p class="agree">시작하면 중간 알림·경고는 기록에 남기고 <b>코스 초안까지 자동으로 진행</b>해요. 기관 데이터는 '없음'으로 진행하고, 홍보물과 최종 문서는 코스를 확인한 뒤 따로 만들어요.</p>
       ${last&&last.상태==='진행중'?'<p class="note">지금 만들고 있는 코스가 있어요. 한 번에 하나씩 만들어요. 끝난 뒤 시작해 주세요.</p>':''}
       <div class="go"><span class="note" id="need"></span><span class="err" id="newErr"></span><button class="btn primary big" id="newGo" type="submit" disabled>코스 만들기 시작</button></div>
     </form></section>`;
@@ -272,6 +272,7 @@ function showRecord(id,cond,rec){
       <p class="note" id="keep"></p><p class="err" id="redoErr"></p></details>
     <details class="card technical"><summary>팀 검토용 상세 · 수정 이력과 검사 기록</summary><p class="note">${esc(rec.안id)}안은 ${rec.안id==='A'?'원래 요청으로 만든 코스':'구성을 조정한 대안'}이고, ${rec.버전}버전은 같은 코스를 ${rec.버전}번째로 작성한 기록이에요. 서로 다른 여행 상품 ${rec.버전}개를 뜻하지 않아요.</p>${vers}${검사}<p><a href="/admin/">서비스 제공자용 로그 보기 ↗</a></p></details>`;
   if(s.코스있음)$('openMap').onclick=()=>openMap(s.일정,{id,cond,rec});
+  if(!이전&&globalThis.홍보화면)globalThis.홍보화면.붙이기(main,{id,cond,rec,돌아가기:()=>show(id,cond,rec.안id,rec.버전)});  // ④ 홍보물 · ⑤ 산출물
   if($('latestPlan'))$('latestPlan').onclick=()=>show(id,cond,rec.안id);
   main.querySelectorAll('.tab[data-plan]').forEach(b=>b.onclick=()=>show(id,cond,b.dataset.plan));
   main.querySelectorAll('.vers .pill').forEach(b=>b.onclick=()=>show(id,cond,rec.안id,b.dataset.v));
