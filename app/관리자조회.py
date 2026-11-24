@@ -8,7 +8,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 기준 = Path(__file__).resolve().parent
-파일이름 = re.compile(r'(?:[1-5]단계_(?:결과(?:_\d+)?\.md|선택(?:_\d+)?\.json|전달_(?:준비|검사)\.json|입력\.json|담당자선택\.json)|3단계_(?:구조화|운영확인)\.json|코스작성조건_선택\.json|통합시험_상태\.json|AI_오류\.json)\Z')
+파일이름 = re.compile(r'(?:[1-5]단계_(?:결과(?:_\d+)?\.md|선택(?:_\d+)?\.json|전달_(?:준비|검사)\.json|입력\.json|담당자선택\.json)|3단계_(?:구조화|운영확인)\.json|코스작성조건_선택\.json|통합시험_상태\.json|기획_진행\.json|근거_추출\.json|AI_오류\.json|2단계_AI요약_원문\.md)\Z')
 
 
 class 결과저장소:
@@ -156,8 +156,11 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None):
                     return self.응답(200, 저장소.상세(인자.get('id', [''])[0]))
                 if 경로.path == '/api/file':
                     return self.응답(200, 저장소.파일(인자.get('path', [''])[0]))
-                자산 = {'/admin': ('index.html', 'text/html; charset=utf-8'),
-                      '/admin/': ('index.html', 'text/html; charset=utf-8'), '/admin/app.js': ('app.js', 'text/javascript; charset=utf-8'),
+                자산 = {'/admin': ('로그.html', 'text/html; charset=utf-8'),
+                      '/admin/': ('로그.html', 'text/html; charset=utf-8'),
+                      '/admin/logs.js': ('로그.js','text/javascript; charset=utf-8'),
+                      '/admin/logs.css': ('로그.css','text/css; charset=utf-8'),
+                      '/admin/app.js': ('app.js', 'text/javascript; charset=utf-8'),
                       '/admin/course.js': ('코스조건.js', 'text/javascript; charset=utf-8'),
                       '/admin/course.css': ('코스조건.css', 'text/css; charset=utf-8'),
                       '/admin/review.js': ('운영확인.js','text/javascript; charset=utf-8'),
@@ -231,7 +234,7 @@ def main():
     args = parser.parse_args()
     server = ThreadingHTTPServer(('127.0.0.1', args.port), 핸들러(결과저장소(args.runs)))
     print(f'관리자 결과 조회: http://127.0.0.1:{args.port}/admin/', flush=True)
-    print('조건 저장은 AI 미호출 · 화면에서 시험 시작 시 3단계만 AI 호출 · 종료: Ctrl+C', flush=True)
+    print('관리자: 읽기 전용 운영 로그 · 기획 시작 시에만 AI 실행 · 종료: Ctrl+C', flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

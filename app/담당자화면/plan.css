@@ -121,3 +121,31 @@ h3{margin:0 0 8px;font-size:16px}
 .w-일부 .tagw{background:var(--gold-soft);color:var(--crust)}.w-못지킴 .tagw{background:var(--err-soft);color:var(--err)}
 .redo-row{display:flex;gap:8px;margin-top:10px}.redo-row input{flex:1;font:inherit;padding:9px 12px;border:1.5px solid var(--line);border-radius:12px}
 @media(max-width:1100px){.agents{grid-template-columns:repeat(3,1fr)}.three{grid-template-columns:1fr}}
+
+/* 담당자 기본 화면: 제안과 일정 우선, 반복 검사와 수정 이력은 팀 상세로. */
+.saved-courses{margin-top:18px}.saved-courses>summary{font-size:13px;font-weight:700;color:var(--sub);cursor:pointer}
+.saved-courses .saved{margin-top:10px;max-height:65vh;overflow:auto}
+.recommendation h2{margin:0;font-size:22px}.recommendation .lead{margin:10px 0 18px;font-size:15px}
+.recommendation .aihead{flex-wrap:wrap}.draft-badge{margin-left:auto;font-size:12px;color:var(--sub);border:1px solid var(--line);background:#fff;padding:3px 9px;border-radius:999px}
+.plan-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.plan-choice{width:100%;padding:16px;min-width:0;background:#fff}.plan-choice small{font-size:13px;line-height:1.65;margin-top:8px;overflow-wrap:anywhere}
+.choice-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.choice-top b{font-size:16px}
+.choice-badge{font-size:11px;color:var(--sub);white-space:nowrap}.plan-choice.on .choice-badge{color:var(--sauce);font-weight:700}
+.review-status{border-radius:10px;background:#f6f3ed;padding:12px 14px;margin-top:16px;border-left:3px solid var(--gold)}
+.review-status b{font-size:14px}.review-status p{font-size:13px;line-height:1.6;margin:4px 0 0;color:var(--sub)}.review-status .btn{margin-top:10px}
+.state-확인{border-left-color:var(--ok);background:var(--ok-soft)}.departure{font-size:14px;margin:14px 0 0}.departure b{margin-right:10px}.departure .note{display:block;margin-top:3px}
+.review-status ul{font-size:13px;margin:8px 0 0;padding-left:18px}.route-preview{font-size:13px;line-height:1.8;color:var(--sub);margin:12px 0}.route-preview span{color:var(--sauce);margin:0 3px}
+.condition-detail{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}.condition-detail summary{font-size:13px;cursor:pointer;color:var(--sub)}
+.condition-detail li{font-size:13px;margin:10px 0}.condition-detail p{margin:4px 0;color:var(--sub);overflow-wrap:anywhere}
+.decision-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;margin-top:12px}
+.decision-list>div{border:1px solid var(--line);border-radius:10px;padding:12px}.decision-list b{font-size:14px}.decision-list p{font-size:13px;color:var(--sub);margin:4px 0 0}
+.decisions a{color:var(--sauce)}.wish>li{padding:13px 0;border-bottom:1px solid var(--line)}.wish>li:last-child{border-bottom:0}.wish p{font-size:13px;line-height:1.7;margin:7px 0 0;color:var(--sub);overflow-wrap:anywhere}.wish b{font-size:14px}
+.reason-more>summary{margin-top:8px;font-size:12px;color:var(--crust);cursor:pointer}.reason-more p{white-space:pre-line}
+.alternative-note{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.alternative-note p{font-size:14px}
+.technical{background:#faf8f3}.technical>summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--sub)}.technical[open]>summary{margin-bottom:16px}
+.technical .three{margin-top:10px}.technical .three li{overflow-wrap:anywhere}.technical .vers{margin:12px 0 18px}.technical h3{font-size:14px}
+.nomap{height:auto;min-height:160px}.nomap b{font-size:14px;font-weight:600}.nomap p{margin-bottom:0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.missing-plan{border-style:dashed;background:#faf9f6;box-shadow:none;cursor:default}.freedom p{font-size:14px}.freedom .note{font-size:13px}
+.tab:focus-visible,summary:focus-visible,.btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+@media(max-width:900px){.saved-courses .saved{max-height:220px}.recommendation h2{font-size:20px}.redo-row{flex-wrap:wrap}.redo-row input{min-width:0;flex-basis:100%}.redo-row button{width:100%}.timeline{max-height:none}.draft-badge{margin-left:0}.decision-list{grid-template-columns:1fr}}
