@@ -501,39 +501,45 @@ body{background-color:#FFF8ED;background-image:url("data:image/svg+xml,%3Csvg xm
 @media(max-width:900px){.day-scene{height:auto;aspect-ratio:1200/290}}
 
 /* ===== 첫 화면 히어로: 하루 길 장면 위에 제목, 열면 한 번 낮→저녁→밤으로 바뀐다 ===== */
-.entry-hero{position:relative;overflow:hidden;border-radius:28px;min-height:clamp(460px,46vw,580px);margin:6px 0 36px;border:1px solid #EFD9B8;box-shadow:0 34px 70px -44px #8a4b1f99;display:flex;align-items:flex-start;background:#FFF6E0}
-.hero-scene{position:absolute;inset:0}
-.hero-scene .scene-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.hero-copy{position:relative;z-index:2;padding:clamp(34px,5vw,64px);max-width:660px}
-.hero-copy h1{margin:0 0 18px;font-weight:850;letter-spacing:-.04em;line-height:1.16;font-size:clamp(40px,5.2vw,70px);color:#252D4A;text-wrap:balance}
-.hero-copy .entry-lead{font-size:19px;line-height:1.7;color:#5b4a3a;max-width:28em;margin:0 0 28px}
-.hero-copy .btn.primary{box-shadow:0 12px 24px -12px #252d4a99}
-.entry-hero .walker{bottom:3.5%;height:22%;filter:drop-shadow(0 6px 4px #5a3a1a40)}
-.entry-hero .walker.raccoon{left:41%}.entry-hero .walker.weasel{left:35%;height:20%}
 /* 등장 연출(한 번) */
-.entry-hero .sun{animation:sun-set 3s .1s cubic-bezier(.16,1,.3,1) both}
-.entry-hero .night-veil{animation:fade-in 2.6s .5s cubic-bezier(.4,0,.2,1) both}
-.entry-hero .night-sky{animation:fade-in 1.4s 1.7s ease-out both}
-.entry-hero .lanterns{animation:light-on .7s 1.9s ease-out both}
-.entry-hero .chick-sign{transform-box:fill-box;transform-origin:50% 100%;animation:sign-on .9s 2.3s cubic-bezier(.34,1.56,.64,1) both}
-.entry-hero .windows{animation:light-on .9s 2.6s ease-out both}
 @keyframes sun-set{from{transform:translateY(-60px)}to{transform:none}}
 @keyframes fade-in{from{opacity:0}to{opacity:1}}
 @keyframes light-on{from{opacity:0;filter:brightness(.6)}to{opacity:1;filter:none}}
 @keyframes sign-on{0%{opacity:0;transform:scale(.6)}60%{opacity:1}100%{opacity:1;transform:none}}
-.entry-hero .chick-sign{filter:drop-shadow(0 0 10px #FFB347aa)}
-@media(prefers-reduced-motion:reduce){.entry-hero .sun,.entry-hero .night-veil,.entry-hero .night-sky,.entry-hero .lanterns,.entry-hero .chick-sign,.entry-hero .windows{animation:none}}
 /* 히어로 아래: 기획 순서 + 하루 구조 | 이어서 보기 */
-.entry-screen{padding:0 0 56px;gap:40px}
-.entry-copy>h2{font-size:22px;margin:4px 0 0}
-.entry-copy .entry-flow{margin-top:22px}
-.entry-copy .entry-day{margin:30px 0 0;grid-template-columns:repeat(3,1fr)}
-.entry-copy .entry-day>div{padding:22px 20px 20px}
-.entry-copy .entry-day b{font-size:16.5px}
 /* 새 닭다리 아이콘 */
 .drum{width:19px;height:19px;vertical-align:-4px;overflow:visible}
 .eve-opts .opt-chicken,.chick-note,.chick-stop{gap:6px}
 body>header .logo-bg,.logo-bg{fill:#FFEBC9}
 @media(max-width:900px){.entry-copy .entry-day{grid-template-columns:1fr}}
-@media(max-width:760px){.entry-hero{flex-direction:column;min-height:0}.hero-scene{position:relative;inset:auto;order:2;aspect-ratio:1200/330;width:100%}.hero-copy{padding:30px 22px 6px}.hero-copy h1{font-size:38px}.hero-copy .entry-lead{font-size:17px;margin-bottom:20px}.entry-hero .walker{height:30%}.entry-hero .walker.weasel{height:27%}}
-@media(max-width:760px){.hero-scene{aspect-ratio:1200/600}.entry-hero .walker{height:24%}.entry-hero .walker.weasel{height:22%}}
+
+/* ===== 첫 화면 위쪽 배경: 해에서 달로 이어지는 하늘. 열면 한 번 길이 그려지고 오른쪽이 밤으로 바뀐다 ===== */
+.entry-backdrop{position:absolute;left:0;right:0;top:0;height:min(760px,100vh);z-index:-1;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(#000 52%,transparent 96%);mask-image:linear-gradient(#000 52%,transparent 96%)}
+.entry-backdrop svg{display:block;width:100%;height:100%}
+.entry-backdrop .sun{animation:sun-set 3.2s .1s cubic-bezier(.16,1,.3,1) both}
+.entry-backdrop .night-veil{animation:fade-in 2.6s .5s cubic-bezier(.4,0,.2,1) both}
+.entry-backdrop .night-sky{animation:fade-in 1.4s 1.9s ease-out both}
+.entry-backdrop .sky-path{animation:path-draw 2.8s .3s cubic-bezier(.65,0,.35,1) both}
+@keyframes path-draw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@media(prefers-reduced-motion:reduce){.entry-backdrop .sun,.entry-backdrop .night-veil,.entry-backdrop .night-sky,.entry-backdrop .sky-path{animation:none}}
+.entry-screen{position:relative}
+.entry-day .chick-sign{filter:drop-shadow(0 0 8px #FFB347aa)}
+
+/* 배경 조각: 해는 왼쪽, 달·별은 오른쪽에 붙여서 화면 폭이 바뀌어도 잘리지 않게 */
+.entry-backdrop>svg{position:absolute}
+.entry-backdrop .bk-sky{inset:0;width:100%;height:100%}
+.entry-backdrop .bk-sun{left:calc(10% - 120px);top:50px;width:240px;height:240px}
+.entry-backdrop .bk-moon{right:0;top:20px;width:520px;height:340px}
+.entry-backdrop .bk-cloud{left:38%;top:70px;width:200px;height:60px}
+@media(max-width:700px){.entry-backdrop .bk-moon{width:360px;height:236px}.entry-backdrop .bk-sun{width:180px;height:180px;left:-40px}}
+/* 아래에 내용이 더 있다는 표시 */
+.scroll-cue{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:8px;margin-top:30px;padding:10px 16px 10px 18px;border-radius:999px;background:#ffffffcc;border:1px solid #EADCC6;color:#252D4A;font-weight:650;font-size:15px;transition:background-color .15s,border-color .15s}
+.scroll-cue:hover{background:#fff;border-color:#D9B98A}
+.scroll-cue:focus-visible{outline:3px solid #D9771888;outline-offset:3px}
+.scroll-cue svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;animation:cue-nudge 1.6s 3.4s ease-in-out 3}
+@keyframes cue-nudge{0%,100%{transform:none}50%{transform:translateY(4px)}}
+@media(prefers-reduced-motion:reduce){.scroll-cue svg{animation:none}}
+.entry-screen{padding-bottom:28px}
+.day-title{margin:8px 4px 16px;font-size:24px;color:#252D4A;scroll-margin-top:100px}
+.day-title span{display:block;font-size:15px;font-weight:500;color:var(--sub);margin-top:4px;letter-spacing:0}
+.entry-backdrop .bk-sun{left:calc(7% - 120px);top:-20px}
