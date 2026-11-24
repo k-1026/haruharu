@@ -198,3 +198,106 @@ h3{margin:0 0 8px;font-size:16px}
 .map3d-stage[data-camera=front] .map3d-character,.map3d-stage[data-camera=follow] .map3d-character{width:160px;height:150px;object-fit:contain;object-position:center bottom;border:0;border-radius:0;background:transparent;mask-image:none;filter:drop-shadow(0 2px 2px #372c2c25)}
 .map-meal-tag{display:inline-block;border-radius:4px;background:#f5e6ce;color:#946e3e;font-size:10px;line-height:1.5;padding:1px 4px;margin-right:3px;vertical-align:1px}
 @media(max-height:620px) and (min-width:601px){.map3d-hud{top:78px;bottom:auto}}
+
+/* ===== 디자인 정리 (2026-11-25) =====
+   하루 띠: 낮(골든 오렌지) → 저녁(양념 노을) → 밤(나이트 네이비). 화면 곳곳에서 시간대를 같은 색으로 읽게 한다.
+   치킨은 메인이 아니라 저녁 선택지·이야기 요소 → 작은 닭다리 아이콘으로만 표시한다. 기존 마크업·클래스는 그대로 둔다. */
+:root{
+  --sauce:#C2551F;--sauce-soft:#FBE8DC;--crust:#8A4B1F;--line:#ecdfcb;--sub:#6f6458;
+  --dusk:linear-gradient(90deg,#F2B14C 0%,#D97718 34%,#C2551F 58%,#6A3B4C 80%,#252D4A 100%);
+  --lift:0 1px 2px #252d4a0d,0 10px 28px -14px #252d4a2e;
+}
+body{font-family:"Pretendard Variable","Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;letter-spacing:-.01em;word-break:keep-all;caret-color:var(--gold)}
+::selection{background:#F7D3A4;color:#292724}
+*{scrollbar-color:#dcc9ad transparent;scrollbar-width:thin}
+h1,h2,h3{letter-spacing:-.03em}
+a{text-underline-offset:3px}
+/* 머리글: 아래에 하루 띠 */
+header{position:relative;background:#FFFCF6;border-bottom:0;padding:14px 28px}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--dusk)}
+.brand b{font-size:18px;font-weight:800;color:var(--night);letter-spacing:-.04em}.brand small{font-size:12.5px;color:var(--sub)}
+/* 카드: 또렷한 선 + 낮은 그림자 */
+.card{border-color:var(--line);border-radius:20px;padding:26px 28px;box-shadow:var(--lift)}
+details.card{box-shadow:none}
+h2{color:var(--night);font-weight:800}h3{color:var(--night);font-weight:750}
+/* 단계 안내: 하루가 흘러가듯 채워지는 진행 막대 */
+.guide{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:0 0 26px}
+.guide li{flex-direction:row;align-items:baseline;gap:6px;font-size:12.5px;padding-top:12px;position:relative}
+.guide li::after{content:"";position:absolute;top:0;left:0;right:0;height:5px;border-radius:3px;background:#efe5d6}
+.guide li+li::before{display:none}
+.guide li b{width:auto;height:auto;background:none;color:var(--sub);font-size:11px;font-weight:700;border-radius:0}
+.guide li:has(~li.on){color:var(--ink)}
+.guide li:nth-child(1)::after{--t:#F2B14C}.guide li:nth-child(2)::after{--t:#E69628}.guide li:nth-child(3)::after{--t:#D97718}.guide li:nth-child(4)::after{--t:#C2551F}.guide li:nth-child(5)::after{--t:#252D4A}
+.guide li:has(~li.on)::after,.guide li.on::after{background:var(--t)}
+.guide li.on{color:var(--night);font-weight:800}.guide li.on b{background:none;color:var(--night)}
+/* 조건 입력 */
+.order{gap:16px}
+.q{grid-template-columns:140px 1fr;padding-bottom:16px;border-bottom:1px solid #f3ebde}
+.q>span{color:var(--night)}
+.pill{border-color:#e4d6c1;background:#fff;color:var(--ink);font-weight:600;transition:background-color .15s,border-color .15s}
+.pill:hover{border-color:var(--gold);background:#FFF6E8}
+.pill[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:#241303}
+.pill:focus-visible,.order input:focus-visible,.order textarea:focus-visible{outline:3px solid #D9771866;outline-offset:2px}
+.order input,.order textarea{background:#FFFCF6;border-color:#e4d6c1}
+.order input::placeholder,.order textarea::placeholder{color:#8a7d6e}
+.sec{color:var(--sauce);border-top:0;padding-top:4px;font-size:14px}
+.agree{background:#FFF3E0;border:1px solid #f1d6ad}
+.btn{border-radius:12px;transition:background-color .15s,border-color .15s,transform .1s}
+.btn:hover:not(:disabled){border-color:#d8c6ab}.btn:active:not(:disabled){transform:translateY(1px)}
+.btn.primary:hover:not(:disabled){background:#1a2038;border-color:#1a2038;filter:none}
+.btn.primary:disabled{background:#a9a59c;border-color:#a9a59c;opacity:1}
+.btn:focus-visible{outline:3px solid #D9771888;outline-offset:3px}
+/* 진행 화면: 일하는 에이전트 */
+.agent{background:#fff;border-color:var(--line);border-radius:16px}
+.agent.now{border-color:var(--gold);background:#FFF6E8;box-shadow:0 8px 22px -14px #D9771899}
+.agent .tag{background:#eef0f6}
+.working{background:#FFF3E0;border:1px solid #f1d6ad}
+.working.ok{border-color:#bfdcc8}.working.stop{border-color:#efc0bb}
+/* 코스 결과 */
+.chip{background:#fff;border:1px solid var(--line);color:var(--night);font-weight:600}
+.recommendation{border-radius:22px!important;box-shadow:var(--lift)!important}
+.recommendation .aibadge{background:var(--night);color:#FFF3E0}
+.plan-choice{transition:border-color .15s}.plan-choice:hover{border-color:#e4c79d!important}
+.route-preview{color:var(--ink);background:#FFFAF1;border-radius:12px;padding:10px 14px}.route-preview span{color:var(--gold);font-weight:700}
+.review-status{border-left:0;border:1px solid #efe2cd;border-radius:12px}
+.state-확인{border-color:#bfdcc8}
+.freedom{background:#FFF3E0;box-shadow:none}
+.map-launch{background:linear-gradient(115deg,#252D4A 55%,#3b3352 82%,#6A3B4C 100%);border-radius:20px}
+.map-launch h3{color:#fff;font-size:18px}
+.next-step{border:2px solid var(--gold);background:#fff}
+.num.eve{background:var(--sauce)}.pin.eve circle{fill:var(--sauce)}.lg-eve{background:var(--sauce)}
+.technical{background:#FBF7F0}
+/* 지난 코스 패널 */
+.history-panel{border-radius:20px}.history-panel .saved button{border-color:var(--line)}.history-panel .saved button:hover{border-color:var(--gold)}
+/* 작은 닭다리: 치킨이 들어가는 자리(저녁 선택지·이야기)를 알려 주는 표시 */
+.drum{width:14px;height:14px;fill:currentColor;flex:0 0 auto;vertical-align:-2px}
+/* 입장 화면 */
+.entry-screen{grid-template-columns:1.05fr 1fr;gap:64px;min-height:72dvh;padding:44px 8px 64px}
+.entry-copy h1{font-weight:850;letter-spacing:-.04em;line-height:1.22;font-size:clamp(38px,4.6vw,62px);text-wrap:balance}
+.entry-lead{font-size:17px;line-height:1.85;max-width:34em;color:#5f564c}
+.entry-actions .btn.primary{padding:16px 26px}
+.entry-steps{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;padding:22px 0 0;margin:30px 0 0;border-top:1px solid var(--line);font-size:14px;color:var(--sub)}
+.entry-steps li{display:flex;align-items:center;gap:7px}.entry-steps b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--night);color:#fff;font-size:11px}
+.entry-journey{position:relative;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:26px;padding:38px 34px 28px;box-shadow:0 24px 60px -30px #252d4a40}
+.entry-journey::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:var(--dusk)}
+.entry-journey h2{font-size:23px;margin:0 0 24px}
+.day-line{list-style:none;margin:0;padding:0;display:grid}
+.day-line li{display:grid;grid-template-columns:54px 1fr;gap:16px;position:relative;padding:0 0 24px}
+.day-line li::before{content:"";position:absolute;left:25px;top:34px;bottom:4px;width:3px;border-radius:2px;background:var(--seg)}
+.day-line li:last-child{padding-bottom:4px}.day-line li:last-child::before{display:none}
+.t-day{--seg:linear-gradient(#F2B14C,#D97718);--c:#7a4108;--bgc:#FBE2B8}
+.t-eve{--seg:linear-gradient(#C2551F,#252D4A);--c:#fff;--bgc:#C2551F}
+.t-night{--c:#fff;--bgc:#252D4A}
+.t-when{align-self:start;display:grid;place-items:center;width:54px;height:30px;border-radius:15px;background:var(--bgc);color:var(--c);font-weight:800;font-size:14px}
+.day-line b{display:block;font-size:17px;color:var(--night);line-height:30px}
+.day-line small{display:block;font-size:13px;color:var(--sub);margin-top:2px}
+.chick-note{display:inline-flex;align-items:center;gap:5px;font-style:normal;font-size:12.5px;color:var(--crust);margin-top:8px}
+.eve-opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.eve-opts i{font-style:normal;font-size:12.5px;padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:#FFFCF6;color:var(--ink);display:inline-flex;gap:5px;align-items:center}
+.eve-opts .opt-chicken{border-color:#ecc391;background:#FFF3E0;color:var(--crust);font-weight:650}
+.entry-signature{letter-spacing:0;font-size:12.5px;color:var(--sub);margin:22px 0 0;padding-top:16px;border-top:1px dashed var(--line)}
+@media(max-width:900px){.entry-screen{grid-template-columns:1fr;gap:32px}.entry-journey{max-width:none}}
+@media(max-width:640px){.guide li{font-size:0;gap:0}.guide li b{font-size:11px}.guide li.on{font-size:12px}}
+@media(max-width:600px){header{padding:12px 14px}.entry-journey{padding:30px 20px 22px}.card{padding:20px 18px}.q{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.btn,.pill,.plan-choice{transition:none}}
+.route-preview .chick-stop{font-style:normal;display:inline-flex;align-items:center;gap:4px;color:var(--crust);font-weight:650}.route-preview .chick-stop .drum{color:var(--gold)}
