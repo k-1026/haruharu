@@ -95,9 +95,11 @@ class 결과저장소:
                 '형식': 경로.suffix.lstrip('.'), '경로': 키}
 
 
-def 핸들러(저장소, 실행서비스=None):
+def 핸들러(저장소, 실행서비스=None, 기획서비스=None):
     from 관리자실행 import 코스시험
+    from 기획실행 import 기획실행
     실행서비스 = 실행서비스 or 코스시험(저장소)
+    기획서비스 = 기획서비스 or 기획실행(실행서비스)
     토큰 = secrets.token_urlsafe(32)
 
     class Handler(BaseHTTPRequestHandler):
@@ -132,6 +134,10 @@ def 핸들러(저장소, 실행서비스=None):
                     return self.응답(200, 실행서비스.상태(인자.get('id', [''])[0]))
                 if 경로.path == '/api/course/review':
                     return self.응답(200, 실행서비스.검토정보(인자.get('id',[''])[0]))
+                if 경로.path == '/api/plan/status':
+                    return self.응답(200, 기획서비스.상태(인자.get('id', [''])[0]))
+                if 경로.path == '/api/plan/latest':
+                    return self.응답(200, {'기획': 기획서비스.최근()})
                 if 경로.path == '/api/plan/course':
                     from 담당자요약 import 요약_불러오기
                     키 = 인자.get('id', [''])[0]
@@ -161,7 +167,7 @@ def 핸들러(저장소, 실행서비스=None):
                     return self.응답(200, (기준 / '관리자화면' / 이름).read_bytes(), 타입)
                 return self.응답(404, {'오류': '없는 페이지'})
             except ValueError as 오류:
-                return self.응답(400, {'오류': str(오류) if 경로.path.startswith('/api/course') else '기록 형식을 확인하세요.'})
+                return self.응답(400, {'오류': str(오류) if 경로.path.startswith(('/api/course', '/api/plan/status')) else '기록 형식을 확인하세요.'})
             except (OSError, UnicodeError):
                 return self.응답(404, {'오류': '기록을 읽을 수 없습니다. 경로와 저장 완료 여부를 확인하세요.'})
 
@@ -187,6 +193,8 @@ def 핸들러(저장소, 실행서비스=None):
                 값 = json.loads(본문.decode('utf-8'))
                 if not isinstance(값, dict):
                     raise ValueError('입력 형식을 확인하세요.')
+                if self.path == '/api/plan/start':
+                    return self.응답(202, 기획서비스.시작(값))
                 if self.path == '/api/course/save':
                     return self.응답(201, 실행서비스.저장(값.get('id'), 값.get('조건')))
                 if self.path == '/api/course/start':

@@ -60,5 +60,16 @@ class 담당자요약시험(unittest.TestCase):
         s=담당자요약.요약_불러오기(svc,'x/01회차/통합시험_1')
         self.assertFalse(s['코스있음']);self.assertEqual(s['일정'],[])
 
+    def test_실제_AI처럼_앞말과_json블록이_붙어도_읽는다(self):
+        글={'x/3단계_결과.md':'지침 파일을 먼저 읽겠습니다.\n```json\n{"칸목록":[{"칸ID":"낮","장소명":"향촌문화관","일차":1,"시간칸":"낮"}],"식사목록":[]}\n```',
+           'x/3단계_입력.json':'{"코스작성조건":{}}'}
+        class 저장소:
+            def 파일(self,경로):return {'본문':글[경로]}
+        class 서비스:
+            pass
+        svc=서비스();svc.저장소=저장소()
+        s=담당자요약.요약_불러오기(svc,'x')
+        self.assertTrue(s['코스있음']);self.assertEqual(s['일정'][0]['표시명'],'향촌문화관')
+
 
 if __name__=='__main__':unittest.main()

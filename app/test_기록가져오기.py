@@ -34,5 +34,12 @@ class 가져오기시험(unittest.TestCase):
             self.assertEqual(r['코스안'],[])
             self.assertTrue(any('코스 결과 없음' in x.get('문구','') for x in r['경고']))
 
+    def test_실제_AI처럼_앞말과_json블록이_붙어도_코스를_읽는다(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);key=make(root)
+            (root/'run1'/'01회차'/'통합시험_1'/'3단계_결과.md').write_text('지침 파일을 먼저 읽겠습니다.\n```json\n{"칸목록":[{"칸ID":"낮"}]}\n```\n',encoding='utf-8')
+            r=기록가져오기.가져오기(root,key)
+            self.assertEqual(len(r['코스안']),1);self.assertEqual(r['코스안'][0]['코스']['칸목록'][0]['칸ID'],'낮')
+
 
 if __name__=='__main__':unittest.main()

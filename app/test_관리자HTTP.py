@@ -128,7 +128,7 @@ class HTTP시험(unittest.TestCase):
 
     def test_담당자화면과_관리자창_경로분리(self):
         code, body = self.raw('/')
-        self.assertEqual(code, 200);self.assertIn('담당자', body)
+        self.assertEqual(code, 200);self.assertIn('코스 기획실', body)  # 담당자 화면
         self.assertEqual(self.raw('/plan/')[1], body)
         self.assertIn('관리자', self.raw('/admin/')[1])
         self.assertEqual(self.request('GET', '/api/plan/course?id=' + quote('../x'))[0], 400)

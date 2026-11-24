@@ -4,6 +4,7 @@ import json
 import re
 from urllib.parse import quote
 from 장소정보 import 좌표
+from 단계연결 import JSON_읽기
 from 운영검토 import 출발가능요일
 
 미정이름={'숙박':'숙박 시간','2일차오전':'2일차 자유시간'}
@@ -46,7 +47,7 @@ def 코스요약(코스, 조건):
 
 def 요약_불러오기(실행서비스, 시험id):
     try:
-        코스=json.loads(실행서비스.저장소.파일(시험id+'/3단계_결과.md')['본문'])
+        코스=JSON_읽기(실행서비스.저장소.파일(시험id+'/3단계_결과.md')['본문'])  # 실제 AI 답은 앞말·```json 블록이 붙는다
         입력=json.loads(실행서비스.저장소.파일(시험id+'/3단계_입력.json')['본문'])
     except (ValueError,OSError,KeyError):
         return {'조건':{},'일정':[],'출발가능요일':None,'확인할것':['이 기록에는 아직 코스가 없습니다.'],'코스있음':False}
