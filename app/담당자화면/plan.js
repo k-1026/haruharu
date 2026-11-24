@@ -73,7 +73,7 @@
     const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const name=문장((s.표시명||s.장소명||'장소 미정').split(/\s+[—–]\s+/)[0]),info=s.장소안내||{};
     const candidates=s.식당후보||[];
-    return `<button type="button" class="panel-close" data-place-close aria-label="장소 설명 닫기">×</button><p class="eyebrow">${safe(s.일차)}일차 · ${safe(s.시각||'권장 시각 미정')}</p>
+    return `<button type="button" class="panel-close" data-place-close aria-label="장소 설명 닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button><p class="eyebrow">${safe(s.일차)}일차 · ${safe(s.시각||'권장 시각 미정')}</p>
       <h2 tabindex="-1" id="placeTitle">${safe(name)}</h2><p>${safe(info.소개||'아직 장소 소개가 등록되지 않은 일정입니다.')}</p>
       ${info.이용시간||info.휴무?`<section class="place-facts"><h3>이용 참고 <small>보유 자료 기준</small></h3>${info.이용시간?`<p>이용시간 · ${safe(info.이용시간)}</p>`:''}${info.휴무?`<p>휴무 · ${safe(info.휴무)}</p>`:''}<p class="note">운영일·시간은 방문 전에 다시 확인해 주세요.${info.확인일?' 자료 확인일 '+safe(info.확인일):''}</p></section>`:''}
       ${info.주소?`<p class="note">${safe(info.주소)}</p>`:''}
