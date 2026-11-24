@@ -662,3 +662,10 @@ body[data-view=landing] .app-actions,body[data-view=form] .app-actions{display:n
 .entry-band{background:none;border:0;padding:0 4px;backdrop-filter:none;border-radius:0}
 @media (max-height:760px) and (min-width:901px){.entry-band .entry-flow small{display:block}.entry-band{padding:0 4px}}
 @media(max-width:640px){body>header .service-nav{margin-left:0}}
+
+/* ===== 머리글: 화면 이동 메뉴 | 기능 버튼(지난 코스·새 코스) 구분 ===== */
+body[data-view=form] .app-actions{display:flex}
+body>header .app-actions{align-items:center;gap:4px;padding-left:12px;margin-left:4px;border-left:1px solid #EADCC6}
+body>header .app-actions #historyBtn{display:inline-flex;align-items:center;gap:6px}
+.ic-clock{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round}
+@media(max-width:640px){body>header .app-actions{border-left:0;padding-left:0;margin-left:auto}}
