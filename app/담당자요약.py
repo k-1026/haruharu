@@ -4,6 +4,7 @@ import json
 import re
 from urllib.parse import quote
 from 장소정보 import 좌표
+from 단계연결 import JSON_읽기
 from 운영검토 import 출발가능요일
 
 미정이름={'숙박':'숙박 시간','2일차오전':'2일차 자유시간'}
@@ -11,6 +12,12 @@ from 운영검토 import 출발가능요일
 
 def _짧게(name):
     return re.sub(r'\s*\([^)]*\)','',str(name or '').replace('대구광역시 ','')).strip()
+
+
+def 지도링크(이름, point):
+    """좌표가 있을 때만 그 위치를 여는 카카오맵 링크. 이름 검색 링크는 엉뚱한 곳을 열 수 있어 만들지 않는다."""
+    if not point:return None
+    return 'https://map.kakao.com/link/map/'+quote(f'{이름},{point[0]},{point[1]}',safe=',')
 
 
 def 코스요약(코스, 조건):
@@ -27,7 +34,7 @@ def 코스요약(코스, 조건):
         시각=(row.get('시각') or {}).get('값','') if isinstance(row.get('시각'),dict) else ''
         일정.append({'순번':i,'일차':row.get('일차','미정'),'시각':시각,'시간칸':row.get('시간칸',''),
                     '장소명':row.get('장소명',''),'표시명':표시명,'좌표':list(point) if point else None,
-                    '네이버':'https://map.naver.com/p/search/'+quote('대구 '+표시명.replace('자유식 · ',''))})
+                    '지도링크':지도링크(표시명,point)})
         if not 시각:확인.append(f"{미정이름.get(row.get('시간칸'),표시명)} 미정")
         if point is None and not 자유식 and row.get('시간칸') not in ['숙박','2일차오전']:확인.append('좌표 미확인: '+표시명)
     try:
@@ -40,7 +47,7 @@ def 코스요약(코스, 조건):
 
 def 요약_불러오기(실행서비스, 시험id):
     try:
-        코스=json.loads(실행서비스.저장소.파일(시험id+'/3단계_결과.md')['본문'])
+        코스=JSON_읽기(실행서비스.저장소.파일(시험id+'/3단계_결과.md')['본문'])  # 실제 AI 답은 앞말·```json 블록이 붙는다
         입력=json.loads(실행서비스.저장소.파일(시험id+'/3단계_입력.json')['본문'])
     except (ValueError,OSError,KeyError):
         return {'조건':{},'일정':[],'출발가능요일':None,'확인할것':['이 기록에는 아직 코스가 없습니다.'],'코스있음':False}

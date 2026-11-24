@@ -47,6 +47,7 @@ class 경계시험(unittest.TestCase):
         source = {**입력2, '확정체류기간': '1박2일', '코스작성조건': {'2일차오전구성': '자유시간'}}
         self.assertFalse(any('근거 없음' in p for p in 코스_검사(value, source)))
         value['칸목록'][-1]['장소명'] = '새 관광지'
+        value['칸목록'][-1]['시간칸'] = '낮'  # 일반 관광 칸은 계속 수요 근거를 요구한다.
         self.assertTrue(any('근거 없음' in p for p in 코스_검사(value, source)))
 
     def test_설명뒤_단일JSON블록_읽기(self):

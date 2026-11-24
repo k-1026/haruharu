@@ -29,14 +29,17 @@ class 규칙시험(unittest.TestCase):
         기록모듈.추가(r,'경고',{'종류':'검증결과','안id':'A','버전':1,'통과':False},'에이전트:검증')
         d=총괄.다음_할일(r);self.assertEqual(d['행동'],'수집');self.assertIn('평일 밤',d['대상'])
         기록모듈.실행_기록(r,'에이전트:수집','수집','평일 밤','x','성공')
-        self.assertEqual(총괄.다음_할일(r)['행동'],'코스')
+        self.assertEqual(총괄.다음_할일(r)['행동'],'담당자에게')  # 찾은 후보가 없으면 다시 써도 소용없음 → 자료 부족으로 넘김
+        기록모듈.추가(r,'후보',{'이름':'향촌문화관','출처ID':'S70'},'에이전트:수집')
+        self.assertEqual(총괄.다음_할일(r)['행동'],'코스')  # 찾은 후보가 있으면 코스에 반영
 
     def test_반려_담당자면_담당자에게_통과도_담당자에게(self):
-        r=rec();코스(r,1)
+        점검=lambda r:기록모듈.추가(r,'경고',{'종류':'코드점검','안id':'A','버전':1},'코드:점검')
+        r=rec();코스(r,1);점검(r)
         기록모듈.추가(r,'경고',{'종류':'검증','안id':'A','버전':1,'되돌릴곳':'담당자','문구':'?'},'에이전트:검증')
         기록모듈.추가(r,'경고',{'종류':'검증결과','안id':'A','버전':1,'통과':False},'에이전트:검증')
         self.assertEqual(총괄.다음_할일(r)['행동'],'담당자에게')
-        r=rec();코스(r,1);기록모듈.추가(r,'경고',{'종류':'검증결과','안id':'A','버전':1,'통과':True},'에이전트:검증')
+        r=rec();코스(r,1);점검(r);기록모듈.추가(r,'경고',{'종류':'검증결과','안id':'A','버전':1,'통과':True},'에이전트:검증')
         self.assertEqual(총괄.다음_할일(r)['행동'],'담당자에게')
 
 
@@ -52,8 +55,8 @@ class 돌리기시험(unittest.TestCase):
             if p.endswith('코스검토.md'):return '{"칸목록":[]}'
             return json.dumps({'통과':False,'문제':[{'종류':'운영','대상':'x','내용':'y','되돌릴곳':'코스'}]},ensure_ascii=False)
         r=rec();steps=총괄.돌리기(r,Path('.'),실행함수=fn)
-        self.assertLessEqual(len(steps),12);self.assertEqual(steps[-1]['행동'],'담당자에게')
-        self.assertIn('한도',steps[-1]['이유'])
+        self.assertLessEqual(len(steps),20);self.assertEqual(steps[-1]['행동'],'담당자에게')
+        self.assertIn('최대 4버전',steps[-1]['이유']);self.assertEqual(기록모듈.버전목록(r,'A'),[1,2,3,4])
 
 
 if __name__=='__main__':unittest.main()

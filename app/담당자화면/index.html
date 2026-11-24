@@ -3,24 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>하루하루 · 담당자 코스 기획</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<title>하루하루 코스 기획실 · 치킨의 수도에서 하룻밤</title>
 <link rel="stylesheet" href="/plan/plan.css">
 </head>
 <body>
-<header><div class="brand"><div class="logo">하</div>하루하루 · 담당자 코스 기획</div><a href="/admin/">관리자 창 (팀용) ↗</a></header>
+<header>
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" class="logo-bg"/><path class="logo-leg" d="M23.5 9.5c4.6 0 8 3.6 8 8.1 0 4.3-3.2 7.4-7.3 7.9l-4.6 4.7a2.6 2.6 0 1 1-3.6 3.3 2.6 2.6 0 1 1-3.3-3.6l4.7-4.6c.5-4.1 3.6-7.3 7.9-7.3"/><circle cx="25.6" cy="15.6" r="1.6" class="logo-shine"/></svg>
+    <div><b>하루하루 코스 기획실</b><small>치킨의 수도 대구, 낮부터 밤까지 머무는 코스</small></div>
+  </div>
+  <a href="/admin/">서비스 운영 로그 ↗</a>
+</header>
 <div class="wrap">
 <aside>
-  <button class="btn primary full" id="newBtn">＋ 새 코스 만들기</button>
-  <h3>저장된 코스</h3>
-  <div class="saved" id="saved"><p class="empty">불러오는 중…</p></div>
+  <button class="btn primary full" id="newBtn"><span aria-hidden="true">＋</span> 새 코스 만들기</button>
+  <details class="saved-courses" id="savedCourses"><summary>지난 코스 보기</summary>
+    <div class="saved" id="saved"><p class="empty">불러오는 중…</p></div>
+  </details>
 </aside>
-<main id="main"><p class="empty">왼쪽에서 저장된 코스를 고르세요.</p></main>
+<main>
+  <section class="card progress" id="progress" hidden></section>
+  <div id="main"></div>
+</main>
 </div>
-<dialog id="newDlg"><h3 style="margin-top:0">새 코스 만들기</h3>
-  <p>조건을 넣으면 AI가 자료를 찾아 코스를 만드는 기능은 <b>다음 단계에서 연결</b>됩니다.</p>
-  <button class="btn primary" onclick="newDlg.close()">확인</button></dialog>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="/plan/plan.js"></script>
 </body>
 </html>

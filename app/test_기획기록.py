@@ -72,5 +72,70 @@ class 한도시험(unittest.TestCase):
         i=기록모듈.실행_기록(r,'코드:점검','점검','A','요일 검사','성공')
         self.assertEqual(r['실행'][0]['id'],i);self.assertEqual(r['결정이력'][-1]['행동'],'실행')
 
+class 안과버전시험(unittest.TestCase):
+    def rec(self):
+        return 기록모듈.새_기록({'계절':'봄','지역':['중구','동구'],'체류기간':'1박2일'},'사람:담당자','저녁까지 머물게',
+                             기록id='ab',희망=['저녁은 동구 평화시장에서','야경 포함'])
+
+    def 코스(self,r,안id,버전):
+        기록모듈.추가(r,'코스안',{'안id':안id,'버전':버전,'코스':{'칸목록':[]}},'에이전트:코스')
+
+    def test_원래요청은_조건을_바꿔도_그대로(self):
+        r=self.rec()
+        기록모듈.조건_변경(r,{'계절':'여름'},'사람:담당자','담당자 수정')
+        self.assertEqual(r['원래요청']['조건']['계절'],'봄');self.assertEqual(r['조건']['계절'],'여름')
+        self.assertEqual([h['id'] for h in r['원래요청']['희망']],['희망-1','희망-2'])
+
+    def test_B안은_희망만_바꾸고_적용조건이_따로(self):
+        r=self.rec()
+        기록모듈.안_추가(r,'B','저녁을 중구로 옮긴 안','에이전트:총괄',바꾼희망={'희망-1':'저녁은 중구 동성로에서'},이유='동구 이동 40분')
+        a=기록모듈.적용조건(r,'A');b=기록모듈.적용조건(r,'B')
+        self.assertEqual(a['희망'][0]['내용'],'저녁은 동구 평화시장에서');self.assertFalse(a['원래요청과_다름'])
+        self.assertEqual(b['희망'][0]['내용'],'저녁은 중구 동성로에서');self.assertTrue(b['희망'][0]['바뀜'])
+        self.assertEqual(b['조건'],a['조건']);self.assertTrue(b['원래요청과_다름'])
+
+    def test_꼭지킬조건을_바꾸는_안은_사람만(self):
+        r=self.rec()
+        with self.assertRaises(PermissionError):기록모듈.안_추가(r,'B','당일로','에이전트:총괄',바꾼조건={'체류기간':'당일'})
+        기록모듈.안_추가(r,'B','당일로','사람:담당자',바꾼조건={'체류기간':'당일'})
+        self.assertEqual(기록모듈.적용조건(r,'B')['조건']['체류기간'],'당일');self.assertEqual(r['조건']['체류기간'],'1박2일')
+
+    def test_없는_희망_조건_안은_거부(self):
+        r=self.rec()
+        with self.assertRaises(ValueError):기록모듈.안_추가(r,'B','x','에이전트:총괄',바꾼희망={'희망-9':'?'})
+        with self.assertRaises(ValueError):기록모듈.안_추가(r,'A','x','에이전트:총괄')
+        with self.assertRaises(ValueError):self.코스(r,'C',1)
+
+    def test_버전은_안마다_따로_쌓이고_겹치지_않음(self):
+        r=self.rec();기록모듈.안_추가(r,'B','대안','에이전트:총괄',바꾼희망={'희망-2':'야경 빼기'})
+        self.코스(r,'A',1);self.코스(r,'A',2);self.코스(r,'B',1)
+        self.assertEqual(기록모듈.버전목록(r,'A'),[1,2]);self.assertEqual(기록모듈.버전목록(r,'B'),[1])
+        with self.assertRaises(ValueError):self.코스(r,'A',2)
+
+    def test_선택은_사람만_있는_버전만(self):
+        r=self.rec();self.코스(r,'A',1)
+        with self.assertRaises(PermissionError):기록모듈.선택(r,'A',1,'에이전트:총괄')
+        with self.assertRaises(ValueError):기록모듈.선택(r,'A',2,'사람:담당자')
+        기록모듈.선택(r,'A',1,'사람:담당자','지도 비교 후')
+        self.assertEqual((r['선택']['안id'],r['선택']['버전']),('A',1))
+
+    def test_검증상태는_그_버전_경고만(self):
+        r=self.rec();self.코스(r,'A',1);self.코스(r,'A',2)
+        기록모듈.추가(r,'경고',{'종류':'검증','안id':'A','버전':1,'문구':'야시장 휴무'},'에이전트:검증')
+        기록모듈.추가(r,'경고',{'종류':'검증결과','안id':'A','버전':1,'통과':False,'문구':'반려'},'에이전트:검증')
+        기록모듈.추가(r,'경고',{'종류':'검증결과','안id':'A','버전':2,'통과':True,'문구':'통과'},'에이전트:검증')
+        self.assertEqual(기록모듈.검증상태(r,'A',1),{'검증':'반려','남은문제':['야시장 휴무'],'코드점검':None})
+        self.assertEqual(기록모듈.검증상태(r,'A',2)['남은문제'],[])
+        self.assertEqual(기록모듈.검증상태(r,'B',1)['검증'],'검증 전')
+
+    def test_형식1_기록을_읽으면_맞춰진다(self):
+        old={'버전':1,'기록id':'old','조건':{'계절':'봄'},'목표':'','근거':[],'후보':[],'코스안':[{'안id':'A','코스':{}}],
+             '경고':[],'결정이력':[],'실행':[],'한도':{}}
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/'기획'/'old';p.mkdir(parents=True);(p/'기획기록.json').write_text(json.dumps(old,ensure_ascii=False),encoding='utf-8')
+            r=기록모듈.읽기(d,'old')
+        self.assertEqual(r['버전'],2);self.assertEqual(r['원래요청']['조건'],{'계절':'봄'})
+        self.assertEqual([a['안id'] for a in r['안']],['A']);self.assertIsNone(r['선택'])
+
 
 if __name__=='__main__':unittest.main()
