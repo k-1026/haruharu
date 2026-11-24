@@ -62,5 +62,35 @@ class 검증시험(unittest.TestCase):
         out=처리기.검증하기(self.rec(),'A',실행함수=lambda p,i:'x')
         self.assertTrue(out.get('오류'));self.assertFalse(out['통과'])
 
+class 안별입력시험(unittest.TestCase):
+    def setUp(self):
+        self.d=tempfile.TemporaryDirectory();self.root=Path(self.d.name)
+        t=self.root/'r'/'01회차'/'통합시험_1';t.mkdir(parents=True)
+        (t/'3단계_입력.json').write_text(json.dumps({'조건':{'계절':'봄','체류기간':'1박2일'},'근거목록':[{'id':'E1'}],'코스작성조건':{'시작지점':'동대구역'}},ensure_ascii=False),encoding='utf-8')
+        self.r=기록모듈.새_기록({'계절':'봄','체류기간':'1박2일'},'사람:담당자',기록id='t',희망=['저녁은 동구'])
+        기록모듈.추가(self.r,'코스안',{'안id':'A','코스':{'칸목록':[]},'출처시험id':'r/01회차/통합시험_1'},'코드:가져오기')
+
+    def tearDown(self):self.d.cleanup()
+
+    def test_B안은_A의_바탕근거에_B안_조건과_희망을_싣는다(self):
+        기록모듈.안_추가(self.r,'B','저녁 중구','에이전트:총괄',바꾼희망={'희망-1':'저녁은 중구'},이유='이동 40분')
+        i=처리기.코스입력(self.r,'B',self.root,[])
+        self.assertEqual(i['근거목록'],[{'id':'E1'}]);self.assertEqual(i['코스작성조건'],{'시작지점':'동대구역'})
+        self.assertEqual(i['희망'][0]['내용'],'저녁은 중구');self.assertEqual(i['안']['안id'],'B')
+        self.assertEqual(i['원래요청']['희망'][0]['내용'],'저녁은 동구')
+        self.assertNotIn('이전코스',i);self.assertNotIn('자료재검토필요',i)  # A안 코스를 B안 이전 버전으로 섞지 않음
+
+    def test_꼭지킬조건을_바꾼_안은_조건_덮어쓰고_재검토_표시(self):
+        기록모듈.안_추가(self.r,'B','당일','사람:담당자',바꾼조건={'체류기간':'당일'})
+        i=처리기.코스입력(self.r,'B',self.root,[])
+        self.assertEqual(i['조건']['체류기간'],'당일');self.assertIn('체류기간',i['자료재검토필요'])
+
+    def test_같은안_다시짜면_최신버전을_이전코스로(self):
+        기록모듈.추가(self.r,'코스안',{'안id':'A','버전':2,'코스':{'칸목록':[{'칸ID':'v2'}]}},'에이전트:코스')
+        i=처리기.코스입력(self.r,'A',self.root,['고칠 점'])
+        self.assertEqual(i['이전버전'],2);self.assertEqual(i['이전코스'],{'칸목록':[{'칸ID':'v2'}]})
+        self.assertTrue(처리기.코스짜기(self.r,'A',self.root,['고칠 점'],실행함수=lambda p,x:'{"칸목록":[]}'))
+        self.assertEqual(기록모듈.버전목록(self.r,'A'),[1,2,3])
+
 
 if __name__=='__main__':unittest.main()
