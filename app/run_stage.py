@@ -6,6 +6,7 @@
 import re
 import asyncio
 import time
+from tempfile import TemporaryDirectory
 from contextvars import ContextVar
 from pathlib import Path
 
@@ -126,22 +127,28 @@ async def _단계_실행(에이전트_경로: str, 입력: str) -> str:
 
 async def _클로드_실행(본문,입력,model,도구):
     from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, TextBlock, query
-    옵션 = ClaudeAgentOptions(
-        model=model,
-        system_prompt=본문,
-        tools=도구,
-        allowed_tools=도구,
-        cwd=str(저장소),
-        max_turns=40,
-        setting_sources=[],  # CLAUDE.md 등 프로젝트 설정은 읽지 않는다. 규칙은 지침/ 에서만 읽는다
-    )
-    조각: list[str] = []
-    async for 메시지 in query(prompt=입력, options=옵션):
-        if isinstance(메시지, AssistantMessage):
-            for 블록 in 메시지.content:
-                if isinstance(블록, TextBlock):
-                    조각.append(블록.text)
-    return "\n".join(조각).strip()
+    # SDK의 문자열 system_prompt는 명령행 인수가 된다. 지침·CSV를 축약하지
+    # 않고 파일로 전달해 Windows 명령행 길이 제한을 피한다. 호출마다 분리하고
+    # query 종료·예외·시간초과 취소 뒤에도 정리한다.
+    with TemporaryDirectory(prefix='haruharu-prompt-') as folder:
+        지침파일 = Path(folder) / 'system-prompt.txt'
+        지침파일.write_text(본문, encoding='utf-8')
+        옵션 = ClaudeAgentOptions(
+            model=model,
+            system_prompt={'type': 'file', 'path': str(지침파일)},
+            tools=도구,
+            allowed_tools=도구,
+            cwd=str(저장소),
+            max_turns=40,
+            setting_sources=[],  # 프로젝트 설정 대신 동봉한 지침을 사용한다
+        )
+        조각: list[str] = []
+        async for 메시지 in query(prompt=입력, options=옵션):
+            if isinstance(메시지, AssistantMessage):
+                for 블록 in 메시지.content:
+                    if isinstance(블록, TextBlock):
+                        조각.append(블록.text)
+        return "\n".join(조각).strip()
 
 
 async def _제미나이_실행(본문,입력,model,key,도구,제한초=기본_제한초):

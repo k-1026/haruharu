@@ -3,11 +3,23 @@ import argparse
 import json
 import re
 import secrets
+import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 기준 = Path(__file__).resolve().parent
+
+
+class 로컬HTTP서버(ThreadingHTTPServer):
+    """Windows에서 이전 서버와 같은 포트를 공유해 다른 코드가 응답하는 일을 막는다."""
+    allow_reuse_address=False
+
+    def server_bind(self):
+        if hasattr(socket,'SO_EXCLUSIVEADDRUSE'):
+            self.socket.setsockopt(socket.SOL_SOCKET,socket.SO_EXCLUSIVEADDRUSE,1)
+        super().server_bind()
+
 파일이름 = re.compile(r'(?:[1-5]단계_(?:결과(?:_\d+)?\.md|선택(?:_\d+)?\.json|전달_(?:준비|검사)\.json|입력\.json|담당자선택\.json)|3단계_(?:구조화|운영확인)\.json|코스작성조건_선택\.json|통합시험_상태\.json|기획_진행\.json|근거_추출\.json|AI_오류\.json|2단계_AI요약_원문\.md)\Z')
 
 
@@ -58,7 +70,62 @@ class 결과저장소:
         return {'id': 폴더.relative_to(self.루트).as_posix(), '실행': 폴더.parent.name if '회차' in 폴더.name else 폴더.name,
                 '회차': 폴더.name if '회차' in 폴더.name else '기본', '조건': 선택.get('조건') or 전달.get('조건') or {},
                 '검사상태': 상태, '근거수': len(전달.get('근거목록') or []), '경고수': len(전달.get('경고목록') or []),
-                '파일수': len(self._파일들(폴더))}
+                '파일수': len(self._파일들(폴더)), '운영진단': self._운영진단(폴더)}
+
+    def _운영진단(self, 폴더):
+        from 운영진단 import 오류안내
+        진행, 깨짐 = self._JSON(폴더, '기획_진행.json')
+        시험폴더 = None
+        시험키 = 진행.get('시험id')
+        if 시험키:
+            try:
+                후보 = self._경로(시험키)
+                if 후보.parent == 폴더 and re.fullmatch(r'통합시험_\d{6}_\d+', 후보.name) and 후보.is_dir():
+                    시험폴더 = 후보
+            except (ValueError, TypeError):
+                pass
+        elif not 진행:
+            후보들 = [p for p in 폴더.iterdir() if p.is_dir() and not p.is_symlink()
+                   and re.fullmatch(r'통합시험_\d{6}_\d+', p.name)]
+            시험폴더 = max(후보들, key=lambda p:p.name, default=None)
+        시험, 시험깨짐 = self._JSON(시험폴더, '통합시험_상태.json') if 시험폴더 else ({}, False)
+        단계값 = 진행.get('단계', [])
+        if not isinstance(단계값, list):
+            단계값, 깨짐 = [], True
+        단계 = [x for x in 단계값 if isinstance(x, dict)]
+        실패 = next((x for x in 단계 if x.get('상태') == '실패'), {})
+        원상태 = 진행.get('상태') or 시험.get('상태') or '기록 없음'
+        상태 = '실패' if 원상태 in ('멈춤', '실행실패', '중단됨') or 실패 else 원상태
+        if 깨짐 or 시험깨짐:
+            상태 = '기록 확인 필요'
+        상세 = {}
+        로그 = ''
+        if 상태 == '실패':
+            # 현재 진행이 가리키는 시험만 조회한다. 과거 실패를 새 실행에 섞지 않는다.
+            for 위치, 값, 이름 in [(폴더, 진행, '기획_진행.json'),
+                                 (시험폴더, 시험, '통합시험_상태.json')]:
+                if 위치 is None:
+                    continue
+                if isinstance(값.get('오류상세'), dict):
+                    상세 = 값['오류상세']
+                    로그 = (위치/이름).relative_to(self.루트).as_posix()
+                기록, _ = self._JSON(위치, 'AI_오류.json')
+                오류값 = 기록.get('오류', [])
+                오류들 = [x for x in 오류값 if isinstance(x, dict)] if isinstance(오류값, list) else []
+                if 오류들:
+                    상세 = 오류들[-1]
+                    로그 = (위치/'AI_오류.json').relative_to(self.루트).as_posix()
+        번호 = {'자료 확인':1, '수요 근거 정리':2, '코스 작성':3, '결과 검사':4, '보완과 대안':5}
+        실패이름 = 실패.get('이름') or ('코스 작성' if 시험.get('상태') in ('실행실패','중단됨') else '')
+        원인, 조치 = 오류안내(상세) if 상세 else ('', '')
+        if 상태 == '실패' and not 상세:
+            원인 = 진행.get('안내') or 시험.get('안내') or '상세 오류가 저장되지 않았습니다.'
+            조치 = '단계 결과와 검사 기록을 확인하세요. 이전에 수집하지 않은 오류는 복구할 수 없습니다.'
+        return {'상태':상태, '실패단계':f'{번호[실패이름]}단계 · {실패이름}' if 실패이름 in 번호 else 실패이름 or '미기록',
+                '원인':원인, '조치':조치, '단계':단계, '로그경로':로그,
+                '오류종류':상세.get('종류') or '미수집', '제공자':상세.get('제공자') or '미수집',
+                '모델':상세.get('모델') or '미수집', '경과초':상세.get('경과초'),
+                '시각':상세.get('시각') or 진행.get('완료시각') or 진행.get('시작시각') or 시험.get('기록시각') or ''}
 
     def 목록(self):
         if not self.루트.is_dir():
@@ -145,6 +212,22 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None):
                     키 = 인자.get('id', [''])[0]
                     저장소._경로(키)  # 잘못된 경로는 ValueError → 400
                     return self.응답(200, 요약_불러오기(실행서비스, 키))
+                지도자산={
+                    '/plan/map-model.js':('map-model.js','text/javascript; charset=utf-8'),
+                    '/plan/three-map.js':('three-map.js','text/javascript; charset=utf-8'),
+                    '/plan/map-data.json':('map-data.json','application/json; charset=utf-8'),
+                    '/plan/road-routes.json':('road-routes.json','application/json; charset=utf-8'),
+                    '/plan/vendor/three/three.module.js':('vendor/three/three.module.js','text/javascript; charset=utf-8'),
+                    '/plan/vendor/three/three.core.js':('vendor/three/three.core.js','text/javascript; charset=utf-8')}
+                for character in ('raccoon','weasel'):
+                    for view in ('front','side','back'):
+                        name=f'characters/{character}-{view}.gif'
+                        지도자산['/plan/'+name]=(name,'image/gif')
+                        transparent=f'characters/transparent/{character}-{view}.png'
+                        지도자산['/plan/'+transparent]=(transparent,'image/png')
+                if 경로.path in 지도자산:
+                    name,mime=지도자산[경로.path]
+                    return self.응답(200,(기준/'담당자화면'/name).read_bytes(),mime)
                 if 경로.path in ['/', '/plan', '/plan/', '/plan/plan.js', '/plan/plan.css']:
                     이름, 타입 = {'/plan.js': ('plan.js', 'text/javascript; charset=utf-8'),
                                '/plan.css': ('plan.css', 'text/css; charset=utf-8')}.get(
@@ -232,7 +315,7 @@ def main():
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--runs', type=Path, default=기준 / 'runs')
     args = parser.parse_args()
-    server = ThreadingHTTPServer(('127.0.0.1', args.port), 핸들러(결과저장소(args.runs)))
+    server = 로컬HTTP서버(('127.0.0.1', args.port), 핸들러(결과저장소(args.runs)))
     print(f'관리자 결과 조회: http://127.0.0.1:{args.port}/admin/', flush=True)
     print('관리자: 읽기 전용 운영 로그 · 기획 시작 시에만 AI 실행 · 종료: Ctrl+C', flush=True)
     try:
