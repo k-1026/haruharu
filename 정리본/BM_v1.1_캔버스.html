@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BM 캔버스 v1.2</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#1f2328;--muted:#5b616b;--line:#d9d4c7;--accent:#b5652a;--tag-ok:#2f6f4e;--tag-ok-bg:#e3f1e8;--tag-as:#8a5a00;--tag-as-bg:#fbf0d9;--tag-u:#6b6f76;--tag-u-bg:#eceef1;--warn:#9b2c2c;--warn-bg:#fbe9e9}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15171a;--card:#1f2226;--ink:#e8e6e1;--muted:#a3a8b0;--line:#363a40;--accent:#e08a4a;--tag-ok:#8fd4ad;--tag-ok-bg:#1d3327;--tag-as:#f0c46b;--tag-as-bg:#3a2f16;--tag-u:#b9bdc4;--tag-u-bg:#2c3036;--warn:#f1a3a3;--warn-bg:#3a1f1f}}
+:root[data-theme="dark"]{--bg:#15171a;--card:#1f2226;--ink:#e8e6e1;--muted:#a3a8b0;--line:#363a40;--accent:#e08a4a;--tag-ok:#8fd4ad;--tag-ok-bg:#1d3327;--tag-as:#f0c46b;--tag-as-bg:#3a2f16;--tag-u:#b9bdc4;--tag-u-bg:#2c3036;--warn:#f1a3a3;--warn-bg:#3a1f1f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 "Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;padding:24px 16px}
+header{max-width:1280px;margin:0 auto 16px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0}
+.one{max-width:1280px;margin:12px auto 16px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px}
+.grid{max-width:1280px;margin:0 auto;display:grid;gap:10px;grid-template-columns:repeat(5,1fr);grid-template-areas:"kp ka vp cr cs" "kp kr vp ch cs" "co co co rs rs"}
+.box{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.box h2{font-size:14px;margin:0 0 8px;color:var(--accent)}
+.box ul{margin:0;padding-left:18px}
+.box li{margin:0 0 6px}
+.src{margin-top:8px;font-size:12px;color:var(--muted);border-top:1px dashed var(--line);padding-top:6px}
+.t{display:inline-block;font-size:11px;padding:0 6px;border-radius:9px;margin-left:2px;white-space:nowrap}
+.ok{color:var(--tag-ok);background:var(--tag-ok-bg)}.as{color:var(--tag-as);background:var(--tag-as-bg)}.u{color:var(--tag-u);background:var(--tag-u-bg)}.w{color:var(--warn);background:var(--warn-bg)}
+.kp{grid-area:kp}.ka{grid-area:ka}.kr{grid-area:kr}.vp{grid-area:vp}.cr{grid-area:cr}.ch{grid-area:ch}.cs{grid-area:cs}.co{grid-area:co}.rs{grid-area:rs}
+.formula{font-weight:700;margin:4px 0}
+footer{max-width:1280px;margin:16px auto 0;color:var(--muted);font-size:12px}
+@media (max-width:900px){.grid{grid-template-columns:1fr;grid-template-areas:"cs" "vp" "ch" "cr" "rs" "ka" "kr" "kp" "co"}}
+</style>
+</head>
+<body>
+<header>
+<h1>BM 캔버스 v1.2 — 담당자용 체류 기획 에이전트</h1>
+<p class="sub">2026-11-24 · 사람2 · 레드팀 24건 모두 수용 반영 · 수업 Day13 형식 (9칸 · 칸마다 근거 · 숫자마다 확인값/가정값) · 원문 <code>정리본/BM_v1.1_초안.md</code> · 레드팀 <code>정리본/BM_레드팀/</code></p>
+</header>
+
+<div class="one"><b>한 줄 BM.</b> 대구 관광 담당자가 체류형 사업을 <b>발주 · 검수 · 결재할 때</b>, 조건 → 수요 근거 → 코스 → 홍보 초안을 출처 · 경고와 함께 묶어 <b>판단 근거를 미리 갖추게</b> 한다. 1~4단계 <span class="t ok">실행 확인</span> · 5단계 결재 파일 <span class="t as">지침만</span>. 건당으로 시작, 시범으로 확인되면 구독 검토 <span class="t u">팀 결정</span></div>
+
+<div class="grid">
+<section class="box kp"><h2>⑦ 핵심 파트너</h2><ul>
+<li>용역 수행 업체 · 대행사 — <b>파트너이자 잠재 경쟁자</b></li>
+<li>운영 주체 후보: 중구청 관광과 상품, 시장 상인 조직 <span class="t u">[U]</span>, 야시장 운영 재단</li>
+<li>여행사 — 진흥원 인센티브 1박 2만 원/인 · 공항 입국 최대 2,000만 원 <span class="t ok">확인값</span>. <b>누구에게나 열린 공개 제도</b>, 예산 조기 소진 기록. <b>우리 매출과 연결 없음</b></li>
+</ul><div class="src">근거: 11_운영주체_후보 1·6장, 작업정리 v2 9절 · 레드팀 R-6 · C-7 · I-8</div></section>
+
+<section class="box ka"><h2>⑤ 핵심 활동</h2><ul>
+<li>공공 데이터 · 장소 운영 정보 · 이동 시간 · 기존 상품 목록 갱신</li>
+<li>스토리 · 외국어 표기 검증, 지침 개선, 시범 지원</li>
+<li><b>지역마다 손으로 갱신</b> → 지역을 넓히면 비용도 비례해 늘 수 있음 <span class="t as">가정</span></li>
+</ul><div class="src">근거: 3_코스검토 2_입력, 4_홍보검토 11·12번 · 레드팀 I-6</div></section>
+
+<section class="box kr"><h2>⑥ 핵심 자원</h2><ul>
+<li><b>복제 가능 (공개 자료):</b> 출처 대장 · 공공 데이터 · 기존 상품 목록 · 용어집 · 지침</li>
+<li><b>우리만 쌓는 것:</b> 캐릭터 너구리 · 족제비, 통합 시험 · 검증 기록. 시범 결과 · 담당자 피드백 <b>아직 없음</b></li>
+<li><span class="t w">진입장벽 지금 없음</span> 네트워크 · 데이터 · 계약 모두</li>
+</ul><div class="src">근거: research/sources.md, 지침/ · 레드팀 R-1 · R-5</div></section>
+
+<section class="box vp"><h2>② 가치 제안</h2><ul>
+<li><b>담당자에게 — 업체 제안 평가 · 결과물 검수 · 결재 근거 확보 부담을 줄인다</b></li>
+<li>(가) 조건 · 근거 · 코스 · 홍보 초안을 출처 · 경고와 한 흐름으로 <span class="t ok">실행 확인</span></li>
+<li>(나) 충돌 · 대체안 <span class="t ok">실행 확인</span>, 기존 상품 겹침 — 근거 1건, 담당자가 놓치는지 <span class="t u">미확인</span></li>
+<li>(다) 표현 필터 · 공식 표기 홍보 초안 <span class="t ok">실행 확인</span> · 결재 파일 <span class="t as">지침만</span></li>
+<li><b>대행사에게</b> 줄 가치 <span class="t u">[U]</span> (일이 줄어 매출이 깎일 수도)</li>
+</ul><div class="src">근거: 과업 문서 원문(검수 · 최종 확정), 3단계_시험값_1123 · 레드팀 C-2 · C-3 · C-7 · R-7 · 대안 비교는 md 6장</div></section>
+
+<section class="box cr"><h2>④ 고객 관계</h2><ul>
+<li>시범 사용 → 결과 공유 → 연 계약 검토. 확정은 담당자</li>
+<li>시범 성공 기준 <span class="t u">[U]</span> — As-Is/To-Be 지표와 연결</li>
+<li>위험: 예산 편성 주기 · 담당자 교체 <span class="t as">가정</span></li>
+</ul><div class="src">근거: 유저플로우 v1.1, AsIs_ToBe 2장 · 레드팀 C-8</div></section>
+
+<section class="box ch"><h2>③ 채널</h2><ul>
+<li>(가) 대행사와 협업해 용역 안에서 — <b>대행사는 잠재 경쟁자</b>, 넘길 것 · 남길 것 <span class="t u">[U]</span></li>
+<li>(나) 발주 부서 시범 사용 1건 (문의 문안 초안 있음)</li>
+<li>첫 접점 · 공공 구매 절차 <span class="t u">[U]</span></li>
+</ul><div class="src">근거: 시장검증 1장 C · 6장 · 레드팀 R-3 · C-3 · C-4</div></section>
+
+<section class="box cs"><h2>① 고객 세그먼트</h2><ul>
+<li><b>사용자:</b> 중구청 관광 부서 담당자 (MVP)</li>
+<li><b>돈을 내는 쪽</b> (결재 · 예산 팀) <span class="t u">[U]</span></li>
+<li>이미 쓰는 돈 (관광 + 홍보 안): 타임워프 페스타 200,000,000원 · 중구 SNS 홍보 <span class="t ok">확인값</span>. 빛 축제는 문화교육과 사업이라 뺌</li>
+<li><span class="t w">위험</span> 고객 1곳 · 대행사가 관계 선점 · 관광재단 재편 선점 경쟁 <span class="t as">가정</span></li>
+</ul><div class="src">근거: 시장검증 4장 · 5-1 · 5-3, 페르소나 1-1 · 레드팀 C-1 · R-6</div></section>
+
+<section class="box co"><h2>⑧ 비용 구조</h2><ul>
+<li><b>지역별 구축비</b> (운영 정보 · 이동 · 상품 목록 · 스토리) · <b>건별</b> (AI c_AI · 검토 c_검토) · <b>공통 고정비</b> (웹 앱 개발 · 유지보수, 데이터 갱신, 영업 · 인터뷰 · 시범, 입찰 자격) · <b>파트너 몫</b> — 금액 모두 <span class="t u">[U]</span></li>
+<li class="formula">건당 공헌이익 = p − (c_AI + c_검토) → 지금은 부호도 모름</li>
+<li>손익분기 틀: n × p × r ≥ 고정비 + 지역 구축비 + n × (c_AI + c_검토) (금액 미정)</li>
+</ul><div class="src">근거: app/통합시험_안내.md, 시장검증 6장 · 레드팀 I-4 · I-5 · I-6 · C-4</div></section>
+
+<section class="box rs"><h2>⑨ 수익원</h2><ul>
+<li><b>기획안 건당 → 연 구독 검토</b> <span class="t u">팀 결정</span> · 다시 볼 기준 있음 (md 5장)</li>
+<li><b>도구 요금 p</b> <span class="t u">[U]</span> · 지불 의향 미확인. 1,500여만~5,000만 원은 <b>사업 예산 크기</b> <span class="t ok">확인값</span>, 요금 아님</li>
+<li><b>SOM = N × n × p × r</b> — <span class="t w">검증 전 식</span>, 값 넣어 결론 내지 않음. n 0~3건 <span class="t as">가정값</span></li>
+<li>확인 순서: ① 채택률(시범 1건) → ② 요금(지불 의향) → ③ 해당 발주 건수</li>
+</ul><div class="src">근거: 시장검증 5-1 · 레드팀 I-1 · I-2 · I-3 · R-4 · C-6 · I-7</div></section>
+</div>
+
+<footer>확인 필요: 결재 팀 · 시범 1건(채택률 · 성공 기준) · 지불 의향 · 해당 발주 건수 · c_AI · c_검토 · 첫 접점과 공공 구매 절차 · 구독 예산 항목 · 대행사와 넘길 것/남길 것 · 시장검증 5-2도 검증 전 식으로 맞추기</footer>
+</body>
+</html>
