@@ -56,5 +56,15 @@ class 호출시험(unittest.TestCase):
         self.assertIsNone(self.call(r,lambda p,i:calls.append(1) or '{}'))
         self.assertEqual(calls,[]);self.assertEqual(r['실행'][-1]['결과'],'보류')
 
+    def test_응답시간초과는_재시도하지_않고_이유를_남긴다(self):
+        import run_stage
+        calls=[]
+        def fn(p,i):
+            calls.append(1);raise run_stage.AI응답시간초과('AI(claude)가 900초 동안 응답하지 않아 중단했습니다.')
+        r=rec()
+        self.assertIsNone(self.call(r,fn))
+        self.assertEqual(len(calls),1);self.assertEqual(r['실행'][-1]['결과'],'실패')
+        self.assertIn('응답하지 않아 중단',r['실행'][-1]['이유'])
+
 
 if __name__=='__main__':unittest.main()

@@ -53,5 +53,27 @@ class AI연결시험(unittest.TestCase):
             for path in ['.env','../outside.md','app/runs/private.json']:
                 with self.subTest(path=path),self.assertRaises(ValueError):read(path)
 
+    def test_응답이_제한시간을_넘으면_끊고_이유를_알린다(self):
+        async def 느린(*a):
+            await asyncio.sleep(5)
+            return '늦은 결과'
+        config={'AI_PROVIDER':'claude','AI_TIMEOUT_SECONDS':'1'}
+        with mock.patch.object(run_stage,'설정_읽기',return_value=config),              mock.patch.object(run_stage,'에이전트_읽기',return_value=('지침',[])),              mock.patch.object(run_stage,'_클로드_실행',side_effect=느린):
+            with self.assertRaisesRegex(run_stage.AI응답시간초과,'1초 동안 응답하지 않아'):
+                asyncio.run(run_stage.단계_실행('agent.md','입력'))
+
+    def test_제한시간_설정값을_검사한다(self):
+        self.assertEqual(run_stage.제한초_읽기({}),run_stage.기본_제한초)
+        self.assertEqual(run_stage.제한초_읽기({'AI_TIMEOUT_SECONDS':'120'}),120)
+        for 값 in ['abc','0','-5']:
+            with self.subTest(값=값),self.assertRaises(ValueError):run_stage.제한초_읽기({'AI_TIMEOUT_SECONDS':값})
+
+    def test_제미나이_통신에도_제한시간을_건다(self):
+        from google import genai
+        with mock.patch.object(genai,'Client') as client:
+            client.return_value.models.generate_content.return_value=SimpleNamespace(text='결과')
+            asyncio.run(run_stage._제미나이_실행('지침','입력','sample-model','test-only-key',[],30))
+        self.assertEqual(client.call_args.kwargs['http_options'].timeout,30000)
+
 
 if __name__=='__main__':unittest.main()
