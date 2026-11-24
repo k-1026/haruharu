@@ -221,7 +221,7 @@ export async function mount(host,stops,options={}){
   }
   for(const item of model.entries)if(item.point){
     const pos=project(item.point),name=globalThis.코스지도모델.label(item);
-    const row=label(`${item.순번}. ${name}`,pos.clone().setY(2),()=>selectStop(item.순번),'stop-marker '+item.kind);
+    const row=label(`${item.순번}. ${name}`,pos.clone().setY(2),()=>selectStop(item.순번),'stop-marker '+item.kind+' slot-'+(item.시간칸==='저녁'?'eve':['밤','숙박'].includes(item.시간칸)?'night':'day'));
     row.el.setAttribute('aria-label',`${item.순번}. ${name}${item.kind==='area'?' · 식당 후보 보기':''}`);
     row.el.innerHTML=`<span class="map-stop-badge" aria-hidden="true">${item.순번}</span><span class="map-stop-name">${item.kind==='area'?'<span class="map-meal-tag">식사</span> ':''}${esc(name)}</span>`;
     row.number=item.순번;allPins.push(row);

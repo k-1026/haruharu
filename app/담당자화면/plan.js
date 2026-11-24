@@ -81,8 +81,10 @@
       ${!s.좌표&&!s.권역표시?.중심?'<p class="note">이 일정은 아직 지도 위치가 정해지지 않았습니다. 목록에는 계속 남겨 둡니다.</p>':''}
       ${위치안내(s)}${info.출처URL?`<p><a target="_blank" rel="noopener" href="${safe(info.출처URL)}">장소 안내 출처 ↗</a></p>`:''}`;
   }
-  function 입장화면(){return `<section class="entry-screen"><div class="entry-copy"><h1>대구의 낮과 밤을,<br>하나의 여행으로.</h1><p class="entry-lead">대구시 관광 담당자를 위한 코스 기획 도구예요. 관광객 유형과 조건을 고르면 AI가 낮 관광부터 저녁, 숙박까지 이어지는 코스 초안을 만들어요. 안을 비교하고, 너구리와 족제비를 따라 지도에서 미리 걸어볼 수 있어요.</p><div class="entry-actions"><button class="btn primary" id="entryNew">새 코스 기획하기</button><button class="btn" id="entrySaved">지난 코스 불러오기</button></div><p class="note">저장된 코스와 지도는 AI 실행 없이 다시 볼 수 있어요.</p><ol class="entry-steps"><li><b>1</b>조건 고르기</li><li><b>2</b>코스·대안 비교</li><li><b>3</b>지도에서 걸어보기</li><li><b>4</b>홍보물·결재 파일</li></ol></div><div class="entry-journey" aria-label="코스가 이어지는 하루"><h2>하루를 이렇게 이어요</h2><ol class="day-line"><li class="t-day"><span class="t-when">낮</span><div><b>중구·동구 관광</b><small>근대골목 · 서문시장 · 동촌유원지 등 운영 중인 곳 위주</small><em class="chick-note"><svg class="drum" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 3.2c3.4 0 6.2 2.7 6.2 6.1 0 3.2-2.4 5.6-5.5 6l-3.5 3.6a2 2 0 1 1-2.7 2.5 2 2 0 1 1-2.5-2.7l3.6-3.5c.4-3.1 2.8-5.5 6-5.5"/></svg>치킨은 장소 해설·이야기로 살짝</em></div></li><li class="t-eve"><span class="t-when">저녁</span><div><b>대구 음식 중에서 고르기</b><small>이동시간·휴무·동행에 맞춰 선택</small><span class="eve-opts"><i class="opt-chicken"><svg class="drum" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 3.2c3.4 0 6.2 2.7 6.2 6.1 0 3.2-2.4 5.6-5.5 6l-3.5 3.6a2 2 0 1 1-2.7 2.5 2 2 0 1 1-2.5-2.7l3.6-3.5c.4-3.1 2.8-5.5 6-5.5"/></svg>평화시장 닭똥집골목</i><i>동성로 닭요리</i><i>다른 대구 음식</i></span></div></li><li class="t-night"><span class="t-when">밤</span><div><b>근거리는 귀가, 원거리는 하룻밤</b><small>야경 → 숙박 → 다음 날 오전 일정</small></div></li></ol><p class="entry-signature">가족 코스는 술 없이 짜요. 업체 섭외·계약은 담당 부서가 결정해요.</p></div></section>`;}
-  const api={문장,짧게,상태,할일,보완요약,위치안내,장소패널,입장화면};
+  const 닭=`<svg class="drum" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 3.2c3.4 0 6.2 2.7 6.2 6.1 0 3.2-2.4 5.6-5.5 6l-3.5 3.6a2 2 0 1 1-2.7 2.5 2 2 0 1 1-2.5-2.7l3.6-3.5c.4-3.1 2.8-5.5 6-5.5"/></svg>`;
+  const 치킨장소=name=>/닭|치킨|치맥/.test(String(name||''));
+  function 입장화면(){return `<section class="entry-screen"><div class="entry-copy"><h1>대구의 낮과 밤을,<br>하나의 여행으로.</h1><p class="entry-lead">관광객 유형과 조건을 고르면 AI가 낮 관광부터 저녁, 숙박까지 이어지는 코스 초안을 만들어요. 안을 비교하고 지도에서 동선을 확인한 뒤, 홍보물과 결재 파일까지 이어서 만들 수 있어요.</p><div class="entry-actions"><button class="btn primary big" id="entryNew">새 코스 기획하기</button></div><ol class="entry-flow" aria-label="기획 순서"><li><b>조건 고르기</b><small>계절·언어권·지역·체류 기간</small></li><li><b>AI 초안 받기</b><small>A안과 대안을 함께 만들어요</small></li><li><b>지도로 검토</b><small>동선·운영시간·이동 시간</small></li><li><b>홍보물·결재 파일</b><small>확정한 안으로 이어서</small></li></ol></div><section class="entry-recent" aria-labelledby="recentTitle"><div class="recent-head"><h2 id="recentTitle">이어서 보기</h2><button class="btn link" id="entrySaved">지난 코스 전체</button></div><div class="recent-list" id="recentList"><p class="empty">불러오는 중…</p></div><p class="note">저장된 코스와 지도는 AI 실행 없이 다시 볼 수 있어요.</p></section></section><section class="entry-day" aria-label="코스가 이어지는 하루"><div class="t-day"><span class="t-when">낮</span><b>중구·동구 관광</b><small>근대골목·서문시장 등 운영 중인 곳 위주</small><em class="chick-note">${닭}치킨은 장소 해설·이야기로 가볍게</em></div><div class="t-eve"><span class="t-when">저녁</span><b>대구 음식 중에서 고르기</b><span class="eve-opts"><i class="opt-chicken">${닭}평화시장 닭똥집골목</i><i>동성로 닭요리</i><i>다른 대구 음식</i></span></div><div class="t-night"><span class="t-when">밤</span><b>근거리는 귀가, 원거리는 하룻밤</b><small>야경 → 숙박 → 다음 날 오전 · 가족 코스는 술 없이</small></div></section>`;}
+  const api={문장,짧게,상태,할일,보완요약,위치안내,장소패널,입장화면,닭,치킨장소};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   root.기획표시=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
@@ -96,7 +98,7 @@ const short=s=>esc(기획표시.짧게(s));
 const slotName=s=>({'낮오후':'오후','2일차오전':'둘째 날 오전'}[s]||s);
 const stopName=s=>기획표시.문장((s.표시명||s.장소명||(s.시간칸==='2일차오전'?'둘째 날 오전':slotName(s.시간칸))||'일정 미정').split(/\s*[—–]\s*/)[0]);
 async function get(url){const r=await fetch(url);const d=await r.json();if(!r.ok)throw new Error(d.오류||'불러오기 실패');return d;}
-let token=null,poll=null,tick=null,last=null;
+let token=null,poll=null,tick=null,last=null,savedItems=null;
 async function post(url,body){
   token=token||(await get('/api/session')).token;
   const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Token':token},body:JSON.stringify(body)});
@@ -110,11 +112,9 @@ async function loadList(select){
   const box=$('saved');
   try{
     const runs=await get('/api/runs');const items=[];
-    for(const run of runs){
-      let info;try{info=await get('/api/course?id='+encodeURIComponent(run.id));}catch{continue;}
-      for(const t of info.시험목록||[])if(t.시험id)items.push({id:t.시험id,조건:run.조건,시각:t.기록시각||''});
-    }
-    items.sort((a,b)=>b.시각.localeCompare(a.시각));
+    const infos=await Promise.all(runs.map(run=>get('/api/course?id='+encodeURIComponent(run.id)).catch(()=>null)));  // 한 번에 받아 첫 화면 목록이 빨리 뜨게
+    runs.forEach((run,i)=>{for(const t of infos[i]?.시험목록||[])if(t.시험id)items.push({id:t.시험id,조건:run.조건,시각:t.기록시각||''});});
+    items.sort((a,b)=>b.시각.localeCompare(a.시각));savedItems=items;renderRecent();
     if(!items.length){box.innerHTML='<p class="empty">아직 만든 코스가 없어요.</p>';return items;}
     box.innerHTML='';
     for(const it of items){
@@ -126,35 +126,53 @@ async function loadList(select){
     return items;
   }catch(e){box.innerHTML=`<p class="empty">${esc(e.message)}</p>`;return [];}
 }
+function renderRecent(){
+  const box=$('recentList');if(!box||!savedItems)return;
+  if(!savedItems.length){box.innerHTML='<p class="empty recent-empty">아직 만든 코스가 없어요. 첫 코스를 기획해 보세요.</p>';return;}
+  box.innerHTML=savedItems.slice(0,4).map(it=>{const c=it.조건||{};return `<button type="button" class="recent-item stay-${c.체류기간==='당일'?'day':'night'}" data-id="${esc(it.id)}"><span class="recent-band" aria-hidden="true"></span><b>${esc([c.계절,c.체류기간].filter(Boolean).join(' · ')||'조건 미기록')}</b><span>${esc([(c.언어권||[]).join('·'),(c.지역||[]).join('·')].filter(Boolean).join(' · '))}</span><small>${esc(it.시각.replace('T',' ').slice(0,16))}</small></button>`;}).join('');
+  box.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const it=savedItems.find(x=>x.id===b.dataset.id);show(it.id,it.조건||{});});
+}
+function setView(v){document.body?.setAttribute?.('data-view',v);}
 function mark(id){$('saved').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.id===id));}
 function hideHistory(){const panel=$('historyPanel');if(panel)panel.hidden=true;$('historyBtn')?.setAttribute('aria-expanded','false');}
 function showHistory(){const panel=$('historyPanel');if(!panel)return;panel.hidden=false;$('historyBtn').setAttribute('aria-expanded','true');$('historyClose').focus();}
-function showLanding(){hideHistory();mark(null);$('main').innerHTML=기획표시.입장화면();$('entryNew').onclick=()=>newForm();$('entrySaved').onclick=showHistory;}
+function showLanding(){hideHistory();mark(null);setView('landing');$('progress').hidden=!(last&&last.상태==='진행중');$('main').innerHTML=기획표시.입장화면();$('entryNew').onclick=()=>newForm();$('entrySaved').onclick=showHistory;renderRecent();}
 
 // ---------- ① 조건 고르기 (주문서) ----------
 const 선택지={계절:['봄','여름','가을','겨울'],언어권:['영어권','일본어','중국어 간체','중국어 번체'],지역:['중구','동구'],체류기간:['당일','1박2일']};
 const 여러개={언어권:1,지역:1};
 function newForm(){
   hideHistory();
-  mark(null);
+  mark(null);setView('form');
   const q=(name,label,help)=>`<div class="q"><span>${label}${help?`<small>${help}</small>`:''}</span><div class="pills" data-name="${name}">${선택지[name].map(v=>`<button type="button" class="pill" aria-pressed="false" data-v="${esc(v)}">${esc(v)}</button>`).join('')}</div></div>`;
   $('main').innerHTML=`<section class="card">${guide(1)}
     <h2>어떤 코스를 만들까요?</h2>
     <p class="lead">꼭 지킬 조건을 고르고, 바라는 점이 있으면 적어 주세요. AI 에이전트들이 자료 확인부터 코스 초안까지 이어서 만들어요.</p>
     <p class="note">고른 지역과 여행 조건 안에서 코스를 제안해요. 시작·종료 장소나 식사 방식이 미정이어도 초안부터 볼 수 있어요.</p>
-    <form class="order" id="order">
+    <form class="order order-layout" id="order"><div class="order-fields">
       ${q('계절','계절')}${q('언어권','대상 언어권','여러 개 고를 수 있어요')}${q('지역','지역','여러 개 고를 수 있어요')}${q('체류기간','체류 기간')}
       <div class="sec">바라는 점 <span class="note">(선택 · 지키기 어려우면 AI가 이유를 남기고 조정할 수 있어요)</span></div>
       <label class="q"><span>목표</span><input name="목표" maxlength="300" placeholder="예: 필수 대상은 일본인 커플, 중구에서 저녁과 숙박으로 연결"></label>
       <label class="q"><span>희망 사항<small>한 줄에 하나</small></span><textarea name="희망" rows="3" placeholder="예: 저녁 이후 야경을 넣고 싶어요&#10;이동을 줄이고 여유롭게 식사하고 싶어요"></textarea></label>
+      </div><aside class="order-summary" aria-label="만들어질 코스 미리보기"><h3>만들어질 코스</h3><div class="sum-chips" id="sumChips"></div><ol class="sum-day" id="sumDay"></ol>
       <p class="agree">시작하면 중간 알림·경고는 기록에 남기고 <b>코스 초안까지 자동으로 진행</b>해요. 기관 데이터는 '없음'으로 진행하고, 홍보물과 최종 문서는 코스를 확인한 뒤 따로 만들어요.</p>
       ${last&&last.상태==='진행중'?'<p class="note">지금 만들고 있는 코스가 있어요. 한 번에 하나씩 만들어요. 끝난 뒤 시작해 주세요.</p>':''}
-      <div class="go"><span class="note" id="need"></span><span class="err" id="newErr"></span><button class="btn primary big" id="newGo" type="submit" disabled>코스 만들기 시작</button></div>
+      <div class="go"><span class="note" id="need"></span><span class="err" id="newErr"></span><button class="btn primary big" id="newGo" type="submit" disabled>코스 만들기 시작</button></div></aside>
     </form></section>`;
   const f=$('order');
   const 값=()=>{const v={};for(const n in 선택지){const on=[...f.querySelectorAll(`[data-name="${n}"] [aria-pressed=true]`)].map(b=>b.dataset.v);v[n]=여러개[n]?on:on[0]||'';}return v;};
   const check=()=>{const v=값();const miss=Object.keys(선택지).filter(n=>!v[n]||!v[n].length).map(n=>({계절:'계절',언어권:'언어권',지역:'지역',체류기간:'체류 기간'}[n]));
-    $('need').textContent=miss.length?`남은 것: ${miss.join(', ')}`:'';$('newGo').disabled=miss.length>0;};
+    $('need').textContent=miss.length?`남은 것: ${miss.join(', ')}`:'모든 조건을 골랐어요.';$('newGo').disabled=miss.length>0;미리보기(v);};
+  const 미리보기=v=>{
+    const chips=[v.계절,(v.언어권||[]).join('·'),(v.지역||[]).join('·'),v.체류기간].filter(Boolean);
+    $('sumChips').innerHTML=chips.length?chips.map(c=>`<span class="chip">${esc(c)}</span>`).join(''):'<span class="note">왼쪽에서 조건을 고르면 여기에 모여요.</span>';
+    const 지역=(v.지역||[]).length?v.지역.join('·'):'선택한 지역';
+    const 단계=v.체류기간==='당일'?[['day','낮',`${지역} 관광`],['eve','저녁','대구 음식 중 선택 · 닭요리 포함'],['home','이후','귀가']]
+      :v.체류기간==='1박2일'?[['day','낮',`${지역} 관광`],['eve','저녁','대구 음식 중 선택 · 닭요리 포함'],['night','밤','야경 → 숙박'],['day2','둘째 날','오전 일정 후 귀가']]
+      :[['day','낮','관광'],['eve','저녁','식사 선택'],['night','이후','체류 기간에 따라 달라져요']];
+    $('sumDay').className='sum-day'+(v.체류기간?'':' is-empty');
+    $('sumDay').innerHTML=단계.map(([k,t,d])=>`<li class="s-${k}"><span>${t}</span><p>${k==='eve'&&v.체류기간?기획표시.닭:''}${esc(d)}</p></li>`).join('');
+  };
   f.querySelectorAll('.pills').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('.pill');if(!b)return;
     if(!여러개[g.dataset.name])g.querySelectorAll('.pill').forEach(x=>x!==b&&x.setAttribute('aria-pressed','false'));
     b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');check();}));
@@ -188,7 +206,7 @@ function showProgress(p){
   const 정리=p.정리;const 남은=정리?정리.사람이정할것:((p.검사&&p.검사.남은문제)||[]);
   box.innerHTML=`${guide(p.상태==='완료'?3:2)}<div class="top"><div><h2>${esc(head)}</h2><span class="note">${esc([c.계절,(c.언어권||[]).join('·'),(c.지역||[]).join('·'),c.체류기간].filter(Boolean).join(' · '))}${p.목표?' · 목표: '+esc(p.목표):''}</span></div>
     <div>${p.상태==='완료'&&p.시험id?`<button class="btn primary" id="seeNew">만든 코스 보기</button> `:''}${진행?'':'<button class="btn" id="closeP">닫기</button>'}</div></div>
-    ${msg}<details><summary>단계별 진행 상황</summary><div class="agents">${cards}</div></details>
+    ${msg}<div class="agents">${cards}</div>
     ${로그}
     ${남은.length?'<p class="note">담당자가 정할 항목은 만든 코스에서 간단히 확인할 수 있어요.</p>':''}
     ${p.희망&&p.희망.length?`<p class="note">바라는 점: ${p.희망.map(esc).join(' / ')}</p>`:''}`;
@@ -207,7 +225,7 @@ function watch(id){
 
 // ---------- ③ 코스 확인 ----------
 async function show(id,cond,안,버전){
-  mark(id);const main=$('main');main.innerHTML='<p class="empty">불러오는 중…</p>';
+  mark(id);setView('course');const main=$('main');main.innerHTML='<p class="empty">불러오는 중…</p>';
   try{const rec=await get('/api/plan/record?id='+encodeURIComponent(id)+(안?'&안='+안:'')+(버전?'&버전='+버전:''));if(rec.있음)return showRecord(id,cond||{},rec);}catch{}
   let s;try{s=await get('/api/plan/course?id='+encodeURIComponent(id));}catch(e){main.innerHTML=`<p class="empty">${esc(e.message)}</p>`;return;}
   const k=s.조건||{};cond=cond||{};
@@ -223,6 +241,14 @@ async function show(id,cond,안,버전){
 const 분류이름={AI수정:['AI가 고칠 것','시간 겹침·형식 오류처럼 코스가 틀린 것. 총괄이 코스 에이전트에게 고치게 해요. 남아 있으면 고치지 못한 것이에요.'],
   자료보완:['자료 보완','자료가 없어 생긴 것. 수집 에이전트가 저장소 자료에서 찾아요. 남아 있으면 못 찾은 것이에요.'],
   사람결정:['담당자가 정할 것','시작·종료, 2일차 오전, 식사 방식, 지키지 못한 희망처럼 사람이 정할 것이에요.']};
+const 칸이름={낮:'낮',낮오후:'오후',점심:'점심',저녁:'저녁',밤:'밤',숙박:'숙박','2일차오전':'둘째 날 오전'};
+function 시간표(일정){
+  if(!일정.length)return '<div class="day-schedule"><p class="empty">아직 일정이 없어요.</p></div>';
+  let day=null;const days=new Set(일정.map(x=>x.일차)).size;
+  const rows=일정.map(x=>{const n=stopName(x),c=칸색(x);const head=days>1&&x.일차!==day?`<li class="ds-day">${esc(x.일차)}일차</li>`:'';day=x.일차;
+    return head+`<li class="ds-row slot-${c}"><span class="ds-time">${esc(x.시각||'미정')}</span><span class="ds-dot" aria-hidden="true"></span><span class="ds-name">${기획표시.치킨장소(n)?`<em class="chick-stop" title="치킨·닭요리 요소">${기획표시.닭}${esc(n)}</em>`:esc(n)}<small>${esc(칸이름[x.시간칸]||x.시간칸||'')}</small></span></li>`;}).join('');
+  return `<div class="day-schedule"><h3>하루 시간표 <span class="note">권장 순서·시각</span></h3><ol>${rows}</ol></div>`;
+}
 function showRecord(id,cond,rec){
   const main=$('main');const 정리=rec.정리;const 안=정리.안.find(a=>a.안id===rec.안id);const s=rec.요약;
   const 원희망=Object.fromEntries((rec.원래요청.희망||[]).map(h=>[h.id,h.내용]));
@@ -259,11 +285,11 @@ function showRecord(id,cond,rec){
     <section class="card ai recommendation"><div class="aihead"><span class="aibadge">코스 초안</span><h2>코스 제안</h2><span class="draft-badge">확정 전 초안</span>${s.코스있음?`<button class="btn primary compare-map-button" id="openMap" title="동선 · 시간표">지도 크게 보기 ↗</button>`:''}</div>
       <p class="lead">${정리.안.length>1?'요청을 바탕으로 만든 코스와 대안을 비교해 보세요.':'요청을 바탕으로 만든 코스예요. 동선과 일정을 먼저 살펴보세요.'}</p>
       <div class="tabs plan-choices">${tabs}</div>
-      ${(s.일정||[]).length?`<p class="route-preview">${s.일정.slice(0,5).map(x=>{const n=esc(stopName(x));return /닭|치킨|치맥/.test(n)?`<em class="chick-stop" title="치킨·닭요리 요소"><svg class="drum" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 3.2c3.4 0 6.2 2.7 6.2 6.1 0 3.2-2.4 5.6-5.5 6l-3.5 3.6a2 2 0 1 1-2.7 2.5 2 2 0 1 1-2.5-2.7l3.6-3.5c.4-3.1 2.8-5.5 6-5.5"/></svg>${n}</em>`:n}).join(' <span aria-hidden="true">→</span> ')}${s.일정.length>5?' …':''}</p>`:''}
+      <div class="rec-split">${시간표(s.일정||[])}<div class="rec-side">
       ${이전?'<div class="review-status state-대기"><b>이전 수정본을 보고 있어요</b><p>최신 코스로 돌아가서 현재 검토 내용을 확인해 주세요.</p><button class="btn" id="latestPlan">최신 코스 보기</button></div>':''}
       <div class="review-status state-${상태.종류}" role="status"><b>${esc(상태.제목)}</b><p>${esc(상태.설명)}</p>${주요확인.length?`<ul>${주요확인.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div>
       ${s.출발가능요일?.length?`<p class="departure"><b>출발 요일 참고</b> ${esc(s.출발가능요일.join(' · '))}<span class="note">정기휴무 기준이에요. 운영 변경 여부는 출발 전 확인해 주세요.</span></p>`:''}
-      ${부분}${alt}${required}</section>
+      ${부분}${alt}${required}</div></div></section>
     <section class="card freedom"><h3>어디까지 자유롭게 이용하나요?</h3><p>표시된 순서와 시각은 권장 일정이에요. 관광·식사는 장소의 운영시간 안에서 선택할 수 있도록 기획합니다.</p><p class="note">예약이나 이용권에 실제로 정해진 시간이 있다면 그 조건을 따라야 해요. 미정인 사용처·유효시간·포함 혜택은 아직 확정된 상품 조건이 아니에요. 집결·해산이나 숙소 예약을 먼저 입력할 필요는 없어요.</p></section>
     ${wish}
     <details class="card"><summary>코스 수정하기 · 바꾸고 싶은 부분이 있나요?</summary><p class="note">고른 일정만 다시 제안해요. 나머지 일정과 이전 초안은 보존해요.</p>
@@ -288,7 +314,7 @@ function showRecord(id,cond,rec){
 let mapController=null,mapVersion=0,explorerStops=[],selectedStop=null,returnFocus=null;
 function closeMap(){
   const view=$('mapView');if(!view||view.hidden)return;
-  mapVersion++;mapController?.destroy();mapController=null;view.hidden=true;
+  mapVersion++;mapController?.destroy();mapController=null;view.hidden=true;setView('course');
   document.body.classList.remove('map-open');
   document.querySelector('.wrap').inert=false;document.querySelector('body > header').inert=false;
   (returnFocus?.isConnected?returnFocus:$('openMap'))?.focus();
@@ -317,13 +343,13 @@ function openMap(stops,context={}){
   let day=null;const list=explorerStops.map((s,index)=>{
     const heading=day!==s.일차?`<h3 class="explorer-day">${esc(s.일차)}일차</h3>`:'';day=s.일차;
     const next=explorerStops[index+1],segment=next&&next.일차===s.일차?`<div class="stop-transfer"><span data-route-time="${s.순번}">경로 확인 중</span><button type="button" data-play-segment="${s.순번}" disabled aria-label="${esc(stopName(s))}에서 ${esc(stopName(next))}까지 구간 재생">구간 재생</button></div>`:'';
-    return heading+`<button type="button" class="explorer-stop" data-stop="${s.순번}" aria-pressed="false"><span class="stop-order">${s.순번}</span><span><small>${esc(s.시각||'시각 미정')}</small><b>${esc(stopName(s))}</b></span></button>${segment}`;
+    return heading+`<button type="button" class="explorer-stop slot-${칸색(s)}" data-stop="${s.순번}" aria-pressed="false"><span class="stop-order">${s.순번}</span><span><small>${esc(s.시각||'시각 미정')}${칸이름[s.시간칸]?' · '+esc(칸이름[s.시간칸]):''}</small><b>${기획표시.치킨장소(stopName(s))?기획표시.닭:''}${esc(stopName(s))}</b></span></button>${segment}`;
   }).join('');
   view.innerHTML=`<header class="explorer-header"><button type="button" class="btn" id="backCompare">← 코스 비교</button><h1>${current?esc(current)+'안':'저장 코스'} · 지도 탐색</h1><nav aria-label="비교할 코스">${tabs}</nav>${plans.length&&!plans.some(a=>a.안id==='B')?'<span class="note">B안 아직 없음</span>':''}</header>
     <div class="explorer-body"><nav class="explorer-list" aria-label="방문 순서"><h2>방문 순서</h2>${list}</nav>
     <div class="explorer-map"><div id="mapbox"></div><p class="map-reference-note">시설·권역의 대표 위치 기준 · 도보 경로·시간은 지도 추정 · 실제 입구는 별도 확인</p></div>
     <aside class="place-panel" id="placePanel" aria-label="선택한 장소 설명" aria-live="polite" hidden></aside></div>`;
-  view.hidden=false;view.classList.remove('place-open');document.body.classList.add('map-open');
+  view.hidden=false;view.classList.remove('place-open');document.body.classList.add('map-open');setView('map');
   document.querySelector('.wrap').inert=true;document.querySelector('body > header').inert=true;
   $('backCompare').onclick=closeMap;
   view.querySelectorAll('[data-stop]').forEach(button=>button.onclick=()=>selectStop(Number(button.dataset.stop)));
