@@ -46,7 +46,8 @@ class 호출시험(unittest.TestCase):
         def busy(p,i):calls.append(1);raise RuntimeError('429 RESOURCE_EXHAUSTED')
         with unittest.mock.patch.object(실행.time,'sleep',lambda s:None):
             self.assertIsNone(self.call(r,busy))
-        self.assertEqual(len(calls),4);self.assertEqual(r['실행'][-1]['결과'],'실패')
+        # 수집 30초 예산에서는 5+15초 뒤의 45초 대기를 시작하지 않는다.
+        self.assertEqual(len(calls),3);self.assertEqual(r['실행'][-1]['결과'],'실패')
         calls.clear()
         def bad(p,i):calls.append(1);raise ValueError('API key not valid')
         self.assertIsNone(self.call(rec(),bad));self.assertEqual(len(calls),1)
@@ -55,6 +56,33 @@ class 호출시험(unittest.TestCase):
         r=rec();기록모듈.실행_기록(r,'에이전트:코스','코스','A','x','성공',AI호출=30);calls=[]
         self.assertIsNone(self.call(r,lambda p,i:calls.append(1) or '{}'))
         self.assertEqual(calls,[]);self.assertEqual(r['실행'][-1]['결과'],'보류')
+
+    def test_혼잡재시도도_남은_AI호출수를_넘지않는다(self):
+        r=rec()
+        기록모듈.실행_기록(r,'에이전트:코스','코스','A','이전 호출','성공',AI호출=29)
+        calls=[]
+        def busy(p,i):
+            calls.append(1)
+            raise RuntimeError('503 overloaded')
+        with unittest.mock.patch.object(실행.time,'sleep') as wait:
+            self.assertIsNone(self.call(r,busy))
+        self.assertEqual(len(calls),1)
+        wait.assert_not_called()
+        self.assertEqual(sum(x['AI호출'] for x in r['실행']),30)
+
+    def test_혼잡대기중_역할시간을_소진하면_다시호출하지않는다(self):
+        clock=[0.0];calls=[]
+        def busy(p,i):
+            calls.append(1)
+            clock[0]+=29
+            raise RuntimeError('503 overloaded')
+        with unittest.mock.patch.object(실행.time,'monotonic',side_effect=lambda:clock[0]), \
+             unittest.mock.patch.object(실행.time,'sleep') as wait:
+            r=rec()
+            self.assertIsNone(self.call(r,busy))
+        self.assertEqual(len(calls),1)
+        wait.assert_not_called()
+        self.assertIn('시간',r['실행'][-1]['이유'])
 
     def test_응답시간초과는_재시도하지_않고_이유를_남긴다(self):
         import run_stage

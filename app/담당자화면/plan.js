@@ -43,11 +43,12 @@ function newForm(){
   $('main').innerHTML=`<section class="card">${guide(1)}
     <h2>어떤 코스를 만들까요?</h2>
     <p class="lead">꼭 지킬 조건을 고르고, 바라는 점이 있으면 적어 주세요. AI 에이전트들이 자료 확인부터 코스 초안까지 이어서 만들어요.</p>
+    <p class="note">이번 MVP 시연은 일본인 커플 · 가을 · 중구 · 1박2일이에요. 저녁은 음식 설문을 참고하며 치킨은 선택 사항이에요. 다른 지역 선택 기능은 그대로 이용할 수 있어요.</p>
     <form class="order" id="order">
       ${q('계절','계절')}${q('언어권','대상 언어권','여러 개 고를 수 있어요')}${q('지역','지역','여러 개 고를 수 있어요')}${q('체류기간','체류 기간')}
       <div class="sec">바라는 점 <span class="note">(선택 · 지키기 어려우면 AI가 이유를 남기고 조정할 수 있어요)</span></div>
-      <label class="q"><span>목표</span><input name="목표" maxlength="300" placeholder="예: 당일 관광객을 저녁까지 머물게 하기"></label>
-      <label class="q"><span>희망 사항<small>한 줄에 하나</small></span><textarea name="희망" rows="3" placeholder="예: 저녁은 평화시장 닭똥집골목에서&#10;야경을 넣고 싶어요"></textarea></label>
+      <label class="q"><span>목표</span><input name="목표" maxlength="300" placeholder="예: 필수 대상은 일본인 커플, 중구에서 저녁과 숙박으로 연결"></label>
+      <label class="q"><span>희망 사항<small>한 줄에 하나</small></span><textarea name="희망" rows="3" placeholder="예: 저녁 이후 야경을 넣고 싶어요&#10;이동을 줄이고 여유롭게 식사하고 싶어요"></textarea></label>
       <p class="agree">시작하면 중간 알림·경고는 기록에 남기고 <b>코스 초안까지 자동으로 진행</b>해요. 기관 데이터는 '없음'으로 진행하고, 코스 확정·홍보·문서는 하지 않아요.</p>
       ${last&&last.상태==='진행중'?'<p class="note">지금 만들고 있는 코스가 있어요. 한 번에 하나씩 만들어요. 끝난 뒤 시작해 주세요.</p>':''}
       <div class="go"><span class="note" id="need"></span><span class="err" id="newErr"></span><button class="btn primary big" id="newGo" type="submit" disabled>코스 만들기 시작</button></div>
@@ -71,7 +72,8 @@ const 아이콘=[ // 돋보기 · 막대그래프 · 지도핀 · 체크 (직접
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>',
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>',
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-5.6-6-10.5a6 6 0 0 1 12 0C18 15.4 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.2"/></svg>',
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>'];
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="6" r="2.5"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M12 8.5v4M12 12.5 6.5 16M12 12.5l5.5 3.5"/></svg>'];
 const 걸린=(a,b)=>{const s=Math.max(0,Math.round(((b?new Date(b):new Date())-new Date(a))/1000));return s<60?`${s}초`:`${Math.floor(s/60)}분 ${s%60}초`;};
 function showProgress(p){
   last=p;const box=$('progress');if(!p){box.hidden=true;return;}
@@ -83,11 +85,15 @@ function showProgress(p){
   const w=p.일하는중;
   const msg=진행&&w?`<div class="working">지금 <b>${esc(w.에이전트)}</b>가 일하고 있어요 — ${esc(w.하는일)}. 몇 분 걸릴 수 있어요. 창을 닫거나 새로고침해도 이어서 볼 수 있어요.</div>`
     :p.상태==='완료'?`<div class="working ok">${esc(p.안내||'')}</div>`:`<div class="working ${진행?'':'stop'}">${esc(p.안내||'')}</div>`;
-  const 남은=(p.검사&&p.검사.남은문제)||[];
+  const 활동=(p.활동||[]).slice(-8).reverse();
+  const 로그=활동.length?`<details ${진행?'open':''}><summary>에이전트 활동 ${p.활동.length}건 <span class="note">(최근 순)</span></summary><ol class="log">${활동.map(a=>`<li class="${a.상태==='진행중'?'now':a.상태==='실패'?'fail':''}"><b>${esc(a.에이전트)}</b> ${esc(a.하는일)}${a.대상&&a.에이전트!=='총괄 에이전트'?` <span class="note">(${esc(String(a.대상).slice(0,60))})</span>`:''}${a.결정?`<br><span class="note">판단: ${esc(a.결정)}</span>`:''}<span class="when">${a.상태==='진행중'?'일하는 중':a.시작?걸린(a.시작,a.끝):''}</span></li>`).join('')}</ol></details>`:'';
+  const 정리=p.정리;const 남은=정리?정리.사람이정할것:((p.검사&&p.검사.남은문제)||[]);
   box.innerHTML=`${guide(p.상태==='완료'?3:2)}<div class="top"><div><h2>${esc(head)}</h2><span class="note">${esc([c.계절,(c.언어권||[]).join('·'),(c.지역||[]).join('·'),c.체류기간].filter(Boolean).join(' · '))}${p.목표?' · 목표: '+esc(p.목표):''}</span></div>
     <div>${p.상태==='완료'&&p.시험id?`<button class="btn primary" id="seeNew">만든 코스 보기</button> `:''}${진행?'':'<button class="btn" id="closeP">닫기</button>'}</div></div>
     <div class="agents">${cards}</div>${msg}
-    ${남은.length?`<details><summary>담당자가 확인할 것 ${남은.length}건</summary><ul>${남은.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>`:''}
+    ${정리?`<p class="plans">${정리.안.map(a=>`<span class="chip">${esc(a.안id)}안 · ${a.안id==='A'?'원래 요청':'대안'} · ${esc(a.검증)}</span>`).join(' ')}</p>`:''}
+    ${로그}
+    ${남은.length?`<details><summary>담당자가 정할 것 ${남은.length}건</summary><ul>${남은.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>`:''}
     ${p.희망&&p.희망.length?`<p class="note">바라는 점: ${p.희망.map(esc).join(' / ')}</p>`:''}`;
   if($('seeNew'))$('seeNew').onclick=()=>{box.hidden=true;loadList(p.시험id);};
   if($('closeP'))$('closeP').onclick=()=>{box.hidden=true;};
@@ -103,8 +109,9 @@ function watch(id){
 }
 
 // ---------- ③ 코스 확인 ----------
-async function show(id,cond){
+async function show(id,cond,안,버전){
   mark(id);const main=$('main');main.innerHTML='<p class="empty">불러오는 중…</p>';
+  try{const rec=await get('/api/plan/record?id='+encodeURIComponent(id)+(안?'&안='+안:'')+(버전?'&버전='+버전:''));if(rec.있음)return showRecord(id,cond||{},rec);}catch{}
   let s;try{s=await get('/api/plan/course?id='+encodeURIComponent(id));}catch(e){main.innerHTML=`<p class="empty">${esc(e.message)}</p>`;return;}
   const k=s.조건||{};cond=cond||{};
   const chips=[cond.계절,(cond.언어권||[]).join('·'),(cond.지역||[]).join('·'),cond.체류기간,k.시작지점&&k.종료지점&&!(k.시작지점==='미확인'&&k.종료지점==='미확인')?`${k.시작지점} → ${k.종료지점}`:'시작·종료 장소 미정'].filter(Boolean);
@@ -117,6 +124,53 @@ async function show(id,cond){
     <span class="legend"><span><i class="lg-day"></i>낮</span><span><i class="lg-eve"></i>저녁</span><span><i class="lg-night"></i>밤·숙박</span></span></div>
     <div class="mapgrid"><div id="mapbox"></div><div class="timeline" id="timeline"></div></div></section>`:''}`;
   if(s.코스있음)draw(s.일정);
+}
+const 분류이름={AI수정:['AI가 고칠 것','시간 겹침·형식 오류처럼 코스가 틀린 것. 총괄이 코스 에이전트에게 고치게 해요. 남아 있으면 고치지 못한 것이에요.'],
+  자료보완:['자료 보완','자료가 없어 생긴 것. 수집 에이전트가 저장소 자료에서 찾아요. 남아 있으면 못 찾은 것이에요.'],
+  사람결정:['담당자가 정할 것','시작·종료, 2일차 오전, 식사 방식, 지키지 못한 희망처럼 사람이 정할 것이에요.']};
+function showRecord(id,cond,rec){
+  const main=$('main');const 정리=rec.정리;const 안=정리.안.find(a=>a.안id===rec.안id);const s=rec.요약;
+  const 원희망=Object.fromEntries((rec.원래요청.희망||[]).map(h=>[h.id,h.내용]));
+  const tabs=정리.안.map(a=>`<button class="tab ${a.안id===rec.안id?'on':''}" data-plan="${esc(a.안id)}"><b>${esc(a.안id)}안</b> ${a.안id==='A'?'원래 요청':'대안'}<small>${esc(a.검증)} · ${a.버전}버전</small></button>`).join('');
+  const vers=안.버전들.length>1?`<div class="vers">버전 ${안.버전들.map(v=>`<button class="pill" aria-pressed="${v===rec.버전}" data-v="${v}">${v}</button>`).join('')}${rec.버전!==안.버전?'<span class="note">이전 버전을 보고 있어요</span>':''}</div>`:'';
+  const 바꾼=Object.entries(안.바꾼희망||{});
+  const 설명=안.대안설명||{};
+  const alt=바꾼.length||안.대안설명?`<section class="card alt"><h3>무엇을, 왜 바꿨나요</h3>
+    ${바꾼.map(([k,v])=>`<p class="chg"><s>${esc(원희망[k]||k)}</s> → <b>${esc(v)}</b></p>`).join('')}
+    ${안.이유?`<p><b>총괄이 바꾼 이유</b> ${esc(안.이유)}</p>`:''}
+    ${안.대안설명?`<dl>${['무엇을','왜','좋아진점','남은문제'].filter(k=>설명[k]).map(k=>`<dt>${({무엇을:'바꾼 것',왜:'이유',좋아진점:'좋아진 점',남은문제:'남은 문제'})[k]}</dt><dd>${esc(설명[k])}</dd>`).join('')}</dl>`:''}</section>`:'';
+  const wish=(안.희망반영||[]).length?`<section class="card"><h3>바라는 점을 지켰나요</h3><ul class="wish">${안.희망반영.map(h=>`<li class="w-${esc(h.반영)}"><span class="tagw">${esc(h.반영||'?')}</span> ${esc(h.내용||원희망[h.희망id]||h.희망id)}${h.이유?`<br><span class="note">${esc(h.이유)}</span>`:''}</li>`).join('')}</ul></section>`:'';
+  const 필수=rec.필수조건반영||안.필수조건반영||[];
+  const required=필수.length?`<section class="card"><h3>꼭 지킬 조건 확인</h3><ul>${필수.map(x=>`<li><b>${esc(x.조건)} · ${esc(x.반영)}</b><br>${esc(x.이유||'이유를 다시 확인해야 합니다.')}</li>`).join('')}</ul></section>`:'';
+  const 분=rec.분류;
+  const 검사=`<section class="card"><h3>검사 결과 <span class="note">${esc(rec.안id)}안 ${rec.버전}버전</span></h3>${rec.검사함?'':'<p class="note">이 버전은 아직 총괄 검사를 거치지 않았어요. 아래 0건은 문제가 없다는 뜻이 아니에요.</p>'}<div class="three">${Object.keys(분류이름).map(k=>`<div class="col c-${k}"><b>${분류이름[k][0]} <span class="cnt">${분[k].length}</span></b><p class="note">${분류이름[k][1]}</p><ul>${분[k].map(x=>`<li>${esc(x.문구)}<small> · ${esc(x.출처)}</small></li>`).join('')||'<li class="none">없음</li>'}</ul></div>`).join('')}</div></section>`;
+  const 기=rec.부분수정기록;
+  const 부분=기?`<p class="note">이 버전은 부분 수정본이에요: "${esc(기.요청)}" (바꾼 칸: ${esc(기.바꿀시간칸.join(', '))} · 유지한 칸: ${esc(기.유지할시간칸.join(', ')||'없음')}${기.코드가_되돌린_유지칸?` · AI가 바꾼 유지 칸 ${기.코드가_되돌린_유지칸}곳은 원래대로 되돌림`:''})</p>`:'';
+  const chips=[cond.계절,(cond.언어권||[]).join('·'),(cond.지역||[]).join('·'),cond.체류기간].filter(Boolean);
+  main.innerHTML=`<div class="cond">${chips.map(c=>`<span class="chip">${esc(c)}</span>`).join('')}</div>
+    <div class="tabs">${tabs}</div>${vers}${alt}
+    <section class="card ai"><div class="aihead"><span class="aibadge">AI 코스 초안</span><strong>${esc(rec.안id)}안 ${rec.버전}버전</strong>
+      ${s.출발가능요일&&s.출발가능요일.length?`<span class="note">출발 가능 요일 <b class="days">${esc(s.출발가능요일.join(' · '))}</b></span>`:''}</div>
+      ${부분}${s.확인할것.length?`<ul>${s.확인할것.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}<p class="note">초안이에요. 확정은 담당자가 해요.</p></section>
+    ${required}${검사}${wish}
+    ${s.코스있음?`<section class="card"><div class="aihead"><strong>동선 · 시간표</strong>
+      <span class="legend"><span><i class="lg-day"></i>낮</span><span><i class="lg-eve"></i>저녁</span><span><i class="lg-night"></i>밤·숙박</span></span></div>
+      <div class="mapgrid"><div id="mapbox"></div><div class="timeline" id="timeline"></div></div></section>`:''}
+    <section class="card"><h3>이 부분만 다시 만들기</h3><p class="note">다시 만들 시간칸을 고르고 바라는 점을 적어 주세요. 고르지 않은 칸은 그대로 두고 새 버전으로 남겨요(이전 버전도 남아요).</p>
+      <div class="pills" id="redo">${rec.시간칸.map(k=>`<button type="button" class="pill" aria-pressed="false" data-v="${esc(k)}">${esc(k)}</button>`).join('')}</div>
+      <div class="redo-row"><input id="redoText" maxlength="300" placeholder="예: 낮은 유지하고 저녁만 설문 음식 후보로 바꿔 주세요"><button class="btn primary" id="redoGo" disabled>다시 만들기</button></div>
+      <p class="note" id="keep"></p><p class="err" id="redoErr"></p></section>`;
+  if(s.코스있음)draw(s.일정);
+  main.querySelectorAll('.tab').forEach(b=>b.onclick=()=>show(id,cond,b.dataset.plan));
+  main.querySelectorAll('.vers .pill').forEach(b=>b.onclick=()=>show(id,cond,rec.안id,b.dataset.v));
+  const redo=$('redo');const pick=()=>[...redo.querySelectorAll('[aria-pressed=true]')].map(b=>b.dataset.v);
+  const upd=()=>{const p=pick();$('keep').textContent=p.length?`그대로 둘 칸: ${rec.시간칸.filter(k=>!p.includes(k)).join(', ')||'없음'}`:'';$('redoGo').disabled=!p.length||!$('redoText').value.trim();};
+  redo.onclick=e=>{const b=e.target.closest('.pill');if(!b)return;b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');upd();};
+  $('redoText').oninput=upd;
+  $('redoGo').onclick=async()=>{const p=pick();$('redoGo').disabled=true;$('redoErr').textContent='';
+    try{const r=await post('/api/plan/revise',{기획id:rec.기획id,안id:rec.안id,바꿀:p,유지:rec.시간칸.filter(k=>!p.includes(k)),요청:$('redoText').value.trim()});
+      showProgress(r);watch(r.기획id);window.scrollTo({top:0,behavior:'smooth'});}
+    catch(err){$('redoErr').textContent=err.message;upd();}};
 }
 function draw(stops){
   const tl=$('timeline');let lastDay=null;

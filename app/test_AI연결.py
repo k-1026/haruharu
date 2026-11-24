@@ -31,11 +31,12 @@ class AI연결시험(unittest.TestCase):
     def test_실제_SDK_요청_형식은_지침과_읽기_도구를_포함한다(self):
         from google import genai
         with mock.patch.object(genai,'Client') as client:
-            client.return_value.models.generate_content.return_value=SimpleNamespace(text='코스 초안')
+            client.return_value.aio.models.generate_content=mock.AsyncMock(return_value=SimpleNamespace(text='코스 초안'))
+            client.return_value.aio.aclose=mock.AsyncMock()
             result=asyncio.run(run_stage._제미나이_실행('지침','입력','sample-model','test-only-key',['Read','Grep','Glob']))
         self.assertEqual(result,'코스 초안')
         self.assertEqual(client.call_args.kwargs['api_key'],'test-only-key')
-        params=client.return_value.models.generate_content.call_args.kwargs
+        params=client.return_value.aio.models.generate_content.call_args.kwargs
         self.assertEqual(params['model'],'sample-model')
         self.assertEqual(params['config'].system_instruction,'지침')
         self.assertEqual(len(params['config'].tools),3)
@@ -71,7 +72,8 @@ class AI연결시험(unittest.TestCase):
     def test_제미나이_통신에도_제한시간을_건다(self):
         from google import genai
         with mock.patch.object(genai,'Client') as client:
-            client.return_value.models.generate_content.return_value=SimpleNamespace(text='결과')
+            client.return_value.aio.models.generate_content=mock.AsyncMock(return_value=SimpleNamespace(text='결과'))
+            client.return_value.aio.aclose=mock.AsyncMock()
             asyncio.run(run_stage._제미나이_실행('지침','입력','sample-model','test-only-key',[],30))
         self.assertEqual(client.call_args.kwargs['http_options'].timeout,30000)
 

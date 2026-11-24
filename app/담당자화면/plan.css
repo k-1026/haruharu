@@ -52,7 +52,7 @@ h2{margin:0 0 4px;font-size:20px}.lead{margin:0 0 16px;color:var(--sub)}
 
 /* 진행 상황: 일하는 에이전트 */
 .progress .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
-.agents{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0 10px}
+.agents{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0 10px}
 .agent{border:1.5px solid var(--line);border-radius:14px;padding:12px;position:relative;background:#fffdf8}
 .agent .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--line);margin-bottom:8px}
 .agent .ic svg{width:22px;height:22px}
@@ -97,3 +97,27 @@ h2{margin:0 0 4px;font-size:20px}.lead{margin:0 0 16px;color:var(--sub)}
 @media(max-width:900px){.wrap{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}
   .mapgrid{grid-template-columns:1fr}header{padding:10px 14px}main{padding:14px}.q{grid-template-columns:1fr}.q>span{padding-top:0}}
 .lg-day{background:var(--gold)}.lg-eve{background:var(--sauce)}.lg-night{background:var(--night)}
+h3{margin:0 0 8px;font-size:16px}
+.log{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}
+.log li{background:#fffdf8;border:1px solid var(--line);border-radius:10px;padding:8px 90px 8px 10px;font-size:13.5px;position:relative}
+.log li.now{border-color:var(--gold);background:var(--gold-soft)}.log li.fail{border-color:var(--err)}
+.log .when{position:absolute;right:10px;top:8px;font-size:12px;color:var(--sub)}
+.plans{margin:10px 0 0}
+.tabs{display:flex;gap:10px;flex-wrap:wrap}
+.tab{border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:10px 16px;cursor:pointer;text-align:left;min-width:150px}
+.tab b{font-size:16px;margin-right:4px}.tab small{display:block;color:var(--sub);font-size:12px}
+.tab.on{border-color:var(--sauce);box-shadow:0 0 0 3px #c8402a22}
+.vers{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--sub)}.vers .pill{padding:3px 12px}
+.alt{border-color:var(--sauce);background:linear-gradient(180deg,var(--sauce-soft),#fff 120px)}
+.chg{margin:4px 0}.chg s{color:var(--sub)}
+.alt dl{display:grid;grid-template-columns:90px 1fr;gap:4px 10px;margin:8px 0 0}.alt dt{font-weight:700;color:var(--crust)}.alt dd{margin:0}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.three .col{border-radius:12px;padding:12px;border:1px solid var(--line)}
+.c-AI수정{background:#fff6e6}.c-자료보완{background:#f3f6fb}.c-사람결정{background:var(--sauce-soft)}
+.three .cnt{display:inline-block;min-width:22px;text-align:center;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:12px;margin-left:4px}
+.three ul{margin:6px 0 0;padding-left:18px;font-size:13.5px}.three small{color:var(--sub)}.three .none{list-style:none;margin-left:-18px;color:var(--sub)}
+.wish{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.tagw{display:inline-block;border-radius:999px;padding:0 9px;font-size:12px;font-weight:700;background:var(--ok-soft);color:var(--ok)}
+.w-일부 .tagw{background:var(--gold-soft);color:var(--crust)}.w-못지킴 .tagw{background:var(--err-soft);color:var(--err)}
+.redo-row{display:flex;gap:8px;margin-top:10px}.redo-row input{flex:1;font:inherit;padding:9px 12px;border:1.5px solid var(--line);border-radius:12px}
+@media(max-width:1100px){.agents{grid-template-columns:repeat(3,1fr)}.three{grid-template-columns:1fr}}

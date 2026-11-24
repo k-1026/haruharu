@@ -3,6 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import threading
 import unittest
+from unittest import mock
 
 from 관리자조회 import 결과저장소
 from 관리자실행 import 코스시험
@@ -44,6 +45,9 @@ class 끝까지시험(unittest.TestCase):
         저장소 = 결과저장소(self.d.name)
         self.코스 = 코스시험(저장소, 실행함수=코스함수)
         self.서비스 = 모듈.기획실행(self.코스, 단계함수=단계함수)
+        self.guard = mock.patch('run_stage.단계_실행', side_effect=AssertionError('자동시험에서 실제 AI 호출 금지'))
+        self.guard.start()
+        self.addCleanup(self.guard.stop)
 
     def 기다리기(self):
         self.서비스.작업.join(timeout=30)
@@ -54,9 +58,15 @@ class 끝까지시험(unittest.TestCase):
 
         def 단계(에이전트, 입력):
             본.append((에이전트, 입력))
-            return (견본 / ('1단계_결과.md' if 에이전트.endswith('기획조건.md') else '2단계_결과.md')).read_text(encoding='utf-8')
+            if 에이전트.endswith('수요요약.md'):
+                return '{"요약":"선택한 근거를 참고하며 자료별 한계를 구분합니다."}'
+            if 에이전트.endswith('검증.md'):
+                return '{"통과":true,"문제":[]}'
+            if 에이전트.endswith('총괄.md'):
+                return '{"행동":"담당자에게","대상":"A","이유":"모의 검증 완료"}'
+            raise AssertionError('예상하지 않은 에이전트: ' + 에이전트)
 
-        async def 코스(에이전트, 요청):
+        def 코스(에이전트, 요청):
             본.append((에이전트, 요청))
             return (견본 / '통합시험_235320_982315' / '3단계_결과.md').read_text(encoding='utf-8')
         self.준비(단계, 코스)
@@ -65,15 +75,16 @@ class 끝까지시험(unittest.TestCase):
         self.기다리기()
         p = self.서비스.상태(시작['기획id'])
         self.assertEqual(p['상태'], '완료', p.get('안내'))
-        self.assertEqual([s['상태'] for s in p['단계']], ['완료'] * 4)
-        self.assertEqual(p['단계'][0]['에이전트'], '기획 조건 에이전트')
+        self.assertEqual([s['상태'] for s in p['단계']], ['완료'] * 5)
+        self.assertFalse(p['단계'][0]['AI'])
         self.assertTrue(all(s.get('시작') and s.get('끝') for s in p['단계']))
         self.assertIsNone(p['일하는중'])
-        self.assertEqual([a for a, _ in 본], ['.claude/agents/기획조건.md', '.claude/agents/수요근거.md', '.claude/agents/코스검토.md'])
+        self.assertEqual([a for a, _ in 본], ['.claude/agents/수요요약.md', '.claude/agents/코스검토.md', '.claude/agents/검증.md', '.claude/agents/총괄.md'])
         폴더 = Path(self.d.name) / 시작['기획id']
         for 이름 in ['1단계_선택.json', '2단계_선택.json']:
             self.assertIn('자동 진행', json.loads((폴더 / 이름).read_text(encoding='utf-8'))['자동처리'])
-        self.assertIn('저녁은 동성로', 본[2][1])   # 희망이 코스 작성 입력에 들어감
+        self.assertIn('저녁은 동성로', 본[1][1])   # 희망이 코스 작성 입력에 들어감
+        self.assertTrue((폴더 / '근거_추출.json').is_file())
         기록 = 기록모듈.읽기(self.d.name, p['기록id'])
         self.assertEqual(기록['원래요청']['희망'][0]['내용'], '저녁은 동성로')
         self.assertEqual(기록모듈.버전목록(기록, 'A'), [1])
@@ -82,25 +93,29 @@ class 끝까지시험(unittest.TestCase):
 
     def test_진행중에_다시_누르면_같은_기획을_돌려준다(self):
         풀림 = threading.Event()
+        진입 = threading.Event()
+        self.addCleanup(풀림.set)
 
         def 단계(에이전트, 입력):
+            진입.set()
             풀림.wait(10)
             raise TimeoutError('AI(claude)가 300초 동안 응답하지 않아 중단했습니다.')
         self.준비(단계, None)
         첫 = self.서비스.시작(좋은입력)
+        self.assertTrue(진입.wait(2))
         둘 = self.서비스.시작(좋은입력)
         for _ in range(50):
             지금 = self.서비스.상태(첫['기획id'])
             if 지금.get('일하는중'):break
             threading.Event().wait(0.05)
-        self.assertEqual(지금['일하는중']['에이전트'], '기획 조건 에이전트')
+        self.assertEqual(지금['일하는중']['에이전트'], '수요 근거 에이전트')
         self.assertEqual(첫['기획id'], 둘['기획id'])
         self.assertTrue(둘['중복'])
         풀림.set()
         self.기다리기()
         p = self.서비스.상태(첫['기획id'])
         self.assertEqual(p['상태'], '멈춤')
-        self.assertEqual(p['단계'][0]['상태'], '실패')
+        self.assertEqual(p['단계'][1]['상태'], '실패')
         self.assertIn('응답하지 않아 중단', p['안내'])   # 기다리기만 하지 않고 이유를 보여 줌
 
     def test_서버가_다시_켜지면_진행중은_중단됨으로_보인다(self):
