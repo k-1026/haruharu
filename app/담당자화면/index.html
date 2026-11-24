@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>하루하루 · 담당자 코스 기획</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/plan/plan.css">
 </head>
 <body>
@@ -17,10 +16,9 @@
 </aside>
 <main id="main"><p class="empty">왼쪽에서 저장된 코스를 고르세요.</p></main>
 </div>
-<dialog id="newDlg"><h3 style="margin-top:0">새 코스 만들기</h3>
+<dialog id="newDlg"><h3 class="dlgtitle">새 코스 만들기</h3>
   <p>조건을 넣으면 AI가 자료를 찾아 코스를 만드는 기능은 <b>다음 단계에서 연결</b>됩니다.</p>
-  <button class="btn primary" onclick="newDlg.close()">확인</button></dialog>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <button class="btn primary" id="newOk">확인</button></dialog>
 <script src="/plan/plan.js"></script>
 </body>
 </html>

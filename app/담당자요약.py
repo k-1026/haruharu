@@ -13,6 +13,12 @@ def _짧게(name):
     return re.sub(r'\s*\([^)]*\)','',str(name or '').replace('대구광역시 ','')).strip()
 
 
+def 지도링크(이름, point):
+    """좌표가 있을 때만 그 위치를 여는 카카오맵 링크. 이름 검색 링크는 엉뚱한 곳을 열 수 있어 만들지 않는다."""
+    if not point:return None
+    return 'https://map.kakao.com/link/map/'+quote(f'{이름},{point[0]},{point[1]}',safe=',')
+
+
 def 코스요약(코스, 조건):
     meals={(m.get('안','공통'),m.get('칸ID')):m for m in 코스.get('식사목록',[]) if isinstance(m,dict)}
     일정=[];확인=[]
@@ -27,7 +33,7 @@ def 코스요약(코스, 조건):
         시각=(row.get('시각') or {}).get('값','') if isinstance(row.get('시각'),dict) else ''
         일정.append({'순번':i,'일차':row.get('일차','미정'),'시각':시각,'시간칸':row.get('시간칸',''),
                     '장소명':row.get('장소명',''),'표시명':표시명,'좌표':list(point) if point else None,
-                    '네이버':'https://map.naver.com/p/search/'+quote('대구 '+표시명.replace('자유식 · ',''))})
+                    '지도링크':지도링크(표시명,point)})
         if not 시각:확인.append(f"{미정이름.get(row.get('시간칸'),표시명)} 미정")
         if point is None and not 자유식 and row.get('시간칸') not in ['숙박','2일차오전']:확인.append('좌표 미확인: '+표시명)
     try:
