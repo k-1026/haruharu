@@ -587,3 +587,29 @@ body:has(#main .guide li:nth-child(5).on){--band:radial-gradient(circle at 82% 3
 .entry-actions #entryNew{padding:17px 30px;font-size:17px;border-radius:14px}
 .cta-hint{margin:0;font-size:14.5px;line-height:1.55;color:var(--sub);padding-left:18px;border-left:1px solid #E6D3B6}
 @media(max-width:600px){.cta-hint{padding-left:0;border-left:0;flex-basis:100%}}
+
+/* ===== 첫 화면 다시 배치: 위(제목·버튼 | 이어서 보기), 아래 전체 폭(1~4단계) ===== */
+.cta-hint{display:none}
+.entry-screen{align-items:center;row-gap:36px}
+.entry-copy{align-self:center}
+.entry-lead{max-width:24em;margin-bottom:26px}
+.entry-screen>.entry-flow{grid-column:1/-1;margin:0;padding:22px 26px 20px;background:#ffffffb8;border:1px solid #EFE0CA;border-radius:20px;backdrop-filter:blur(6px)}
+.entry-screen>.entry-flow li{padding:36px 18px 0 0}
+.entry-screen>.entry-flow li::before{top:0}
+.entry-screen>.entry-flow li::after{top:12px}
+/* 아래 안내 버튼: 다시 가운데 */
+.scroll-cue{left:50%;transform:translateX(-50%)}
+.scroll-cue.is-hidden{transform:translate(-50%,12px)}
+@media(max-width:600px){.scroll-cue{left:50%}}
+@media(max-width:900px){.entry-screen>.entry-flow{grid-template-columns:1fr 1fr;row-gap:22px}.entry-screen>.entry-flow li:nth-child(2)::after{display:none}}
+/* 이어서 보기 목록을 한 줄형으로: 첫 화면 윗줄 높이를 줄여 1~4단계 띠가 한 화면에 들어오게 */
+.recent-item{grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:1px;padding:12px 14px 11px}
+.recent-item b{grid-column:1;font-size:16px}
+.recent-item span:not(.recent-band){grid-column:1}
+.recent-item small{grid-column:2;grid-row:1/3;align-self:center;text-align:right;white-space:nowrap}
+.recent-list{gap:8px}
+.entry-recent{padding:20px 20px 16px}
+.recent-head{margin-bottom:10px}
+.entry-recent>.note{margin-top:10px;font-size:13px}
+.entry-screen{row-gap:28px}
+.scroll-cue{white-space:nowrap}@media(max-width:600px){.scroll-cue{display:none}}
