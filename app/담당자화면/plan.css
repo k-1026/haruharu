@@ -460,3 +460,42 @@ body>header .service-nav a,body>header nav[aria-label] a{font-size:14.5px}
 .three ul{font-size:14.5px}
 .explorer-stop small{font-size:13px}.explorer-day{font-size:13px}.stop-transfer{font-size:12.5px}.stop-transfer button{font-size:12px}
 .map-explorer .map3d-label{font-size:13px}.map-stop-name{font-size:13px}
+
+/* ===== 하루 길 장면: 낮(근대골목·계산성당) → 저녁(시장 등불) → 밤(83타워·야경), 너구리·족제비가 걷는다 ===== */
+.entry-day::before{display:none}
+.day-scene{grid-column:1/-1;position:relative;height:clamp(170px,21vw,270px);overflow:hidden;border-bottom:1px solid var(--line)}
+.scene-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.walker{position:absolute;bottom:2%;height:52%;width:auto;pointer-events:none;filter:drop-shadow(0 4px 3px #5a3a1a33)}
+.walker.raccoon{left:33%;animation:walk-in 5.5s cubic-bezier(.16,1,.3,1) both}
+.walker.weasel{left:27%;transform:scaleX(-1);height:46%;animation:walk-in-flip 5.5s cubic-bezier(.16,1,.3,1) .25s both}
+@keyframes walk-in{from{translate:-28vw 0}to{translate:0 0}}
+@keyframes walk-in-flip{from{translate:-28vw 0}to{translate:0 0}}
+.lanterns circle{filter:drop-shadow(0 0 4px #FFB347)}
+.entry-day>div:not(.day-scene){padding-top:22px}
+@media(prefers-reduced-motion:reduce){.walker{animation:none!important}}
+@media(max-width:900px){.day-scene{height:180px}.walker.raccoon{left:46%}.walker.weasel{left:36%}}
+.walker.raccoon{left:41%}.walker.weasel{left:35%}
+
+/* ===== 그림 요소 확장 ===== */
+/* 저녁 시장의 닭다리 간판: 장면 안의 작은 표시 */
+.chick-sign{filter:drop-shadow(0 0 6px #FFB34766)}
+/* 진행 화면: 너구리·족제비가 길을 따라 계속 걷는다(작업 중 표시) */
+.progress-walk{position:relative;height:92px;margin:0 0 16px;overflow:hidden;border-radius:16px;background:linear-gradient(90deg,#FFF4DA 0%,#FFE6C2 55%,#F9C9A0 100%)}
+.pw-path{position:absolute;left:0;right:0;bottom:16px;border-top:3px dotted #fff}
+.progress-walk .walker{bottom:6px;height:70px;left:0;animation:walk-across 16s linear infinite}
+.progress-walk .walker.weasel{height:62px;animation-delay:-1.1s}
+@keyframes walk-across{from{translate:-120px 0}to{translate:calc(100cqw + 40px) 0}}
+.progress-walk{container-type:inline-size}
+@media(prefers-reduced-motion:reduce){.progress-walk .walker{animation:none;left:38%}.progress-walk .walker.weasel{left:30%}}
+/* 조건 요약 위로 고개를 내민 너구리 */
+.order-summary{margin-top:46px}
+.peek{position:absolute;top:-50px;right:20px;width:72px;height:50px;overflow:hidden;pointer-events:none}
+.peek img{width:72px;height:auto;display:block}
+/* 빈 목록 */
+.recent-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 8px;text-align:center;color:var(--sub)}
+.recent-empty img{width:96px;height:auto}
+.recent-empty p{margin:0}
+/* 사이트 배경: 길 점선·별을 아주 연하게 (지도 위에서 기획한다는 느낌) */
+body{background-color:#FFF8ED;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='720' height='520' viewBox='0 0 720 520'%3E%3Cg fill='none' stroke='%23E7D3B4' stroke-width='2' stroke-linecap='round' stroke-dasharray='1 10'%3E%3Cpath d='M-20 120 C120 60 220 180 360 130 S600 40 740 110'/%3E%3Cpath d='M-20 420 C140 360 260 470 420 410 S620 350 740 400'/%3E%3C/g%3E%3Cg fill='%23EBD7B5'%3E%3Ccircle cx='360' cy='130' r='4'/%3E%3Ccircle cx='420' cy='410' r='4'/%3E%3Cpath d='M600 230l1.6 4.4 4.4 1.6-4.4 1.6-1.6 4.4-1.6-4.4-4.4-1.6 4.4-1.6z'/%3E%3Cpath d='M120 290l1.2 3.3 3.3 1.2-3.3 1.2-1.2 3.3-1.2-3.3-3.3-1.2 3.3-1.2z'/%3E%3Cpath d='M250 30l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z'/%3E%3C/g%3E%3C/svg%3E");background-size:720px 520px;background-attachment:fixed}
+.progress-walk .walker.raccoon,.progress-walk .walker.weasel{left:0}@media(prefers-reduced-motion:reduce){.progress-walk .walker.raccoon{left:38%}.progress-walk .walker.weasel{left:30%}}
+@media(max-width:900px){.day-scene{height:auto;aspect-ratio:1200/290}}
