@@ -647,3 +647,18 @@ body:has(#main .guide li:nth-child(5).on){--band:radial-gradient(circle at 82% 3
   .entry-band .entry-flow li{padding-top:30px}
   .entry-screen{padding-top:clamp(14px,3vh,32px);row-gap:clamp(16px,3vh,28px)}
 }
+
+/* ===== 머리글 정리: 메뉴(코스 기획·지난 코스·운영 로그)를 오른쪽에, 새 코스 버튼은 필요한 화면에서만 ===== */
+body>header .service-nav{margin-left:auto;margin-right:0}
+body>header .nav-btn{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;padding:7px 14px;border-radius:9px;color:#756a5e;font-size:14.5px;font-weight:600}
+body>header .nav-btn:hover{color:#252D4A;background:#FFFFFF99}
+body>header .nav-btn[aria-expanded=true]{background:#fff;color:#252D4A;box-shadow:0 1px 3px #6b4a2226}
+body>header .nav-btn:focus-visible{outline:3px solid #D9771888;outline-offset:2px}
+body[data-view=landing] #historyBtn,body[data-view=landing] #newBtn,body[data-view=form] #newBtn{display:none}
+body[data-view=landing] .app-actions,body[data-view=form] .app-actions{display:none}
+.history-panel{right:auto;left:max(24px,calc(100vw - 1260px)/2 + 24px)}
+.history-panel{left:auto;right:max(24px,calc((100vw - 1260px)/2 + 24px))}
+/* 1~4단계: 상자 없이 */
+.entry-band{background:none;border:0;padding:0 4px;backdrop-filter:none;border-radius:0}
+@media (max-height:760px) and (min-width:901px){.entry-band .entry-flow small{display:block}.entry-band{padding:0 4px}}
+@media(max-width:640px){body>header .service-nav{margin-left:0}}
