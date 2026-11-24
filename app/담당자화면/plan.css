@@ -629,3 +629,8 @@ body:has(#main .guide li:nth-child(5).on){--band:radial-gradient(circle at 82% 3
 @media(max-width:900px){.entry-band{flex-direction:column;align-items:stretch;gap:24px}.entry-band .entry-flow{grid-template-columns:1fr 1fr;row-gap:22px}.entry-band .entry-flow li:nth-child(2)::after{display:none}.entry-band .scroll-cue{justify-content:center}}
 @media(max-width:600px){.entry-screen{padding-top:32px;row-gap:32px}.entry-band .scroll-cue{display:inline-flex}}
 .entry-band .scroll-cue{background:#fff;border:1px solid #E3D2B8;color:#252D4A}.entry-band .scroll-cue:hover{background:#FFF6E8;border-color:#D9B98A}
+/* 첫 화면 간격을 화면 높이에 맞춰 줄이고 늘린다(짧은 화면에서는 촘촘하게) */
+.entry-screen{padding-top:clamp(20px,4vh,40px);padding-bottom:clamp(32px,6vh,64px);row-gap:clamp(20px,3.5vh,36px)}
+.entry-lead{margin-bottom:clamp(18px,3vh,28px)}
+.entry-band{padding:clamp(16px,2.6vh,22px) 22px clamp(16px,2.6vh,22px) 26px}
+.entry-band .entry-flow li{padding-top:32px}
