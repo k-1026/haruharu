@@ -577,3 +577,8 @@ body:has(#main .guide li:nth-child(5).on){--band:radial-gradient(circle at 82% 3
 .entry-flow li{padding-top:34px}
 .entry-screen{padding-bottom:84px}
 .entry-screen{padding-top:24px}
+/* 아래 안내 버튼: 본문 왼쪽 선에 맞춘다 */
+.scroll-cue{left:max(28px,calc((100vw - 1260px)/2 + 28px));transform:none}
+.scroll-cue.is-hidden{transform:translateY(12px)}
+@media(max-width:600px){.scroll-cue{left:16px}}
+.scroll-cue{left:max(32px,calc((100vw - 1260px)/2 + 32px))}@media(max-width:600px){.scroll-cue{left:16px}}
