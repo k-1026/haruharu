@@ -3,6 +3,80 @@ const assert=require('node:assert/strict');
 const ui=require('./담당자화면/plan.js');
 const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 
+test('입장 화면은 새 조건과 지난 코스 진입만 제공한다',()=>{
+  const html=ui.입장화면();assert.match(html,/entryNew/);assert.match(html,/entrySaved/);
+  assert.match(html,/AI 실행 없이/);assert.doesNotMatch(html,/type="submit"|\/api\/plan\/start/);
+});
+
+test('지난 코스는 고정 레일이 아닌 닫힌 부유 창이며 두 메뉴 형태가 같다',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'담당자화면/index.html'),'utf8');
+  assert.match(html,/class="history-panel"[^>]*hidden/);assert.match(html,/class="service-nav"/);
+  assert.match(html,/>코스 기획<\/a>/);assert.match(html,/>서비스 운영 로그 ↗<\/a>/);
+});
+
+test('장소마다 배지를 반복하지 않고 위치 정보만 닫힌 상세에 둔다',()=>{
+  const html=ui.위치안내({위치설명:'권역 대표 위치 · 관광센터 입구 아님',진입안내:'관광센터 기준, 입구 미확정',위치근거URL:'https://example.org/proof',지도링크:'https://map.kakao.com/link/map/x'});
+  assert.doesNotMatch(html,/location-badge/);
+  assert.match(html,/<details class="location-info"><summary>위치 정보<\/summary>/);
+  assert.doesNotMatch(html,/<details[^>]*\bopen/);
+  assert.doesNotMatch(html.split('<details')[0],/관광센터|kakao|위치 근거/);
+});
+
+test('비교 화면에는 큰 지도 진입 버튼을 두고 지도를 함께 렌더링하지 않는다',()=>{
+  const html=render();
+  assert.match(html,/id="openMap"/);assert.match(html,/지도 크게 보기/);
+  assert.doesNotMatch(html,/id="mapbox"|id="timeline"/);
+  assert.ok(html.indexOf('id="openMap"')<html.indexOf('plan-choices'));
+  assert.match(html,/<section class="card freedom">/);
+  assert.match(html,/<section class="card request-card">/);
+});
+
+test('장소 설명과 후보는 선택한 장소 패널에서만 보여 준다',()=>{
+  const html=ui.장소패널({순번:5,표시명:'서문시장 야시장',장소안내:{소개:'저녁 시장 구간',이용시간:'19:00-23:00',휴무:'월~목',출처URL:'https://example.org'},식당후보:[]});
+  assert.match(html,/서문시장 야시장/);assert.match(html,/저녁 시장 구간/);
+  assert.match(html,/보유 자료 기준/);assert.doesNotMatch(html,/location-badge/);
+});
+
+test('왼쪽 일정 선택은 지도 이동과 오른쪽 설명을 함께 갱신하고 지도 선택은 되먹임하지 않는다',()=>{
+  const calls=[],pressed={};let closedFocus=false;
+  const close={},button={dataset:{stop:'5'},setAttribute:(key,value)=>pressed[key]=value,focus:()=>closedFocus=true};
+  const view={classList:{add(){},remove(){}},querySelectorAll:()=>[button],querySelector:()=>button};
+  const panel={hidden:true,innerHTML:'',querySelector:()=>close,querySelectorAll:()=>[]};
+  const document={getElementById:id=>id==='mapView'?view:panel};
+  const fixture=[{순번:5,표시명:'서문시장 야시장',일차:1,좌표:[35.86,128.58],장소안내:{소개:'야시장 설명'}}];
+  const source=fs.readFileSync(path.join(__dirname,'담당자화면/plan.js'),'utf8').split('// ---------- 시작 ----------')[0];
+  vm.runInNewContext(source+'\nexplorerStops=fixture;mapController={selectStop:(...x)=>calls.push(x)};selectStop(5);selectStop(5,true);\n}',{document,fixture,calls,console});
+  assert.equal(calls.length,1);assert.equal(calls[0][0],5);assert.equal(calls[0][1].notify,false);
+  assert.equal(panel.hidden,false);assert.match(panel.innerHTML,/야시장 설명/);assert.equal(pressed['aria-pressed'],'true');
+  close.onclick();assert.equal(panel.hidden,true);assert.equal(closedFocus,true);
+});
+
+test('큰 지도는 별도 보기를 열고 돌아가면 원래 화면의 초점과 입력을 복구한다',()=>{
+  const elements=new Map(),calls=[];
+  const original={isConnected:true,focus:()=>calls.push('focus')},wrap={inert:false},header={inert:false};
+  const make=()=>({hidden:true,setAttribute(){},addEventListener(){},classList:{add(){},remove(){}},focus(){},querySelectorAll:()=>[],innerHTML:''});
+  const document={activeElement:original,createElement:make,getElementById:id=>elements.get(id),querySelector:selector=>selector==='.wrap'?wrap:header,
+    body:{classList:{add(){},remove(){}},append:view=>elements.set(view.id,view)}};
+  elements.set('backCompare',make());elements.set('openMap',original);
+  const result={};const source=fs.readFileSync(path.join(__dirname,'담당자화면/plan.js'),'utf8').split('// ---------- 시작 ----------')[0];
+  vm.runInNewContext(source+'\ndraw=()=>{mapController={destroy:()=>calls.push("destroy")}};openMap([{일차:1,표시명:"야시장"}]);result.html=document.getElementById("mapView").innerHTML;result.open=!document.getElementById("mapView").hidden;result.inert=wrap.inert;closeMap();result.closed=document.getElementById("mapView").hidden;\n}',{document,result,calls,wrap,console});
+  assert.equal(result.open,true);assert.equal(result.inert,true);assert.equal(result.closed,true);assert.equal(wrap.inert,false);
+  assert.deepEqual(calls,['destroy','focus']);assert.equal((result.html.match(/시설·권역의 대표 위치/g)||[]).length,1);
+  assert.match(result.html,/class="explorer-list"/);assert.match(result.html,/id="placePanel"[^>]*hidden/);
+});
+
+test('식당 후보는 지도에 표시하되 방문 연결선에는 넣지 않는다',()=>{
+  const {model}=require('./담당자화면/map-model.js');
+  const input=[
+    {순번:1,일차:1,시간칸:'낮',표시명:'관광A',좌표:[35.86,128.58]},
+    {순번:2,일차:1,시간칸:'점심',표시명:'자유식',좌표:null,식당후보:[{이름:'후보식당',좌표:[35.87,128.60]}]},
+    {순번:3,일차:1,시간칸:'낮',표시명:'관광B',좌표:[35.86,128.59]}];
+  const data=model(input);
+  assert.equal(data.areas[0].candidates[0].이름,'후보식당');
+  assert.equal(data.entries.length,3);
+  assert.equal(data.entries.filter(s=>s.표시명==='후보식당').length,0);
+});
+
 function render(overrides={}){
   const elements=new Map();
   const document={getElementById(id){if(!elements.has(id))elements.set(id,{innerHTML:'',querySelectorAll:()=>[]});return elements.get(id);}};

@@ -12,9 +12,14 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-# claude_agent_sdk가 없어도 orchestrator를 불러올 수 있게 빈 모듈을 끼운다
-sys.modules.setdefault("claude_agent_sdk", types.SimpleNamespace(
-    AssistantMessage=object, ClaudeAgentOptions=object, TextBlock=object, query=None))
+# 설치된 SDK는 보존한다. 전역 가짜 모듈이 다른 시험의 실제 SDK 검사를 막지 않게 한다.
+try:
+    import claude_agent_sdk
+except ModuleNotFoundError as error:
+    if error.name != 'claude_agent_sdk':
+        raise
+    sys.modules.setdefault("claude_agent_sdk", types.SimpleNamespace(
+        AssistantMessage=object, ClaudeAgentOptions=object, TextBlock=object, query=None))
 
 import orchestrator  # noqa: E402
 from 흐름 import 빠진_조건, 확정체류기간_정하기, 전달_준비, 전달_검사, 근거표_읽기, 경고_읽기  # noqa: E402

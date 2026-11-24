@@ -15,6 +15,44 @@ def course():
 
 
 class 담당자요약시험(unittest.TestCase):
+    def test_야시장소개와_자료기준_이용정보를_원본변경없이_제공한다(self):
+        c={'칸목록':[{'일차':1,'시간칸':'밤','장소명':'서문시장 야시장 (대구광역시 중구)'}]}
+        result=담당자요약.코스요약(c,{})['일정'][0]['장소안내']
+        self.assertIn('야시장',result['소개'])
+        self.assertEqual(result['이용시간'],'19:00-23:00')
+        self.assertTrue(result['출처URL'].startswith('https://'))
+        self.assertNotIn('장소안내',c['칸목록'][0])
+    def test_대표좌표로_동선을_연결해도_입구나_호텔을_확정하지않는다(self):
+        import copy
+        names=['근대골목','서문시장','김광석길','평화시장 닭똥집골목 (대구광역시 동구) — 희망 반영','서문시장 야시장',
+               '숙소 (중구 동성로 일대 호텔 후보 권역, 업체 미고정)','']
+        slots=['낮','점심','낮오후','저녁','밤','숙박','2일차오전']
+        c={'칸목록':[{'순번':i+1,'일차':1 if i<6 else 2,'시간칸':slot,'장소명':name} for i,(name,slot) in enumerate(zip(names,slots))]}
+        c['칸목록'][3]['칸ID']='저녁-1'
+        c['식사목록']=[{'칸ID':'저녁-1','방식':'미선택','권역':'동구 평화시장 일대 (평화시장 닭똥집골목, 희망-1)'}]
+        before=copy.deepcopy(c);s=담당자요약.코스요약(c,{})
+        self.assertTrue(all(row['좌표'] for row in s['일정'][:6]))
+        self.assertIsNone(s['일정'][6]['좌표'])
+        self.assertTrue(s['일정'][1]['식사권역'])
+        self.assertFalse(s['일정'][5]['식사권역'])
+        self.assertIn('대표',s['일정'][0]['위치설명'])
+        self.assertIn('업체',s['일정'][5]['위치설명'])
+        self.assertEqual(c,before)
+    def test_자유식후보는_선택없이_별도지도위치로_반환한다(self):
+        c=course();c['식사목록'][0]['추천후보']=['가게A','가게B']
+        with mock.patch.object(담당자요약,'좌표',side_effect=lambda n:(35.87,128.60) if n=='가게A' else None):
+            result=담당자요약.코스요약(c,{})
+        meal=result['일정'][1]
+        self.assertIsNone(meal['좌표'])
+        self.assertEqual(meal['식당후보'][0]['좌표'],[35.87,128.60])
+        self.assertIsNone(meal['식당후보'][1]['좌표'])
+        self.assertNotIn('선택',c)
+
+    def test_명시적으로_제외한_후보는_지도자료에서_제거한다(self):
+        c=course();c['운영검토기록']={'운영확인':[{'안':'공통','칸ID':'점심','대상명':'가게A','처리':'제외'}]}
+        result=담당자요약.코스요약(c,{})
+        self.assertEqual([x['이름'] for x in result['일정'][1]['식당후보']],['가게B'])
+
     def summary(self):
         with mock.patch.object(담당자요약,'좌표',side_effect=lambda n:(35.86,128.6) if '김광석길' in n else None):
             return 담당자요약.코스요약(course(),{'시작지점':'김광석길'})
