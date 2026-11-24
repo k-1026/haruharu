@@ -62,7 +62,27 @@
     }
     return [...new Set(notes)].slice(0,2);
   }
-  const api={문장,짧게,상태,할일,보완요약};
+  function 위치안내(s){
+    const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const lines=[s.위치설명,s.진입안내].filter(Boolean).map(x=>`<p class="note">${safe(x)}</p>`).join('');
+    const proof=s.위치근거URL?`<a href="${safe(s.위치근거URL)}" target="_blank" rel="noopener">위치 근거</a>`:'';
+    const map=s.지도링크?`<a href="${safe(s.지도링크)}" target="_blank" rel="noopener">카카오맵에서 보기 ↗</a>`:'';
+    return lines||proof||map?`<details class="location-info"><summary>위치 정보</summary>${lines}<p>${[proof,map].filter(Boolean).join(' · ')}</p></details>`:'';
+  }
+  function 장소패널(s){
+    const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const name=문장((s.표시명||s.장소명||'장소 미정').split(/\s+[—–]\s+/)[0]),info=s.장소안내||{};
+    const candidates=s.식당후보||[];
+    return `<button type="button" class="panel-close" data-place-close aria-label="장소 설명 닫기">×</button><p class="eyebrow">${safe(s.일차)}일차 · ${safe(s.시각||'권장 시각 미정')}</p>
+      <h2 tabindex="-1" id="placeTitle">${safe(name)}</h2><p>${safe(info.소개||'아직 장소 소개가 등록되지 않은 일정입니다.')}</p>
+      ${info.이용시간||info.휴무?`<section class="place-facts"><h3>이용 참고 <small>보유 자료 기준</small></h3>${info.이용시간?`<p>이용시간 · ${safe(info.이용시간)}</p>`:''}${info.휴무?`<p>휴무 · ${safe(info.휴무)}</p>`:''}<p class="note">운영일·시간은 방문 전에 다시 확인해 주세요.${info.확인일?' 자료 확인일 '+safe(info.확인일):''}</p></section>`:''}
+      ${info.주소?`<p class="note">${safe(info.주소)}</p>`:''}
+      ${s.식사권역?`<section><h3>식당 후보</h3><p class="note">후보를 눌러도 방문이 확정되지 않습니다.</p>${candidates.length?candidates.map((c,i)=>`<button type="button" class="candidate-choice" data-explore-candidate="${i}">${safe(c.이름)} <small>미리보기${c.좌표?'':' · 위치 확인 중'}</small></button>`).join(''):'<p class="note">아직 등록된 식당 후보가 없습니다. 권역만 표시합니다.</p>'}<div id="candidatePreview" role="status"></div></section>`:''}
+      ${!s.좌표&&!s.권역표시?.중심?'<p class="note">이 일정은 아직 지도 위치가 정해지지 않았습니다. 목록에는 계속 남겨 둡니다.</p>':''}
+      ${위치안내(s)}${info.출처URL?`<p><a target="_blank" rel="noopener" href="${safe(info.출처URL)}">장소 안내 출처 ↗</a></p>`:''}`;
+  }
+  function 입장화면(){return `<section class="entry-screen"><div class="entry-copy"><p class="entry-kicker">HARUHARU · DAEGU</p><h1>대구의 낮과 밤을,<br>하나의 여행으로.</h1><p class="entry-lead">여행 조건을 고르고 코스를 비교하세요.<br>너구리와 족제비를 따라 지도에서 미리 걸어볼 수 있어요.</p><div class="entry-actions"><button class="btn primary" id="entryNew">새 코스 기획하기</button><button class="btn" id="entrySaved">지난 코스 불러오기</button></div><p class="note">저장된 코스와 지도는 AI 실행 없이 다시 볼 수 있어요.</p></div><div class="entry-journey"><p class="entry-kicker">PLAN YOUR DAY & NIGHT</p><h2>조건에서 지도까지,<br>한눈에 살펴보세요.</h2><ol><li><b>01</b><span>여행 조건 고르기<small>계절 · 지역 · 언어 · 체류 기간</small></span></li><li><b>02</b><span>코스와 대안 비교하기<small>내 요청을 우선한 안과 구성을 바꾼 안</small></span></li><li><b>03</b><span>지도에서 함께 걷기<small>전체 동선 · 구간 재생 · 가까이 따라보기</small></span></li></ol><p class="entry-signature">DAY TO NIGHT, HARUHARU</p></div></section>`;}
+  const api={문장,짧게,상태,할일,보완요약,위치안내,장소패널,입장화면};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   root.기획표시=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
@@ -100,18 +120,22 @@ async function loadList(select){
     for(const it of items){
       const c=it.조건||{};const b=document.createElement('button');b.dataset.id=it.id;
       b.innerHTML=`<b>${esc([c.계절,c.체류기간].filter(Boolean).join(' · '))}</b> ${esc([(c.언어권||[]).join('·'),(c.지역||[]).join('·')].filter(Boolean).join(' · '))}<br><small>${esc(it.시각.replace('T',' ').slice(0,16))}</small>`;
-      b.onclick=()=>show(it.id,c);box.append(b);
+      b.onclick=()=>{hideHistory();show(it.id,c);};box.append(b);
     }
     if(select)show(select,(items.find(x=>x.id===select)||{}).조건||{});
     return items;
   }catch(e){box.innerHTML=`<p class="empty">${esc(e.message)}</p>`;return [];}
 }
 function mark(id){$('saved').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.id===id));}
+function hideHistory(){const panel=$('historyPanel');if(panel)panel.hidden=true;$('historyBtn')?.setAttribute('aria-expanded','false');}
+function showHistory(){const panel=$('historyPanel');if(!panel)return;panel.hidden=false;$('historyBtn').setAttribute('aria-expanded','true');$('historyClose').focus();}
+function showLanding(){hideHistory();mark(null);$('main').innerHTML=기획표시.입장화면();$('entryNew').onclick=()=>newForm();$('entrySaved').onclick=showHistory;}
 
 // ---------- ① 조건 고르기 (주문서) ----------
 const 선택지={계절:['봄','여름','가을','겨울'],언어권:['영어권','일본어','중국어 간체','중국어 번체'],지역:['중구','동구'],체류기간:['당일','1박2일']};
 const 여러개={언어권:1,지역:1};
 function newForm(){
+  hideHistory();
   mark(null);
   const q=(name,label,help)=>`<div class="q"><span>${label}${help?`<small>${help}</small>`:''}</span><div class="pills" data-name="${name}">${선택지[name].map(v=>`<button type="button" class="pill" aria-pressed="false" data-v="${esc(v)}">${esc(v)}</button>`).join('')}</div></div>`;
   $('main').innerHTML=`<section class="card">${guide(1)}
@@ -193,10 +217,8 @@ async function show(id,cond,안,버전){
   <section class="card ai"><div class="aihead"><span class="aibadge">AI 코스 초안</span><strong>${s.코스있음?'담당자가 확인할 것':'아직 코스가 없어요'}</strong></div>${days}
     ${s.확인할것.length?`<ul>${s.확인할것.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p class="note">확인할 것이 없어요.</p>'}
     <p class="note">이전 방식으로 저장된 초안이에요. 이 기록에는 A·B 비교 정보가 없어요. 아래 시각은 추천 동선을 살펴보는 기준이며 실제 예약·운영시간을 확인해야 해요.</p></section>
-  ${s.코스있음?`<section class="card"><div class="aihead"><strong>동선 · 시간표</strong>
-    <span class="legend"><span><i class="lg-day"></i>낮</span><span><i class="lg-eve"></i>저녁</span><span><i class="lg-night"></i>밤·숙박</span></span></div>
-    <div class="mapgrid"><div id="mapbox"></div><div class="timeline" id="timeline"></div></div></section>`:''}`;
-  if(s.코스있음)draw(s.일정);
+  ${s.코스있음?`<section class="card map-launch"><div><h3>동선 · 시간표</h3><p class="note">큰 지도에서 방문 순서와 장소 설명을 살펴보세요.</p></div><button class="btn primary" id="openMap">지도 크게 보기 ↗</button></section>`:''}`;
+  if(s.코스있음)$('openMap').onclick=()=>openMap(s.일정,{id,cond});
 }
 const 분류이름={AI수정:['AI가 고칠 것','시간 겹침·형식 오류처럼 코스가 틀린 것. 총괄이 코스 에이전트에게 고치게 해요. 남아 있으면 고치지 못한 것이에요.'],
   자료보완:['자료 보완','자료가 없어 생긴 것. 수집 에이전트가 저장소 자료에서 찾아요. 남아 있으면 못 찾은 것이에요.'],
@@ -221,7 +243,7 @@ function showRecord(id,cond,rec){
     <p>${short(설명.왜||안.이유||'변경 이유는 팀 검토가 필요해요.')}</p>
     ${설명.남은문제?`<p class="note">더 확인할 점: ${short(설명.남은문제)}</p>`:''}</div>`:'';
   // 이전 버전에는 최신 버전의 희망 반영 설명을 붙이지 않는다.
-  const wish=!이전&&(안.희망반영||[]).length?`<section class="card"><h3>요청을 이렇게 반영했어요</h3><ul class="wish">${안.희망반영.map(h=>{
+  const wish=!이전&&(안.희망반영||[]).length?`<section class="card request-card"><h3>요청을 이렇게 반영했어요</h3><ul class="wish">${안.희망반영.map(h=>{
     const status=({지킴:'일정에 반영',일부:'일부 반영',못지킴:'조정 필요'})[h.반영]||'확인 필요';
     const reason=기획표시.문장(h.이유||'반영 이유가 아직 정리되지 않았어요.');
     return `<li class="w-${esc(h.반영)}"><div><span class="tagw">${esc(status)}</span> <b>${plain(h.내용||원희망[h.희망id]||'요청 사항')}</b></div><p>${esc(기획표시.짧게(reason))}</p>${reason.length>140?`<details class="reason-more"><summary>반영 이유 더 보기</summary><p>${esc(reason)}</p></details>`:''}</li>`;
@@ -234,7 +256,7 @@ function showRecord(id,cond,rec){
   const 부분=기?`<p class="note">최근 수정 요청: ${plain(기.요청)}</p>`:'';
   const chips=[cond.계절,(cond.언어권||[]).join('·'),(cond.지역||[]).join('·'),cond.체류기간].filter(Boolean);
   main.innerHTML=`<div class="cond">${chips.map(c=>`<span class="chip">${esc(c)}</span>`).join('')}</div>
-    <section class="card ai recommendation"><div class="aihead"><span class="aibadge">코스 초안</span><h2>코스 제안</h2><span class="draft-badge">확정 전 초안</span></div>
+    <section class="card ai recommendation"><div class="aihead"><span class="aibadge">코스 초안</span><h2>코스 제안</h2><span class="draft-badge">확정 전 초안</span>${s.코스있음?`<button class="btn primary compare-map-button" id="openMap" title="동선 · 시간표">지도 크게 보기 ↗</button>`:''}</div>
       <p class="lead">${정리.안.length>1?'요청을 바탕으로 만든 코스와 대안을 비교해 보세요.':'요청을 바탕으로 만든 코스예요. 동선과 일정을 먼저 살펴보세요.'}</p>
       <div class="tabs plan-choices">${tabs}</div>
       ${(s.일정||[]).length?`<p class="route-preview">${s.일정.slice(0,5).map(x=>esc(stopName(x))).join(' <span aria-hidden="true">→</span> ')}${s.일정.length>5?' …':''}</p>`:''}
@@ -242,19 +264,16 @@ function showRecord(id,cond,rec){
       <div class="review-status state-${상태.종류}" role="status"><b>${esc(상태.제목)}</b><p>${esc(상태.설명)}</p>${주요확인.length?`<ul>${주요확인.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div>
       ${s.출발가능요일?.length?`<p class="departure"><b>출발 요일 참고</b> ${esc(s.출발가능요일.join(' · '))}<span class="note">정기휴무 기준이에요. 운영 변경 여부는 출발 전 확인해 주세요.</span></p>`:''}
       ${부분}${alt}${required}</section>
-    ${s.코스있음?`<section class="card"><div class="aihead"><strong>동선 · 시간표</strong>
-      <span class="legend"><span><i class="lg-day"></i>낮</span><span><i class="lg-eve"></i>저녁</span><span><i class="lg-night"></i>밤·숙박</span></span></div>
-      <div class="mapgrid"><div id="mapbox"></div><div class="timeline" id="timeline"></div></div></section>`:''}
     <section class="card freedom"><h3>어디까지 자유롭게 이용하나요?</h3><p>표시된 순서와 시각은 권장 일정이에요. 관광·식사는 장소의 운영시간 안에서 선택할 수 있도록 기획합니다.</p><p class="note">예약이나 이용권에 실제로 정해진 시간이 있다면 그 조건을 따라야 해요. 미정인 사용처·유효시간·포함 혜택은 아직 확정된 상품 조건이 아니에요. 집결·해산이나 숙소 예약을 먼저 입력할 필요는 없어요.</p></section>
     ${wish}
-    <section class="card"><h3>바꾸고 싶은 부분이 있나요?</h3><p class="note">고른 일정만 다시 제안해요. 나머지 일정과 이전 초안은 보존해요.</p>
+    <details class="card"><summary>코스 수정하기 · 바꾸고 싶은 부분이 있나요?</summary><p class="note">고른 일정만 다시 제안해요. 나머지 일정과 이전 초안은 보존해요.</p>
       <div class="pills" id="redo">${rec.시간칸.map(k=>`<button type="button" class="pill" aria-pressed="false" data-v="${esc(k)}">${esc(slotName(k))}</button>`).join('')}</div>
       <div class="redo-row"><input id="redoText" maxlength="300" placeholder="예: 낮은 유지하고 저녁만 설문 음식 후보로 바꿔 주세요"><button class="btn primary" id="redoGo" disabled>다시 만들기</button></div>
-      <p class="note" id="keep"></p><p class="err" id="redoErr"></p></section>
+      <p class="note" id="keep"></p><p class="err" id="redoErr"></p></details>
     <details class="card technical"><summary>팀 검토용 상세 · 수정 이력과 검사 기록</summary><p class="note">${esc(rec.안id)}안은 ${rec.안id==='A'?'원래 요청으로 만든 코스':'구성을 조정한 대안'}이고, ${rec.버전}버전은 같은 코스를 ${rec.버전}번째로 작성한 기록이에요. 서로 다른 여행 상품 ${rec.버전}개를 뜻하지 않아요.</p>${vers}${검사}<p><a href="/admin/">서비스 제공자용 로그 보기 ↗</a></p></details>`;
-  if(s.코스있음)draw(s.일정);
+  if(s.코스있음)$('openMap').onclick=()=>openMap(s.일정,{id,cond,rec});
   if($('latestPlan'))$('latestPlan').onclick=()=>show(id,cond,rec.안id);
-  main.querySelectorAll('.tab').forEach(b=>b.onclick=()=>show(id,cond,b.dataset.plan));
+  main.querySelectorAll('.tab[data-plan]').forEach(b=>b.onclick=()=>show(id,cond,b.dataset.plan));
   main.querySelectorAll('.vers .pill').forEach(b=>b.onclick=()=>show(id,cond,rec.안id,b.dataset.v));
   const redo=$('redo');const pick=()=>[...redo.querySelectorAll('[aria-pressed=true]')].map(b=>b.dataset.v);
     const upd=()=>{const p=pick();$('keep').textContent=p.length?`그대로 둘 일정: ${rec.시간칸.filter(k=>!p.includes(k)).map(slotName).join(', ')||'없음'}`:'';$('redoGo').disabled=!p.length||!$('redoText').value.trim();};
@@ -265,48 +284,106 @@ function showRecord(id,cond,rec){
       showProgress(r);watch(r.기획id);window.scrollTo({top:0,behavior:'smooth'});}
     catch(err){$('redoErr').textContent=err.message;upd();}};
 }
-function draw(stops){
-  const tl=$('timeline');let lastDay=null;
-  for(const s of stops){
-    const cls=!s.좌표?'none':칸색(s);
-    if(s.일차!==lastDay){tl.insertAdjacentHTML('beforeend',`<div class="daylabel">${esc(s.일차)}일차</div>`);lastDay=s.일차;}
-    const link=s.지도링크?`<br><a target="_blank" rel="noopener" href="${esc(s.지도링크)}">이 위치를 카카오맵에서 보기 ↗</a>`:'';
-    const name=stopName(s);
-    tl.insertAdjacentHTML('beforeend',`<div class="stop"><div class="num ${cls}">${s.순번}</div><div><b>${esc(s.시각||'시각 미정')}</b> ${esc(name)}${name===slotName(s.시간칸)?'':` <small>· ${esc(slotName(s.시간칸))}</small>`}${link}</div></div>`);
-  }
-  $('mapbox').innerHTML=routeSvg(stops);
+let mapController=null,mapVersion=0,explorerStops=[],selectedStop=null,returnFocus=null;
+function closeMap(){
+  const view=$('mapView');if(!view||view.hidden)return;
+  mapVersion++;mapController?.destroy();mapController=null;view.hidden=true;
+  document.body.classList.remove('map-open');
+  document.querySelector('.wrap').inert=false;document.querySelector('body > header').inert=false;
+  (returnFocus?.isConnected?returnFocus:$('openMap'))?.focus();
 }
-// 바탕 지도 없이 좌표만으로 그리는 동선 그림. 외부 프로그램·이미지를 불러오지 않는다.
-function routeSvg(stops){
-  const pts=stops.filter(s=>s.좌표);const none=stops.length-pts.length;
-  if(pts.length<2)return `<div class="nomap"><div><b>지도 위치 정보는 추가 확인이 필요해요</b><p class="note">여행 순서와 시각은 시간표에서 확인할 수 있어요.</p></div></div>`;
-  const W=600,H=460,P=48;
-  const lat0=pts.reduce((a,s)=>a+s.좌표[0],0)/pts.length,kx=Math.cos(lat0*Math.PI/180);
-  const raw=pts.map(s=>[s.좌표[1]*kx,-s.좌표[0]]),xs=raw.map(p=>p[0]),ys=raw.map(p=>p[1]);
-  const minx=Math.min(...xs),maxx=Math.max(...xs),miny=Math.min(...ys),maxy=Math.max(...ys);
-  const span=Math.max(maxx-minx,maxy-miny,0.003),sc=Math.min(W-2*P,H-2*P)/span;
-  const ox=(W-(maxx-minx)*sc)/2,oy=(H-(maxy-miny)*sc)/2,seen={};
-  const at=pts.map((s,i)=>{let x=ox+(raw[i][0]-minx)*sc,y=oy+(raw[i][1]-miny)*sc;
-    const key=Math.round(x/6)+','+Math.round(y/6);const k=seen[key]=(seen[key]||0)+1;if(k>1)y+=24*(k-1);return {s,x,y};});
-  const mPerPx=111320/sc;const nice=[50,100,200,250,500,1000,2000,5000].find(m=>m/mPerPx>=70)||5000;
-  const barPx=nice/mPerPx,barLabel=nice>=1000?(nice/1000)+'km':nice+'m';
-  let lines='';
-  for(const day of [...new Set(at.map(p=>p.s.일차))]){const d=at.filter(p=>p.s.일차===day);if(d.length<2)continue;
-    lines+=`<polyline class="route ${day===2?'d2':''}" points="${d.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ')}"/>`;}
-  const dots=at.map(({s,x,y})=>`<g class="pin ${칸색(s)}" transform="translate(${x.toFixed(1)},${y.toFixed(1)})"><title>${esc(s.순번+'. '+s.표시명+' · '+s.일차+'일차 '+(s.시각||'시각 미정'))}</title><circle r="13"/><text dy="4.5">${s.순번}</text>${x>W*0.62?'<text class="lbl end" x="-17" dy="4">':'<text class="lbl" x="17" dy="4">'}${esc(s.표시명)}</text></g>`).join('');
-  return `<div class="routemap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="코스 동선 그림"><text class="north" x="${W-26}" y="30">N ↑</text>${lines}${dots}
-    <g transform="translate(20,${H-22})"><line class="bar" x1="0" y1="0" x2="${barPx.toFixed(1)}" y2="0"/><text class="barlbl" x="${(barPx/2).toFixed(1)}" y="-6">${barLabel}</text></g></svg>
-    <p class="note">바탕 지도 없이 장소 위치만 그린 동선이에요. 선은 순서를 잇는 직선이며 실제 이동 경로가 아니에요.${none?` 좌표가 없는 장소 ${none}곳은 그림에서 빠졌어요.`:''}</p></div>`;
+function openMap(stops,context={}){
+  let view=$('mapView');
+  if(!view){
+    view=document.createElement('section');view.id='mapView';view.className='map-explorer';view.hidden=true;
+    view.setAttribute('role','dialog');view.setAttribute('aria-modal','true');view.setAttribute('aria-label','코스 지도 탐색');view.tabIndex=-1;
+    document.body.append(view);
+    view.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){e.preventDefault();closeMap();return;}
+      if(e.key==='Tab'){
+        const focusable=[...view.querySelectorAll('button,a,summary,[tabindex="0"]')].filter(x=>!x.disabled&&x.getClientRects().length);
+        const first=focusable[0],last=focusable.at(-1);
+        if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}
+        else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}
+      }
+    });
+  }
+  if(view.hidden)returnFocus=document.activeElement;
+  mapController?.destroy();mapController=null;selectedStop=null;
+  explorerStops=stops.map((s,i)=>({...s,표시명:stopName(s),순번:s.순번??i+1}));
+  const plans=context.rec?.정리?.안||[],current=context.rec?.안id;
+  const tabs=plans.map(a=>`<button type="button" class="explorer-plan ${a.안id===current?'active':''}" aria-pressed="${a.안id===current}" data-explorer-plan="${esc(a.안id)}">${esc(a.안id)}안</button>`).join('');
+  let day=null;const list=explorerStops.map((s,index)=>{
+    const heading=day!==s.일차?`<h3 class="explorer-day">${esc(s.일차)}일차</h3>`:'';day=s.일차;
+    const next=explorerStops[index+1],segment=next&&next.일차===s.일차?`<div class="stop-transfer"><span data-route-time="${s.순번}">경로 확인 중</span><button type="button" data-play-segment="${s.순번}" disabled aria-label="${esc(stopName(s))}에서 ${esc(stopName(next))}까지 구간 재생">구간 재생</button></div>`:'';
+    return heading+`<button type="button" class="explorer-stop" data-stop="${s.순번}" aria-pressed="false"><span class="stop-order">${s.순번}</span><span><small>${esc(s.시각||'시각 미정')}</small><b>${esc(stopName(s))}</b></span></button>${segment}`;
+  }).join('');
+  view.innerHTML=`<header class="explorer-header"><button type="button" class="btn" id="backCompare">← 코스 비교</button><h1>${current?esc(current)+'안':'저장 코스'} · 지도 탐색</h1><nav aria-label="비교할 코스">${tabs}</nav>${plans.length&&!plans.some(a=>a.안id==='B')?'<span class="note">B안 아직 없음</span>':''}</header>
+    <div class="explorer-body"><nav class="explorer-list" aria-label="방문 순서"><h2>방문 순서</h2>${list}</nav>
+    <div class="explorer-map"><div id="mapbox"></div><p class="map-reference-note">시설·권역의 대표 위치 기준 · 도보 경로·시간은 지도 추정 · 실제 입구는 별도 확인</p></div>
+    <aside class="place-panel" id="placePanel" aria-label="선택한 장소 설명" aria-live="polite" hidden></aside></div>`;
+  view.hidden=false;view.classList.remove('place-open');document.body.classList.add('map-open');
+  document.querySelector('.wrap').inert=true;document.querySelector('body > header').inert=true;
+  $('backCompare').onclick=closeMap;
+  view.querySelectorAll('[data-stop]').forEach(button=>button.onclick=()=>selectStop(Number(button.dataset.stop)));
+  view.querySelectorAll('[data-play-segment]').forEach(button=>button.onclick=()=>mapController?.playLeg?.(Number(button.dataset.playSegment)));
+  view.querySelectorAll('[data-explorer-plan]').forEach(button=>button.onclick=async()=>{
+    if(button.dataset.explorerPlan===current)return;
+    button.disabled=true;const version=mapVersion;
+    try{
+      const rec=await get('/api/plan/record?id='+encodeURIComponent(context.id)+'&안='+encodeURIComponent(button.dataset.explorerPlan));
+      if(view.hidden||mapVersion!==version)return;
+      showRecord(context.id,context.cond||{},rec);openMap(rec.요약.일정,{...context,rec});
+    }catch{button.disabled=false;button.textContent='불러오기 재시도';}
+  });
+  $('backCompare').focus();draw(explorerStops);
+}
+function selectStop(number,fromMap=false){
+  const stop=explorerStops.find(s=>s.순번===number);if(!stop)return;
+  selectedStop=number;
+  const view=$('mapView'),panel=$('placePanel');view.classList.add('place-open');panel.hidden=false;
+  panel.innerHTML=기획표시.장소패널(stop);
+  view.querySelectorAll('[data-stop]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.stop)===number)));
+  panel.querySelector('[data-place-close]').onclick=()=>{
+    panel.hidden=true;view.classList.remove('place-open');view.querySelector(`[data-stop="${number}"]`)?.focus();
+  };
+  panel.querySelectorAll('[data-explore-candidate]').forEach(button=>button.onclick=()=>{const index=Number(button.dataset.exploreCandidate);showCandidate(number,index);mapController?.previewCandidate?.(number,index);});
+  if(!fromMap)mapController?.selectStop?.(number,{notify:false});
+}
+function showCandidate(number,index){
+  const stop=explorerStops.find(s=>s.순번===number),candidate=stop?.식당후보?.[index];if(!candidate)return;
+  if(selectedStop!==number)selectStop(number,true);
+  const panel=$('candidatePreview');if(panel)panel.innerHTML=`<p><b>${esc(candidate.이름)}</b></p><p class="note">후보 미리보기 · 방문 확정은 바뀌지 않습니다.${candidate.좌표?'':' 위치는 확인 중입니다.'}</p>`;
+}
+function draw(stops){
+  const version=++mapVersion;mapController?.destroy();mapController=null;
+  const box=$('mapbox');box.innerHTML='<p class="note">큰 지도를 불러오는 중…</p>';
+  import('/plan/three-map.js').then(m=>{
+    if(version!==mapVersion)return null;
+    return m.mount(box,stops,{externalDetails:true,onSelect:(number,event)=>{
+      selectStop(number,true);
+      if(event?.playback){$('placePanel').hidden=true;$('mapView').classList.remove('place-open');}
+    },onCandidate:showCandidate});
+  }).then(controller=>{
+    if(!controller)return;if(version!==mapVersion){controller.destroy();return;}
+    mapController=controller;if(selectedStop!==null)controller.selectStop?.(selectedStop,{notify:false});
+    for(const node of $('mapView').querySelectorAll('[data-route-time]')){
+      const leg=controller.routes?.find(leg=>leg.from===Number(node.dataset.routeTime));node.textContent=leg?코스지도모델.timeLabel(leg.durationSeconds):'경로 미확인';
+    }
+    for(const button of $('mapView').querySelectorAll('[data-play-segment]'))button.disabled=!controller.routes?.some(leg=>leg.from===Number(button.dataset.playSegment));
+  }).catch(()=>{if(version===mapVersion)box.innerHTML='<p class="note">지도를 불러오지 못했습니다. 왼쪽 일정과 장소 설명은 계속 볼 수 있습니다.</p>';});
 }
 
 // ---------- 시작 ----------
 $('newBtn').onclick=()=>{$('progress').hidden=!(last&&last.상태==='진행중');newForm();};
-if($('savedCourses'))$('savedCourses').open=window.matchMedia('(min-width:901px)').matches;
+$('historyBtn').onclick=()=>{$('historyPanel').hidden?showHistory():hideHistory();};
+$('historyClose').onclick=()=>{hideHistory();$('historyBtn').focus();};
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('historyPanel').hidden){hideHistory();$('historyBtn').focus();}});
 (async()=>{
+  showLanding();
   const items=await loadList();
   let p=null;try{p=(await get('/api/plan/latest')).기획;}catch{}
   if(p&&p.상태==='진행중'){showProgress(p);watch(p.기획id);$('main').innerHTML='';return;}  // 새로고침해도 진행 상황을 이어서 보여 줌
-  if(items.length)show(items[0].id,items[0].조건);else newForm();
 })();
 
 }
