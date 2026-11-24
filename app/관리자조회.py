@@ -8,7 +8,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 기준 = Path(__file__).resolve().parent
-파일이름 = re.compile(r'(?:[1-5]단계_(?:결과(?:_\d+)?\.md|선택(?:_\d+)?\.json|전달_(?:준비|검사)\.json|입력\.json|담당자선택\.json)|3단계_(?:구조화|운영확인)\.json|코스작성조건_선택\.json|통합시험_상태\.json)\Z')
+파일이름 = re.compile(r'(?:[1-5]단계_(?:결과(?:_\d+)?\.md|선택(?:_\d+)?\.json|전달_(?:준비|검사)\.json|입력\.json|담당자선택\.json)|3단계_(?:구조화|운영확인)\.json|코스작성조건_선택\.json|통합시험_상태\.json|AI_오류\.json)\Z')
 
 
 class 결과저장소:

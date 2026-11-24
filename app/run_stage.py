@@ -69,6 +69,20 @@ def 제한초_읽기(config, 에이전트_경로='') -> int:
 
 
 async def 단계_실행(에이전트_경로: str, 입력: str) -> str:
+    """실패의 제공자·모델·소요시간을 예외에 보존한다. AI를 추가 호출하지 않는다."""
+    start=time.monotonic()
+    try:
+        return await _단계_실행(에이전트_경로,입력)
+    except Exception as error:
+        from 오류기록 import 진단
+        config=설정_읽기(저장소)
+        provider=(config.get('AI_PROVIDER') or 'claude').strip().lower()
+        model=config.get('GEMINI_MODEL','') if provider=='gemini' else config.get('CLAUDE_MODEL') or 'claude-sonnet-5-5'
+        error.AI진단=진단(error,제공자=provider,모델=model,단계=에이전트_경로,경과초=round(time.monotonic()-start,3))
+        raise
+
+
+async def _단계_실행(에이전트_경로: str, 입력: str) -> str:
     """설정한 AI 제공자로 에이전트를 한 번 호출한다. 제한 시간을 넘기면 끊고 이유를 올린다."""
     본문, 도구 = 에이전트_읽기(에이전트_경로)
     config=설정_읽기(저장소)
