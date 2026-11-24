@@ -6,6 +6,25 @@ from test_운영검토 import example
 
 
 class 장소정보시험(unittest.TestCase):
+    def test_입구미확정이어도_검토된_대표위치를_찾는다(self):
+        from 장소정보 import 대표위치
+        for name in ['근대골목 (대구광역시 중구)','대구광역시 중구 서문시장','서문시장 야시장',
+                     '식사 방식 미선택 · 권역 후보: 대구광역시 중구 서문시장',
+                     '평화시장 닭똥집골목 (대구광역시 동구) — 운영시간 자료 없음']:
+            with self.subTest(name=name):
+                row=대표위치(name)
+                self.assertIsNotNone(row)
+                self.assertEqual(len(row['중심']),2)
+                self.assertTrue(row['근거URL'].startswith('https://'))
+                self.assertIn('대표',row['설명'])
+                self.assertFalse(row['입구확인'])
+
+    def test_숙소는_명시된_권역만_표시한다(self):
+        from 장소정보 import 대표위치
+        row=대표위치('숙소 (중구 동성로 일대 호텔 후보 권역, 업체 미고정)',시간칸='숙박')
+        self.assertEqual(row['이름'],'동성로')
+        for name in ['숙소 (중구·동구 권역 미정)','숙소 (동구, 업체 미고정)','없는 서문시장 가게','서문시장과 평화시장 중 미선택']:
+            self.assertIsNone(대표위치(name,시간칸='숙박'))
     def test_실제자료와_이동기준점_검색(self):
         rows=장소목록()
         self.assertTrue(any(r['장소명']=='동대구역' for r in rows))
