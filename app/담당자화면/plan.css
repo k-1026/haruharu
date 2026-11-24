@@ -582,3 +582,8 @@ body:has(#main .guide li:nth-child(5).on){--band:radial-gradient(circle at 82% 3
 .scroll-cue.is-hidden{transform:translateY(12px)}
 @media(max-width:600px){.scroll-cue{left:16px}}
 .scroll-cue{left:max(32px,calc((100vw - 1260px)/2 + 32px))}@media(max-width:600px){.scroll-cue{left:16px}}
+/* 첫 화면 주 버튼: 조금 키우고 오른쪽에 시작 조건 안내 */
+.entry-actions{align-items:center;gap:20px}
+.entry-actions #entryNew{padding:17px 30px;font-size:17px;border-radius:14px}
+.cta-hint{margin:0;font-size:14.5px;line-height:1.55;color:var(--sub);padding-left:18px;border-left:1px solid #E6D3B6}
+@media(max-width:600px){.cta-hint{padding-left:0;border-left:0;flex-basis:100%}}
