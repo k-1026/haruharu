@@ -26,7 +26,19 @@ def 에이전트_읽기(상대경로: str) -> tuple[str, list[str]]:
     도구 = [t.strip() for t in 도구줄.group(1).split(",") if t.strip()] if 도구줄 else []
     if Path(상대경로).name == '코스검토.md':
         return _자료동봉(본문.strip()), []
+    if Path(상대경로).name == '홍보검토.md':
+        return _지침동봉(본문.strip()), []
     return 본문.strip(), 도구
+
+
+def _지침동봉(본문):
+    조각=['아래 지침 본문을 이미 첨부했다. 파일을 다시 찾아 읽지 말고 적용한다.',본문]
+    for 경로 in dict.fromkeys(re.findall(r'`((?:지침/|\.claude/skills/)[^`\n]+\.md)`',본문)):
+        파일=(저장소/경로).resolve()
+        if not any(파일.is_relative_to((저장소/root).resolve()) for root in ['지침','.claude/skills']):
+            raise ValueError('첨부 지침 경로를 확인하세요.')
+        조각.append(f'\n첨부 지침: {경로}\n'+파일.read_text(encoding='utf-8'))
+    return '\n\n'.join(조각)
 
 
 def _자료동봉(본문):

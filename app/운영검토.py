@@ -245,7 +245,17 @@ def 검토_반영(기존,검토,이전칸=None):
     for r in 검토['운영확인']:
         if r['처리']=='제외':
             meal=next((m for m in course.get('식사목록',[]) if _key(m)==_key(r)),None)
-            if meal is not None:meal['추천후보']=[x for x in meal.get('추천후보',[]) if x!=r['대상명']]
+            if meal is not None:
+                meal['추천후보']=[x for x in meal.get('추천후보',[]) if x!=r['대상명']]
+                def 지우기(text):
+                    # 같은 칸에서 명시적으로 제외한 상호만 제거한다. 권역·다른 후보는 보존한다.
+                    text=str(text).replace(r['대상명'],'')
+                    text=re.sub(r'(?:\s*·\s*){2,}',' · ',text)
+                    text=re.sub(r'(:\s*)·\s*',r'\1',text)
+                    return re.sub(r'추천\s*후보\s*:\s*$','',text).strip(' ·,')
+                meal['권역']=지우기(meal.get('권역',''))
+                for row in course['칸목록']:
+                    if _key(row)==_key(r):row['장소명']=지우기(row.get('장소명',''))
     course['운영검토기록']=copy.deepcopy(검토)
     course['담당자최종확인기록']={'확인':검토['담당자최종확인'],'입력경로':'관리자 화면'}
     return course
