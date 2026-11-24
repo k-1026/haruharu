@@ -136,7 +136,7 @@ function setView(v){document.body?.setAttribute?.('data-view',v);}
 function mark(id){$('saved').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.id===id));}
 function hideHistory(){const panel=$('historyPanel');if(panel)panel.hidden=true;$('historyBtn')?.setAttribute('aria-expanded','false');}
 function showHistory(){const panel=$('historyPanel');if(!panel)return;panel.hidden=false;$('historyBtn').setAttribute('aria-expanded','true');$('historyClose').focus();}
-function showLanding(){hideHistory();mark(null);setView('landing');$('progress').hidden=!(last&&last.상태==='진행중');$('main').innerHTML=기획표시.입장화면();$('entryNew').onclick=()=>newForm();$('entrySaved').onclick=showHistory;$('toDay').onclick=()=>$('dayTitle').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});renderRecent();}
+function showLanding(){hideHistory();mark(null);setView('landing');$('progress').hidden=!(last&&last.상태==='진행중');$('main').innerHTML=기획표시.입장화면();$('entryNew').onclick=()=>newForm();$('entrySaved').onclick=showHistory;const cueScroll=()=>{const c=$('toDay');if(!c){removeEventListener('scroll',cueScroll);return;}c.classList.toggle('is-hidden',scrollY>80);};addEventListener('scroll',cueScroll,{passive:true});cueScroll();$('toDay').onclick=()=>$('dayTitle').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});renderRecent();}
 
 // ---------- ① 조건 고르기 (주문서) ----------
 const 선택지={계절:['봄','여름','가을','겨울'],언어권:['영어권','일본어','중국어 간체','중국어 번체'],지역:['중구','동구'],체류기간:['당일','1박2일']};
