@@ -353,7 +353,7 @@ function openMap(stops,context={}){
   }).join('');
   view.innerHTML=`<header class="explorer-header"><button type="button" class="btn" id="backCompare">← 코스 비교</button><h1>${current?esc(current)+'안':'저장 코스'} · 지도 탐색</h1><nav aria-label="비교할 코스">${tabs}</nav>${plans.length&&!plans.some(a=>a.안id==='B')?'<span class="note">B안 아직 없음</span>':''}</header>
     <div class="explorer-body"><nav class="explorer-list" aria-label="방문 순서"><h2>방문 순서</h2>${list}</nav>
-    <div class="explorer-map"><div id="mapbox"></div><p class="map-reference-note">시설·권역의 대표 위치 기준 · 도보 경로·시간은 지도 추정 · 실제 입구는 별도 확인</p></div>
+    <div class="explorer-map"><div id="mapbox"></div><p class="map-reference-note">시설·권역의 대표 위치 기준 · 코스 이해용으로 정리한 동선(실제 보행 안내와 다를 수 있음) · 이동시간은 원본 자료 기준 · 대중교통 경로 미연결</p></div>
     <aside class="place-panel" id="placePanel" aria-label="선택한 장소 설명" aria-live="polite" hidden></aside></div>`;
   view.hidden=false;view.classList.remove('place-open');document.body.classList.add('map-open');setView('map');
   document.querySelector('.wrap').inert=true;document.querySelector('body > header').inert=true;
@@ -401,9 +401,16 @@ function draw(stops){
     if(!controller)return;if(version!==mapVersion){controller.destroy();return;}
     mapController=controller;if(selectedStop!==null)controller.selectStop?.(selectedStop,{notify:false});
     for(const node of $('mapView').querySelectorAll('[data-route-time]')){
-      const leg=controller.routes?.find(leg=>leg.from===Number(node.dataset.routeTime));node.textContent=leg?코스지도모델.timeLabel(leg.durationSeconds):'경로 미확인';
+      const leg=controller.routes?.find(leg=>leg.from===Number(node.dataset.routeTime));
+      if(!leg){node.textContent='경로 미확인';continue;}
+      const alt=leg.mode==='transit'?코스지도모델.timeLabel(leg.walkSeconds):leg.transitSeconds?'대중교통 약 '+Math.round(leg.transitSeconds/60)+'분':'대중교통 자료 없음';
+      node.innerHTML=`<b class="mode-primary ${leg.mode==='transit'?'transit':'foot'}">${esc(코스지도모델.legTimeLabel(leg))}</b><small class="mode-alt">${esc(alt)}</small>`;
+      const t=leg.transport||{};node.title=[t.노선,t.출처,t.기준요일,t.기준출발시각,t.확인일,t.비고].filter(Boolean).join(' · ');
     }
-    for(const button of $('mapView').querySelectorAll('[data-play-segment]'))button.disabled=!controller.routes?.some(leg=>leg.from===Number(button.dataset.playSegment));
+    for(const button of $('mapView').querySelectorAll('[data-play-segment]')){
+      const leg=controller.routes?.find(leg=>leg.from===Number(button.dataset.playSegment));button.disabled=!leg;
+      if(leg)button.textContent=leg.mode==='transit'?'이동 안내':'구간 재생';
+    }
   }).catch(()=>{if(version===mapVersion)box.innerHTML='<p class="note">지도를 불러오지 못했습니다. 왼쪽 일정과 장소 설명은 계속 볼 수 있습니다.</p>';});
 }
 
