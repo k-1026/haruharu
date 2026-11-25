@@ -279,5 +279,91 @@ class 안조립시험(unittest.TestCase):
         self.assertIsInstance(시간표검사.시간표_검사(코스, 입력['코스작성조건'], '1박2일'), dict)
 
 
+class 파생시험(unittest.TestCase):
+    def 완성(self, 입력=None, 주문=None, 표=None):
+        입력 = 입력 or 시험입력()
+        표 = 표 or 후보(입력)
+        코스 = 코스조립.안_조립((주문 or 정상주문())['A'], 표, 입력)
+        return 코스조립.파생_채우기(코스, 표, 입력)
+
+    def 체크(self, 코스, 번호):
+        return next(r for r in 코스['체크리스트'] if r['C번호'] == 번호)
+
+    def test_경고는_입력에서_이어받고_코스적용칸을_적는다(self):
+        w = next(x for x in self.완성()['남은경고'] if x.get('경고ID') == 'W1')
+        self.assertIn('낮-1', w['코스적용'])
+
+    def test_근거없는_관광칸에는_근거없음_경고(self):
+        import 단계연결
+        입력 = 시험입력(); 코스 = self.완성(입력)
+        self.assertFalse([p for p in 단계연결.코스_검사(코스, 입력) if '수요 근거 없음' in p or '없는 안·칸ID' in p or '경고 누락' in p])
+
+    def test_운영정보_미입력_장소는_미확인사항(self):
+        행 = [x for x in self.완성()['미확인사항'] if x['종류'] == '운영정보 미확인']
+        self.assertIn('낮-1', [x['대상 칸ID'] for x in 행])
+
+    def test_이름대응_불명확은_미확인사항(self):
+        입력 = 시험입력()
+        표 = 후보(입력, 장소행=시험장소() + [장소(99, '서문시장 (2지구)', 칸='점심', 유형='시장')])
+        행 = [x for x in self.완성(입력, 표=표)['미확인사항'] if x['종류'] == '이름 대응 불명확']
+        self.assertEqual([x['대상 칸ID'] for x in 행], ['점심-1'])
+
+    def test_장소별근거는_근거수치를_원문에서_옮긴다(self):
+        r = next(x for x in self.완성()['장소별근거'] if x['칸ID'] == '낮-1')
+        self.assertIn('R01 1%', r['근거수치'])
+        self.assertIn('근대 골목 산책', r['넣은이유'])
+        self.assertIn('W1', r['이어받은경고'])
+
+    def test_기존상품_표를_읽는다(self):
+        표 = 코스조립.기존상품_읽기(저장소 / '지침/3_코스검토/9_기존_상품_목록.md')
+        self.assertIn('김광석길', 표['경유']['G4'])
+        self.assertEqual(표['별칭']['김광석 다시그리기길'], '김광석길')
+
+    def test_연속3곳이_한상품에_있으면_노선겹침(self):
+        주문 = 정상주문()
+        주문['A']['칸'] = [{'칸ID': f'낮-{i}', '일차': 1, '시간칸': '낮', '장소': p, '머무는분': 30, '근거': [], '운영': [], '이유': ''}
+                       for i, p in enumerate(['P12', 'P3', 'P4'], 1)]
+        주문['A']['식사'] = []
+        코스 = self.완성(주문=주문)
+        노선 = [x for x in 코스['겹침이력'] if x['종류'] == '노선 겹침']
+        self.assertEqual(len(노선), 1)
+        self.assertIn('G4', 노선[0]['상품ID'])
+        self.assertEqual(노선[0]['선택'], '미선택')
+        self.assertFalse(코스['확정조건']['겹침처리'])
+        self.assertEqual(self.체크(코스, 'C6')['결과'], '통과 못 함')
+
+    def test_겹침이_없으면_C6통과와_겹침처리(self):
+        주문 = 정상주문(); 주문['A']['칸'] = [주문['A']['칸'][3]]; 주문['A']['식사'] = []
+        코스 = self.완성(주문=주문)
+        self.assertEqual(self.체크(코스, 'C6')['결과'], '통과')
+        self.assertTrue(코스['확정조건']['겹침처리'])
+
+    def test_체크리스트_C2_치킨은_저녁1번까지(self):
+        입력 = 시험입력(치킨='선택')
+        주문 = 정상주문(); 주문['A']['칸'][2]['장소'] = 'P7'; 주문['A']['칸'][3]['장소'] = 'P13'
+        self.assertEqual(self.체크(self.완성(입력, 주문), 'C2')['결과'], '통과 못 함')
+        self.assertEqual(self.체크(self.완성(), 'C2')['결과'], '통과')
+
+    def test_체크리스트_C8_고른구밖(self):
+        입력 = 시험입력(치킨='선택')
+        넓은 = copy.deepcopy(입력); 넓은['조건']['지역'] = ['중구', '동구']
+        주문 = 정상주문(); 주문['A']['칸'][3]['장소'] = 'P8'
+        self.assertEqual(self.체크(self.완성(입력, 주문, 후보(넓은)), 'C8')['결과'], '통과 못 함')
+
+    def test_체크리스트_C1_C3은_재확인필요(self):
+        코스 = self.완성()
+        self.assertEqual(self.체크(코스, 'C1')['결과'], '재확인 필요')
+        self.assertEqual(self.체크(코스, 'C3')['결과'], '재확인 필요')
+        self.assertEqual(sorted(r['C번호'] for r in 코스['체크리스트']), sorted(f'C{i}' for i in range(1, 11)))
+
+    def test_운영시간_밖_칸에는_대체후보가_붙고_바꾸지않는다(self):
+        행 = 시험장소(); 행[0]['운영시간'] = '매일 11:00-18:00'
+        입력 = 시험입력(); 표 = 후보(입력, 장소행=행)
+        r = 칸(self.완성(입력, 표=표), '낮-1')
+        self.assertEqual(r['장소명'], '대구광역시 중구 근대골목')
+        self.assertIn('대구광역시 중구 봉산문화거리', r['대체후보'])
+        self.assertNotIn('대구광역시 중구 김광석길', r['대체후보'])  # 이미 코스에 쓴 장소는 대체후보가 아님
+
+
 if __name__ == '__main__':
     unittest.main()
