@@ -162,13 +162,16 @@ class 결과저장소:
                 '형식': 경로.suffix.lstrip('.'), '경로': 키}
 
 
-def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서비스=None):
+def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서비스=None, 장소서비스=None):
     from 관리자실행 import 코스시험
     from 기획실행 import 기획실행
     from 홍보실행 import 홍보실행
     실행서비스 = 실행서비스 or 코스시험(저장소)
     기획서비스 = 기획서비스 or 기획실행(실행서비스)
     홍보서비스 = 홍보서비스 or 홍보실행(기획서비스)
+    if 장소서비스 is None:
+        from 장소위치 import 장소서비스 as _장소서비스
+        장소서비스 = _장소서비스()
     토큰 = secrets.token_urlsafe(32)
 
     class Handler(BaseHTTPRequestHandler):
@@ -199,6 +202,8 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서�
                     name='시연용_가상설문_일본인커플_중구_가을.'+ext
                     mime='text/csv; charset=utf-8' if ext=='csv' else 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                     return self.응답(200,(기준/'시험자료'/name).read_bytes(),mime)
+                if 경로.path == '/api/place-review':
+                    return self.응답(200, 장소서비스.목록())
                 if 경로.path == '/api/places':
                     from 장소정보 import 장소목록
                     return self.응답(200, {'장소목록':장소목록()})
@@ -270,7 +275,9 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서�
                       '/admin/review.js': ('운영확인.js','text/javascript; charset=utf-8'),
                       '/admin/places.js': ('장소선택.js','text/javascript; charset=utf-8'),
                       '/admin/review.css': ('운영확인.css','text/css; charset=utf-8'),
-                      '/admin/style.css': ('style.css', 'text/css; charset=utf-8')}
+                      '/admin/style.css': ('style.css', 'text/css; charset=utf-8'),
+                      '/admin/places-review': ('장소위치.html', 'text/html; charset=utf-8'),
+                      '/admin/place-review.js': ('장소위치.js', 'text/javascript; charset=utf-8')}
                 if 경로.path in 자산:
                     이름, 타입 = 자산[경로.path]
                     return self.응답(200, (기준 / '관리자화면' / 이름).read_bytes(), 타입)
@@ -306,6 +313,10 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서�
                     raise ValueError('입력 형식을 확인하세요.')
                 if self.path == '/api/plan/upload':
                     return self.응답(201, 기획서비스.자료미리보기(값))
+                if self.path == '/api/place-review/confirm':
+                    return self.응답(201, 장소서비스.확인(값))
+                if self.path == '/api/place-review/report':
+                    return self.응답(201, 장소서비스.신고(값))
                 if self.path == '/api/plan/revise':
                     return self.응답(202, 기획서비스.수정시작(값))
                 if self.path == '/api/promo/start':
@@ -343,8 +354,13 @@ def main():
     parser = argparse.ArgumentParser(description='실행 기록 조회·코스 조건 입력·3단계 시험')
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--runs', type=Path, default=기준 / 'runs')
+    parser.add_argument('--자동수집끄기', action='store_true', help='서버 시작 때 좌표 후보 찾기·지도 길 모으기를 하지 않음(개발·점검용)')
     args = parser.parse_args()
-    server = 로컬HTTP서버(('127.0.0.1', args.port), 핸들러(결과저장소(args.runs)))
+    from 장소위치 import 장소서비스
+    장소 = 장소서비스()
+    server = 로컬HTTP서버(('127.0.0.1', args.port), 핸들러(결과저장소(args.runs), 장소서비스=장소))
+    if not args.자동수집끄기:
+        장소.작업.시작()  # 서버가 켜질 때 좌표 후보 찾기·지도 길 모으기를 뒤에서 한 번 돌린다
     print(f'관리자 결과 조회: http://127.0.0.1:{args.port}/admin/', flush=True)
     print('관리자: 읽기 전용 운영 로그 · 기획 시작 시에만 AI 실행 · 종료: Ctrl+C', flush=True)
     try:
