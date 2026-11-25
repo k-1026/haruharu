@@ -48,6 +48,18 @@
     if(!s)return null;
     return (t.mode==='transit'?'대중교통 약 ':'도보 약 ')+Math.round(s/60)+'분 · 지도 경로 준비 중';
   }
+  // 대중교통 구간은 실제 노선 모양을 모르니, 두 장소를 잇는 점선 조각(직선)으로만 보여 준다.
+  function dashRows(a,b,dash=10,gap=6){
+    const dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy);if(!len)return [];
+    const ux=dx/len,uy=dy/len,rows=[];
+    for(let t=0;t<len;t+=dash+gap){const e=Math.min(len,t+dash);rows.push([[a[0]+ux*t,a[1]+uy*t],[a[0]+ux*e,a[1]+uy*e]]);}
+    return rows;
+  }
+  // 지도 선이 없을 때의 구간 안내: 위치 없는 숙소로 가는 구간은 '미확인'이 아니라 숙소를 정해야 하는 구간이다.
+  function legFallbackLabel(from,to){
+    if(to&&to.시간칸==='숙박'&&!to.좌표)return '숙소를 정하면 이동 안내';
+    return tableLabel(from&&from.다음이동)||'경로 미확인';
+  }
   function legTimeLabel(leg){return leg.mode==='transit'?'대중교통 약 '+Math.round(leg.durationSeconds/60)+'분':timeLabel(leg.durationSeconds);}
   // 도로 굽이를 보존하고 거의 일직선인 잔점만 정리한다. 원본·이동시간은 건드리지 않는다.
   function simplifyPath(points,toleranceMeters=2){
@@ -158,6 +170,6 @@
         return arrive();
       }};
   }
-  root.코스지도모델={model,preview,valid,label,motionView,routeKey,routesFor,track,sample,timeLabel,playback,roadStrip,clockMinutes,courseMinutes,sceneTime,previewSeconds,travelInfo,legTimeLabel,tableLabel,simplifyPath,characterMotion,walkingRoadRows};
+  root.코스지도모델={model,preview,valid,label,motionView,routeKey,routesFor,track,sample,timeLabel,playback,roadStrip,clockMinutes,courseMinutes,sceneTime,previewSeconds,travelInfo,legTimeLabel,tableLabel,legFallbackLabel,dashRows,simplifyPath,characterMotion,walkingRoadRows};
   if(typeof module!=='undefined')module.exports=root.코스지도모델;
 })(typeof globalThis!=='undefined'?globalThis:this);

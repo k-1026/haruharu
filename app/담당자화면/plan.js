@@ -435,7 +435,7 @@ function draw(stops){
     mapController=controller;if(selectedStop!==null)controller.selectStop?.(selectedStop,{notify:false});
     for(const node of $('mapView').querySelectorAll('[data-route-time]')){
       const leg=controller.routes?.find(leg=>leg.from===Number(node.dataset.routeTime));
-      if(!leg){const s=stops.find(x=>x.순번===Number(node.dataset.routeTime));node.textContent=코스지도모델.tableLabel(s?.다음이동)||'경로 미확인';continue;}
+      if(!leg){const i=stops.findIndex(x=>x.순번===Number(node.dataset.routeTime));node.textContent=코스지도모델.legFallbackLabel(stops[i],stops[i+1]);continue;}
       const alt=leg.mode==='transit'?코스지도모델.timeLabel(leg.walkSeconds):leg.transitSeconds?'대중교통 약 '+Math.round(leg.transitSeconds/60)+'분':'대중교통 자료 없음';
       node.innerHTML=`<b class="mode-primary ${leg.mode==='transit'?'transit':'foot'}">${esc(코스지도모델.legTimeLabel(leg))}</b><small class="mode-alt">${esc(alt)}</small>`;
       const t=leg.transport||{};node.title=[t.노선,t.출처,t.기준요일,t.기준출발시각,t.확인일,t.비고].filter(Boolean).join(' · ');

@@ -212,3 +212,19 @@ test('홍보 화면도 포롱이·여울이를 너구리·족제비 그림으로
   assert.equal(promo.캐릭터('동등'), null);
   assert.equal(promo.그림('여울이'), 'weasel');
 });
+
+test('다음 일정이 위치 없는 숙소면 경로 미확인 대신 숙소를 정하면 안내한다고 쓴다', () => {
+  const m = require('./담당자화면/map-model.js');
+  assert.equal(m.legFallbackLabel({다음이동: null}, {시간칸: '숙박', 좌표: null}), '숙소를 정하면 이동 안내');
+  assert.equal(m.legFallbackLabel({다음이동: {도보분: 14, 대중교통분: 9}}, {시간칸: '낮', 좌표: [35.8, 128.5]}), '도보 약 14분 · 지도 경로 준비 중');
+  assert.equal(m.legFallbackLabel({다음이동: null}, {시간칸: '낮', 좌표: null}), '경로 미확인');
+});
+
+test('대중교통 구간은 두 장소 사이를 점선 조각으로 잇는다', () => {
+  const m = require('./담당자화면/map-model.js');
+  const rows = m.dashRows([0, 0], [100, 0], 10, 6);
+  assert.ok(rows.length >= 6 && rows.length <= 7);
+  assert.deepEqual(rows[0], [[0, 0], [10, 0]]);
+  assert.ok(rows.every(r => r.length === 2 && r[1][0] <= 100));
+  assert.deepEqual(m.dashRows([0, 0], [0, 0], 10, 6), []);
+});
