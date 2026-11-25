@@ -89,7 +89,8 @@
     for(const leg of data.legs){
       const route=cache?.routes?.[routeKey(leg.from.point,leg.to.point)];
       const info=travelInfo(leg.from.다음이동,route?.durationSeconds);
-      if(info.mode==='transit')legs.push({...leg,...info,path:null,distance:null});
+      const road=route?.profile==='foot'&&route.points?.length>=2&&route.points.every(valid)?simplifyPath(route.points):null;
+      if(info.mode==='transit')legs.push({...leg,...info,path:null,distance:null,roadPath:road});
       else if(route?.profile==='foot'&&route.points?.length>=2&&route.points.every(valid))legs.push({...leg,...info,path:simplifyPath(route.points),distance:route.distance});
       else missing.push(leg);
     }

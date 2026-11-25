@@ -47,13 +47,15 @@ test('정면 걷기는 두 캐릭터의 원본 정면 모션 시선을 같은 �
   assert.equal(UI.characterMotion('raccoon',0,-1,0,'follow').view,'back');
 });
 
-test('대중교통에는 도보 geometry를 붙이지 않고 시간·노선만 전달한다',()=>{
+test('대중교통 구간은 걷기 재생용 path는 비우고, 지도 표시용 도로 선(roadPath)만 붙인다',()=>{
   const data=UI.model([{일차:1,좌표:[35.86,128.6],다음이동:{도보분:60,대중교통분:39,노선:'401',확인일:'2026-11-19'}},{일차:1,좌표:[35.88,128.62]}]);
   const cache={routes:{[UI.routeKey(data.entries[0].point,data.entries[1].point)]:{profile:'foot',points:[[35.86,128.6],[35.88,128.62]],durationSeconds:3600}}};
   const before=JSON.stringify(data),result=UI.routesFor(data,cache);
   assert.equal(result.legs[0].mode,'transit');assert.equal(result.legs[0].durationSeconds,2340);
   assert.equal(result.legs[0].path,null);assert.equal(result.legs[0].canWalk,false);
+  assert.deepEqual(result.legs[0].roadPath,[[35.86,128.6],[35.88,128.62]]);   // 사용자 결정(11/26): 버스 구간도 도로 선으로 보여 준다
   assert.equal(UI.routesFor(data,{}).legs[0].mode,'transit');
+  assert.equal(UI.routesFor(data,{}).legs[0].roadPath,null);
   assert.match(UI.legTimeLabel(result.legs[0]),/대중교통.*39분/);
   assert.equal(JSON.stringify(data),before);
 });

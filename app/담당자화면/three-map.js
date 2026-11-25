@@ -37,9 +37,10 @@ async function roadFallback(host,model,routed,options={}){
   const width=xs.length?Math.max(1000,Math.max(...xs)-left+400):4000,height=ys.length?Math.max(800,Math.max(...ys)-top+400):3000;
   const roads=(rows,color,width)=>`<g fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round">${(rows||[]).map(row=>`<polyline vector-effect="non-scaling-stroke" points="${row.map(p=>p[0]+','+(-p[1])).join(' ')}"/>`).join('')}</g>`;
   const routePaths=routed.legs.map(leg=>leg.canWalk?leg.path.map(p=>project(p).join(' ')).join(' L '):null);
-  const transitStroke=`<g fill="none" stroke="${ROUTE.transit}" stroke-width="3" stroke-dasharray="10 8" stroke-linecap="round">${routed.legs.filter(leg=>!leg.canWalk).map(leg=>`<path vector-effect="non-scaling-stroke" d="M ${project(leg.from.point).join(' ')} L ${project(leg.to.point).join(' ')}"/>`).join('')}</g>`;
+  const transitLegs=routed.legs.filter(leg=>!leg.canWalk);
+  const transitStroke=`<g fill="none" stroke="${ROUTE.transit}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">${transitLegs.filter(leg=>leg.roadPath).map(leg=>`<path vector-effect="non-scaling-stroke" d="M ${leg.roadPath.map(p=>project(p).join(' ')).join(' L ')}"/>`).join('')}</g><g fill="none" stroke="${ROUTE.transit}" stroke-width="3" stroke-dasharray="10 8" stroke-linecap="round">${transitLegs.filter(leg=>!leg.roadPath).map(leg=>`<path vector-effect="non-scaling-stroke" d="M ${project(leg.from.point).join(' ')} L ${project(leg.to.point).join(' ')}"/>`).join('')}</g>`;
   const routeStroke=(color,width,progress=false)=>`<g fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round">${routePaths.map((path,i)=>path?`<path ${progress?`data-flat-progress="${i}" pathLength="100" stroke-dasharray="100 100"`:''} vector-effect="non-scaling-stroke" d="M ${path}"/>`:'').join('')}</g>`;
-  host.innerHTML=`<div class="map3d-tools"><button type="button" data-flat-play>전체 동선 재생</button><button type="button" data-flat-pause disabled>잠시 멈춤</button><button type="button" data-flat-transit-next hidden>도착지로 넘어가기</button><button type="button" data-flat-speed title="지도 미리보기 속도">속도 1×</button><button type="button" data-flat-home>전체 지도</button><button type="button" data-flat-follow>따라보기</button><span data-flat-clock title="코스 일정 시각 기준 분위기 · 실제 일몰 예측 아님"></span></div><p class="note" data-flat-status>청록 실선은 도보 · 대중교통은 시간/노선 안내. 이 환경에서는 평면 지도로 표시합니다.</p>
+  host.innerHTML=`<div class="map3d-tools"><button type="button" data-flat-play>전체 동선 재생</button><button type="button" data-flat-pause disabled>잠시 멈춤</button><button type="button" data-flat-transit-next hidden>도착지로 넘어가기</button><button type="button" data-flat-speed title="지도 미리보기 속도">속도 1×</button><button type="button" data-flat-home>전체 지도</button><button type="button" data-flat-follow>따라보기</button><span data-flat-clock title="코스 일정 시각 기준 분위기 · 실제 일몰 예측 아님"></span></div><p class="note" data-flat-status>청록은 걷기 · 보라는 버스·지하철(선은 도로 경로, 실제 노선과 다를 수 있음). 이 환경에서는 평면 지도로 표시합니다.</p>
     <svg class="map-road-fallback" viewBox="${left} ${top} ${width} ${height}" role="img" aria-label="코스 도로 지도">
     <rect data-flat-ground x="${left}" y="${top}" width="${width}" height="${height}" fill="#F1E8D9"/>
     ${roads(geo.minor,'#CBBEAB',2.5)}${roads(geo.minor,'#FFFCF5',1.3)}${roads(geo.walk,'#E8BB7A',1.5)}
@@ -256,8 +257,11 @@ export async function mount(host,stops,options={}){
   for(const [index,leg] of legs.entries()){
     if(!leg.canWalk){
       // 대중교통 구간: 노선 모양을 모르니 두 장소를 보라색 점선 직선으로만 잇는다.
-      const a=project(leg.from.point),b=project(leg.to.point);
-      stroke(globalThis.코스지도모델.dashRows([a.x,a.z],[b.x,b.z],9,7),ROUTE.transit,1.18,3.2,0,{round:true});
+      // 대중교통 구간: 같은 도로 위에 보라색 선으로. 도로 선이 없을 때만 두 장소를 점선 직선으로 잇는다.
+      if(leg.roadPath){const rows=[leg.roadPath.map(p=>{const v=project(p);return [v.x,v.z];})];
+        stroke(rows,ROUTE.edge,1.17,9,0,{round:true});stroke(rows,ROUTE.transit,1.18,5,0,{round:true});}
+      else{const a=project(leg.from.point),b=project(leg.to.point);
+        stroke(globalThis.코스지도모델.dashRows([a.x,a.z],[b.x,b.z],9,7),ROUTE.transit,1.18,3.2,0,{round:true});}
       const middle=project(leg.from.point).lerp(project(leg.to.point),.5).setY(3);
       const pin=label(globalThis.코스지도모델.legTimeLabel(leg),middle,()=>startPlayback(leg.from.순번),'travel-time transit');pin.routeFrom=leg.from.순번;continue;
     }
@@ -347,7 +351,7 @@ export async function mount(host,stops,options={}){
   canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);canvas.addEventListener('wheel',wheel,{passive:false});
   function resize(){const w=Math.max(1,stage.clientWidth),h=Math.max(1,stage.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
   const observer=new ResizeObserver(resize);observer.observe(stage);resize();
-  status.textContent=`청록 실선: 도보 ${legs.filter(leg=>leg.canWalk).length}구간 · 대중교통 안내 ${legs.filter(leg=>!leg.canWalk).length}구간${routed.missing.length?` · 경로 미확인 ${routed.missing.length}구간`:''}`;
+  status.textContent=`청록: 걷기 ${legs.filter(leg=>leg.canWalk).length}구간 · 보라: 버스·지하철 ${legs.filter(leg=>!leg.canWalk).length}구간(선은 도로 경로, 실제 노선과 다를 수 있음)${routed.missing.length?` · 경로 미확인 ${routed.missing.length}구간`:''}`;
   function tick(now){
     if(dead)return;const dt=Math.min(.05,(now-last)/1000||0);last=now;
     if(player.state.playing&&arrivalHold>0)arrivalHold=Math.max(0,arrivalHold-dt);
