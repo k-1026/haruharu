@@ -195,3 +195,20 @@ test('잘못된 좌표를 버리고 공식 권역 대표점을 후보와 구분�
   assert.equal(data.places.length,0);assert.equal(data.areas[0].candidates.length,0);
   assert.deepEqual(data.areas[0].point,[35.86,128.58]);
 });
+
+test('지도 경로가 없어도 이동표 시간이 있으면 시간을 보여 준다', () => {
+  const m = require('./담당자화면/map-model.js');
+  assert.equal(m.tableLabel({도보분: 14, 대중교통분: 9}), '도보 약 14분 · 지도 경로 준비 중');
+  assert.equal(m.tableLabel({도보분: 32, 대중교통분: 21}), '대중교통 약 21분 · 지도 경로 준비 중');
+  assert.equal(m.tableLabel(null), null);
+  assert.equal(m.tableLabel({}), null);
+});
+
+test('홍보 화면도 포롱이·여울이를 너구리·족제비 그림으로 바꾼다', () => {
+  const promo = require('./담당자화면/promo.js');
+  assert.equal(promo.캐릭터('포롱이'), '너구리');
+  assert.equal(promo.캐릭터('여울이'), '족제비');
+  assert.equal(promo.캐릭터('너구리'), '너구리');
+  assert.equal(promo.캐릭터('동등'), null);
+  assert.equal(promo.그림('여울이'), 'weasel');
+});

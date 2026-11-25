@@ -102,7 +102,7 @@ let token=null,poll=null,tick=null,last=null,savedItems=null;
 async function post(url,body){
   token=token||(await get('/api/session')).token;
   const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Token':token},body:JSON.stringify(body)});
-  const d=await r.json();if(!r.ok)throw new Error(d.오류||'요청 실패');return d;
+  const d=await r.json();if(!r.ok)throw Object.assign(new Error(d.오류||'요청 실패'),{status:r.status});return d;
 }
 const guide=n=>`<ol class="guide">${['조건 고르기','AI가 코스 만들기','코스 확인','홍보물 · 번역','최종 산출물'].map((t,i)=>`<li class="${i+1===n?'on':''}"><b>${i+1}</b>${t}</li>`).join('')}</ol>`;
 const 칸색=s=>s.일차===2&&s.시간칸==='2일차오전'?'day':['저녁'].includes(s.시간칸)?'eve':['밤','숙박'].includes(s.시간칸)?'night':'day';
@@ -160,15 +160,23 @@ function newForm(){
       <div class="sec">바라는 점 <span class="note">(선택 · 지키기 어려우면 AI가 이유를 남기고 조정할 수 있어요)</span></div>
       <label class="q"><span>목표</span><input name="목표" maxlength="300" placeholder="예: 필수 대상은 일본인 커플, 중구에서 저녁과 숙박으로 연결"></label>
       <label class="q"><span>희망 사항<small>한 줄에 하나</small></span><textarea name="희망" rows="3" placeholder="예: 저녁 이후 야경을 넣고 싶어요&#10;이동을 줄이고 여유롭게 식사하고 싶어요"></textarea></label>
+      <section class="upload-data"><h3>가지고 있는 자료 함께 쓰기 <small>(선택)</small></h3>
+        <p class="note">CSV·엑셀(XLSX) 표를 읽어 수요 근거에 더해요. 1MB 이하, 시트당 100행까지예요. 출처·기간·지역·대상·항목·값·단위·표본수 열이 필요해요.</p>
+        <p><a href="/plan/examples/demo.csv" download>시연용 가상 CSV 받기</a> · <a href="/plan/examples/demo.xlsx" download>시연용 가상 엑셀 받기</a></p>
+        <label class="q"><span>자료 파일</span><input type="file" id="dataFile" accept=".csv,.xlsx"></label>
+        <div id="uploadPreview" aria-live="polite"></div><p class="note" id="uploadState">올리지 않으면 기존 자료만 사용해요.</p>
+        <button type="button" class="btn" id="uploadRemove" hidden>자료 빼기</button>
+      </section>
       </div><aside class="order-summary" aria-label="만들어질 코스 미리보기"><div class="peek" aria-hidden="true"><img src="/plan/characters/promo/raccoon-front.png" alt=""></div><h3>만들어질 코스</h3><div class="sum-chips" id="sumChips"></div><ol class="sum-day" id="sumDay"></ol>
-      <p class="agree">시작하면 중간 알림·경고는 기록에 남기고 <b>코스 초안까지 자동으로 진행</b>해요. 기관 데이터는 '없음'으로 진행하고, 홍보물과 최종 문서는 코스를 확인한 뒤 따로 만들어요.</p>
+      <p class="agree">시작하면 중간 알림·경고는 기록에 남기고 <b>코스 초안까지 자동으로 진행</b>해요. 위에서 적용한 자료를 함께 쓰며, 홍보물과 최종 문서는 코스를 확인한 뒤 따로 만들어요.</p>
       ${last&&last.상태==='진행중'?'<p class="note">지금 만들고 있는 코스가 있어요. 한 번에 하나씩 만들어요. 끝난 뒤 시작해 주세요.</p>':''}
       <div class="go"><span class="note" id="need"></span><span class="err" id="newErr"></span><button class="btn primary big" id="newGo" type="submit" disabled>코스 만들기 시작</button></div></aside>
     </form></section>`;
   const f=$('order');
+  let appliedUpload=null,uploadPending=false,uploadVersion=0,uploadError='';
   const 값=()=>{const v={};for(const n in 선택지){const on=[...f.querySelectorAll(`[data-name="${n}"] [aria-pressed=true]`)].map(b=>b.dataset.v);v[n]=여러개[n]?on:on[0]||'';}return v;};
   const check=()=>{const v=값();const miss=Object.keys(선택지).filter(n=>!v[n]||!v[n].length).map(n=>({계절:'계절',언어권:'언어권',지역:'지역',체류기간:'체류 기간'}[n]));
-    $('need').textContent=miss.length?`남은 것: ${miss.join(', ')}`:'모든 조건을 골랐어요.';$('newGo').disabled=miss.length>0;미리보기(v);};
+    $('need').textContent=uploadPending?(uploadError||'파일 미리보기 아래의 「내용 확인 · 이 자료 적용」을 눌러 주세요.'):miss.length?`남은 것: ${miss.join(', ')}`:'모든 조건을 골랐어요.';$('newGo').disabled=miss.length>0||uploadPending;미리보기(v);};
   const 미리보기=v=>{
     const chips=[v.계절,(v.언어권||[]).join('·'),(v.지역||[]).join('·'),v.체류기간].filter(Boolean);
     $('sumChips').innerHTML=chips.length?chips.map(c=>`<span class="chip">${esc(c)}</span>`).join(''):'<span class="note">왼쪽에서 조건을 고르면 여기에 모여요.</span>';
@@ -182,9 +190,28 @@ function newForm(){
   f.querySelectorAll('.pills').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('.pill');if(!b)return;
     if(!여러개[g.dataset.name])g.querySelectorAll('.pill').forEach(x=>x!==b&&x.setAttribute('aria-pressed','false'));
     b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');check();}));
+  $('uploadRemove').onclick=()=>{uploadVersion++;appliedUpload=null;uploadPending=false;uploadError='';$('dataFile').value='';$('uploadPreview').innerHTML='';$('uploadState').textContent='자료를 뺐어요. 기존 자료만 사용해요.';$('uploadRemove').hidden=true;check();};
+  $('dataFile').onchange=async()=>{
+    const version=++uploadVersion,file=$('dataFile').files[0];appliedUpload=null;uploadError='';
+    if(!file){$('uploadRemove').onclick();return;}
+    uploadPending=true;$('uploadRemove').hidden=false;$('uploadPreview').innerHTML='';$('uploadState').textContent='파일을 읽고 숫자·열을 검사하고 있어요.';check();
+    try{
+      if(file.size>1024*1024)throw new Error('1MB 이하 파일을 골라 주세요.');
+      const bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));
+      const data=await post('/api/plan/upload',{파일명:file.name,내용:btoa(binary)});
+      if(version!==uploadVersion||$('order')!==f)return;
+      const sheets=data.시트.filter(s=>s.행수>0);
+      $('uploadPreview').innerHTML=`<label>사용할 시트 <select id="uploadSheet">${sheets.map((s,i)=>`<option value="${i}">${esc(s.이름)} (${s.행수}행)</option>`).join('')}</select></label><div id="uploadRows"></div><button type="button" class="btn primary" id="uploadApply">내용 확인 · 이 자료 적용</button>`;
+      const preview=()=>{appliedUpload=null;uploadPending=true;const s=sheets[Number($('uploadSheet').value)];
+        $('uploadRows').innerHTML=`<p>${esc(data.안내)}</p><div class="upload-table"><table><thead><tr><th>항목</th><th>값</th><th>대상</th><th>기간·지역</th><th>출처</th></tr></thead><tbody>${s.행.slice(0,5).map(r=>`<tr><td>${esc(r.항목)} ${esc(r.세부항목||'')}</td><td>${esc(r.값)}${esc(r.단위)}</td><td>${esc(r.대상)}</td><td>${esc(r.기간)} · ${esc(r.지역)}</td><td>${esc(r.출처)}</td></tr>`).join('')}</tbody></table></div><p class="note">${s.행수}행 중 처음 5행을 보여 줍니다. 다른 지역·계절 행은 코스에 적용할 때 제외해요.</p>${s.경고.map(w=>`<p class="err">${esc(w)}</p>`).join('')}${data.시트.filter(x=>!x.행수).map(x=>`<p class="note">${esc(x.이름)}: 읽을 수 있는 표가 없어 사용하지 않아요.</p>`).join('')}`;
+        $('uploadState').textContent='원하는 시트인지 확인한 뒤 적용해 주세요.';$('uploadApply').disabled=false;check();};
+      $('uploadSheet').onchange=preview;preview();
+      $('uploadApply').onclick=()=>{const s=sheets[Number($('uploadSheet').value)];appliedUpload={업로드id:data.업로드id,시트:s.이름,확인:true};uploadPending=false;$('uploadState').textContent=`${data.파일명} · ${s.이름} ${s.행수}행을 함께 검토해요.`;$('uploadApply').disabled=true;check();};
+    }catch(e){if(version===uploadVersion&&$('order')===f){uploadError='업로드 실패: '+(e.status===404?'실행 중인 서버가 업로드 기능을 지원하지 않습니다. 서버를 재시작하고 화면을 새로고침해 주세요.':e.message);$('uploadState').textContent=uploadError;check();}}
+  };
   check();
   f.onsubmit=async e=>{e.preventDefault();$('newGo').disabled=true;$('newErr').textContent='';
-    try{const p=await post('/api/plan/start',{...값(),목표:f.목표.value.trim(),희망:f.희망.value.split('\n').map(x=>x.trim()).filter(Boolean),자동진행동의:true});  // 시작 버튼 옆 안내 문구를 보고 누르는 것이 동의
+    try{if(uploadPending)throw new Error('자료 내용을 확인하고 적용하거나 빼 주세요.');const p=await post('/api/plan/start',{...값(),목표:f.목표.value.trim(),희망:f.희망.value.split('\n').map(x=>x.trim()).filter(Boolean),자동진행동의:true,...(appliedUpload?{기관업로드:appliedUpload}:{})});  // 시작 버튼 옆 안내 문구를 보고 누르는 것이 동의
       $('main').innerHTML='';showProgress(p);watch(p.기획id);}
     catch(err){$('newErr').textContent=err.message;check();}};
 }
@@ -266,7 +293,7 @@ function showRecord(id,cond,rec){
     const label=a.안id==='A'?'A안 · 내 요청을 우선한 안':`${a.안id}안 · 구성을 조정한 안`;
     const reason=a.대안설명?.왜||a.이유||a.설명||'저장된 코스의 동선과 일정을 확인해 보세요.';
     return `<button class="tab plan-choice ${active?'on':''}" aria-pressed="${active}" data-plan="${esc(a.안id)}"><span class="choice-top"><b>${esc(label)}</b><span class="choice-badge">${active?'보고 있는 코스':'다른 코스 보기'}</span></span><small>${short(reason)}</small></button>`;
-  }).join('')+(!정리.안.some(a=>a.안id==='B')?`<div class="tab plan-choice missing-plan"><span class="choice-top"><b>B안 · 구성을 조정한 안</b><span class="choice-badge">아직 없음</span></span><small>${short(정리.대안상태?.이유||'이 저장 기록에는 B안이 없어요. 새 기획에서는 A/B 비교안을 함께 요청해요.')}</small></div>`:'');
+  }).join('')+(!정리.안.some(a=>a.안id==='B')?`<div class="tab plan-choice missing-plan"><span class="choice-top"><b>B안 · 구성을 조정한 안</b><span class="choice-badge">미생성</span></span><small>${esc(정리.대안상태?.이유||'이 저장 기록에는 B안과 미생성 사유가 저장되지 않았어요.')}</small></div>`:'');
   const vers=(안.버전들||[]).length>1?`<div class="vers"><span>수정 이력</span> ${안.버전들.map(v=>`<button class="pill" aria-pressed="${v===rec.버전}" data-v="${v}">${v}번째 초안${v===안.버전?' · 최신':''}</button>`).join('')}</div>`:'';
   const 바꾼=Object.entries(안.바꾼희망||{});
   const 설명=안.대안설명||{};
@@ -291,6 +318,7 @@ function showRecord(id,cond,rec){
     <section class="card ai recommendation"><div class="aihead"><span class="aibadge">코스 초안</span><h2>코스 제안</h2><span class="draft-badge">확정 전 초안</span>${s.코스있음?`<button class="btn primary compare-map-button" id="openMap" title="동선 · 시간표">지도 크게 보기 ↗</button>`:''}</div>
       <p class="lead">${정리.안.length>1?'요청을 바탕으로 만든 코스와 대안을 비교해 보세요.':'요청을 바탕으로 만든 코스예요. 동선과 일정을 먼저 살펴보세요.'}</p>
       <div class="tabs plan-choices">${tabs}</div>
+      ${rec.기관업로드?`<details class="upload-result"><summary>함께 참고한 자료: ${esc(rec.기관업로드.파일명)} · 적용 ${esc(rec.기관업로드.적용행수)}행${rec.기관업로드.가상자료?' (시연용 가상 자료 · 실제 조사 아님)':''}</summary>${(rec.기관업로드.경고||[]).map(w=>`<p class="note">${esc(w)}</p>`).join('')}</details>`:''}
       <div class="rec-split">${시간표(s.일정||[])}<div class="rec-side">
       ${이전?'<div class="review-status state-대기"><b>이전 수정본을 보고 있어요</b><p>최신 코스로 돌아가서 현재 검토 내용을 확인해 주세요.</p><button class="btn" id="latestPlan">최신 코스 보기</button></div>':''}
       <div class="review-status state-${상태.종류}" role="status"><b>${esc(상태.제목)}</b><p>${esc(상태.설명)}</p>${주요확인.length?`<ul>${주요확인.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div>
@@ -402,7 +430,7 @@ function draw(stops){
     mapController=controller;if(selectedStop!==null)controller.selectStop?.(selectedStop,{notify:false});
     for(const node of $('mapView').querySelectorAll('[data-route-time]')){
       const leg=controller.routes?.find(leg=>leg.from===Number(node.dataset.routeTime));
-      if(!leg){node.textContent='경로 미확인';continue;}
+      if(!leg){const s=stops.find(x=>x.순번===Number(node.dataset.routeTime));node.textContent=코스지도모델.tableLabel(s?.다음이동)||'경로 미확인';continue;}
       const alt=leg.mode==='transit'?코스지도모델.timeLabel(leg.walkSeconds):leg.transitSeconds?'대중교통 약 '+Math.round(leg.transitSeconds/60)+'분':'대중교통 자료 없음';
       node.innerHTML=`<b class="mode-primary ${leg.mode==='transit'?'transit':'foot'}">${esc(코스지도모델.legTimeLabel(leg))}</b><small class="mode-alt">${esc(alt)}</small>`;
       const t=leg.transport||{};node.title=[t.노선,t.출처,t.기준요일,t.기준출발시각,t.확인일,t.비고].filter(Boolean).join(' · ');

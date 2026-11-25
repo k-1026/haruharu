@@ -178,7 +178,8 @@ def 저장(기록,루트):
     tmp=path.with_suffix('.tmp')
     try:
         with tmp.open('w',encoding='utf-8') as f:json.dump(기록,f,ensure_ascii=False,indent=2)
-        os.replace(tmp,path)
+        from 파일쓰기 import 바꿔쓰기
+        바꿔쓰기(tmp,path)
     finally:
         if tmp.exists():tmp.unlink()
     return path

@@ -194,6 +194,11 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서�
             try:
                 if 경로.path == '/api/session':
                     return self.응답(200, {'token': 토큰})
+                if 경로.path in ['/plan/examples/demo.csv','/plan/examples/demo.xlsx']:
+                    ext=경로.path.rsplit('.',1)[1]
+                    name='시연용_가상설문_일본인커플_중구_가을.'+ext
+                    mime='text/csv; charset=utf-8' if ext=='csv' else 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    return self.응답(200,(기준/'시험자료'/name).read_bytes(),mime)
                 if 경로.path == '/api/places':
                     from 장소정보 import 장소목록
                     return self.응답(200, {'장소목록':장소목록()})
@@ -280,10 +285,12 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서�
             # Windows에서 거부 응답 대신 연결 중단으로 보일 수 있다.
             try:
                 크기=int(self.headers.get('Content-Length','0'))
-                if not 0<크기<=65536:return self.응답(413,{'오류':'입력 크기를 확인하세요.'})
+                한도=1450000 if self.path=='/api/plan/upload' else 65536
+                if not 0<크기<=2*1024*1024:return self.응답(413,{'오류':'입력 크기를 확인하세요. 업로드는 1MB까지 가능합니다.'})
                 self.connection.settimeout(5)
                 본문=self.rfile.read(크기)
                 if len(본문)!=크기:return self.응답(400,{'오류':'입력 본문을 끝까지 받지 못했습니다.'})
+                if 크기>한도:return self.응답(413,{'오류':'입력 크기를 확인하세요. 업로드는 1MB까지 가능합니다.'})
             except (ValueError,OSError):
                 return self.응답(400,{'오류':'입력 본문을 읽지 못했습니다.'})
             if not self.호스트확인() or self.headers.get('Origin') != 'http://' + self.headers.get('Host', ''):
@@ -297,6 +304,8 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서�
                 값 = json.loads(본문.decode('utf-8'))
                 if not isinstance(값, dict):
                     raise ValueError('입력 형식을 확인하세요.')
+                if self.path == '/api/plan/upload':
+                    return self.응답(201, 기획서비스.자료미리보기(값))
                 if self.path == '/api/plan/revise':
                     return self.응답(202, 기획서비스.수정시작(값))
                 if self.path == '/api/promo/start':
