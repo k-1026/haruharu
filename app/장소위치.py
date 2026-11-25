@@ -238,8 +238,27 @@ class 자동작업:
 
     def __init__(self, 경로파일=경로파일_기본, 신고파일=신고파일_기본):
         self.경로파일, self.신고파일 = 경로파일, 신고파일
-        self.잠금 = threading.Lock(); self.다시 = False
+        self.잠금 = threading.Lock(); self.다시 = False; self.본시각 = None
         self.상태 = {'상태': '쉼', '안내': '아직 실행하지 않았어요.'}
+
+    def 감시한번(self):
+        """장소 CSV·지도 대표위치가 바뀌었으면(화면 밖에서 직접 고친 경우 포함) 자동작업을 다시 돈다."""
+        파일 = [_장소파일(), _장소파일().with_name('지도_대표위치.json')]
+        시각 = tuple(f.stat().st_mtime if f.exists() else 0 for f in 파일)
+        if 시각 != self.본시각:
+            self.본시각 = 시각
+            self.시작()
+
+    def 감시(self, 간격=120):
+        """서버가 켜져 있는 동안 간격마다 파일이 바뀌었는지 본다. 바뀌지 않으면 외부에 묻지 않는다."""
+        def 돌기():
+            while True:
+                try:
+                    self.감시한번()
+                except OSError:
+                    pass
+                time.sleep(간격)
+        threading.Thread(target=돌기, daemon=True).start()
 
     def 시작(self):
         with self.잠금:

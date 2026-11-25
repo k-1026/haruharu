@@ -96,6 +96,17 @@ class 장소위치시험(unittest.TestCase):
         다시 = 장소위치.길수집(경로파일=self.routes, 묻기=묻기, 쉬기=0)
         self.assertEqual(다시['새경로'], 0)   # 이미 모은 쌍은 다시 묻지 않는다
 
+    def test_장소파일이_바뀌면_자동작업을_다시_돈다(self):
+        작업 = 장소위치.자동작업(self.routes, self.reports)
+        시작 = []
+        작업.시작 = lambda: 시작.append(1)
+        작업.감시한번()                       # 처음 본 파일: 한 번 돈다
+        작업.감시한번()                       # 그대로면 다시 돌지 않는다
+        p = self.data / 장소CSV
+        os.utime(p, (p.stat().st_atime, p.stat().st_mtime + 5))   # 데이터 담당이 파일을 직접 고친 경우
+        작업.감시한번()
+        self.assertEqual(len(시작), 2)
+
     def test_화면의_긴_장소명으로_신고해도_목록_이름으로_맞춘다(self):
         장소위치.신고('대구광역시 중구 김광석길', '입구가 반대편이에요', 신고파일=self.reports)
         self.assertEqual(json.loads(self.reports.read_text(encoding='utf-8'))[0]['장소명'], '김광석길')
