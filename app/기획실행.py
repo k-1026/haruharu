@@ -168,7 +168,7 @@ class 기획실행:
             자료 = None
             if 업로드 is not None:
                 if not isinstance(업로드,dict):raise ValueError('기관 자료 선택을 확인하세요.')
-                자료=self.자료보관함.선택(업로드.get('업로드id'),업로드.get('시트'),업로드.get('확인'))
+                자료=self.자료보관함.선택(업로드.get('업로드id'),업로드.get('시트'),업로드.get('확인'),조건)
             실행 = datetime.now().strftime('%Y%m%d_%H%M%S')
             기획id = f'{실행}/01회차'
             폴더 = self.runs / 실행 / '01회차'
