@@ -52,7 +52,7 @@ class 돌리기시험(unittest.TestCase):
 
     def test_계속반려면_한도로_멈춤(self):
         def fn(p,i):
-            if p.endswith('코스검토.md'):return '{"칸목록":[]}'
+            if p.endswith('코스주문.md'):return '{"안":{"칸":[],"식사":[]}}'
             return json.dumps({'통과':False,'문제':[{'종류':'운영','대상':'x','내용':'y','되돌릴곳':'코스'}]},ensure_ascii=False)
         r=rec();steps=총괄.돌리기(r,Path('.'),실행함수=fn)
         self.assertLessEqual(len(steps),20);self.assertEqual(steps[-1]['행동'],'담당자에게')

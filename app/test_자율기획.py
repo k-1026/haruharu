@@ -38,8 +38,11 @@ class 전체총괄시험(unittest.TestCase):
             if path.endswith('검증.md'):return '{"통과":true,"문제":[]}'
             if path.endswith('총괄.md'):return '{"행동":"담당자에게","대상":"A","이유":"모의 검토"}'
             raise AssertionError(path)
+        칸=lambda id,일차,시간칸,p:{'칸ID':id,'일차':일차,'시간칸':시간칸,'장소':p,'머무는분':60,'근거':[],'운영':[],'이유':''}
+        주문={'A':{'칸':[칸('낮-1',1,'낮','P1'),칸('낮-2',2,'낮','P11')],'식사':[]},
+             'B':{'이유':'문화관 중심으로 순서를 조정','무엇을':'낮 관광지 변경','바꾼희망':{},'바꾼칸':[칸('낮-1',1,'낮','P10')],'뺀칸':[]}}
         def draft(path,text):
-            calls.append(path);self.assertIn('대안제안',text);return json.dumps(a,ensure_ascii=False)
+            calls.append(path);self.assertIn('"B"',text);return json.dumps(주문,ensure_ascii=False)
         with TemporaryDirectory() as folder,mock.patch('run_stage.단계_실행',side_effect=AssertionError('실제 AI 금지')):
             service=기획실행(코스시험(결과저장소(folder),실행함수=draft),단계함수=fn)
             p=service.시작({'계절':'가을','지역':['중구'],'언어권':['일본어'],'체류기간':'1박2일','자동진행동의':True})
@@ -49,7 +52,7 @@ class 전체총괄시험(unittest.TestCase):
             r=기록모듈.읽기(folder,p['기록id'])
             self.assertEqual([x['안id'] for x in r['안']],['A','B'])
             self.assertEqual(r['총괄진행']['완료단계'],총괄.전체순서)
-            self.assertEqual(calls.count('.claude/agents/코스검토.md'),1)
+            self.assertEqual(calls.count('.claude/agents/코스주문.md'),1)
             self.assertEqual(calls.count('.claude/agents/검증.md'),2)
             self.assertIsNone(r['선택'])
 

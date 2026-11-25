@@ -23,7 +23,7 @@ class 재시도범위시험(unittest.TestCase):
         self.assertEqual(len(본), 2)
         # 담당자가 새 초안을 저장하면 이전 버전 생성 실패와 별개의 작업이다.
         기록모듈.추가(r, '코스안', {'안id': 'A', '버전': 1, '코스': {'칸목록': []}}, '사람:담당자')
-        self.assertTrue(처리기.코스짜기(r, 'A', Path('.'), [], lambda p, i: '{"칸목록":[]}'))
+        self.assertTrue(처리기.코스짜기(r, 'A', Path('.'), [], lambda p, i: '{"안":{"칸":[],"식사":[]}}'))
         self.assertEqual(기록모듈.버전목록(r, 'A'), [1, 2])
 
     def test_총괄은_같은상황에서_두번만_묻고_새버전에서는_다시판단한다(self):

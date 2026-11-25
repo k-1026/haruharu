@@ -68,7 +68,8 @@ class 끝까지시험(unittest.TestCase):
 
         def 코스(에이전트, 요청):
             본.append((에이전트, 요청))
-            return (견본 / '통합시험_235320_982315' / '3단계_결과.md').read_text(encoding='utf-8')
+            칸 = lambda id, 일차, 시간칸, p: {'칸ID': id, '일차': 일차, '시간칸': 시간칸, '장소': p, '머무는분': 60, '근거': [], '운영': [], '이유': ''}
+            return json.dumps({'A': {'칸': [칸('낮-1', 1, '낮', 'P1'), 칸('저녁-1', 1, '저녁', 'P6'), 칸('낮-2', 2, '낮', 'P11')], '식사': []}}, ensure_ascii=False)
         self.준비(단계, 코스)
         시작 = self.서비스.시작(좋은입력)
         self.assertEqual(시작['상태'], '진행중')
@@ -79,7 +80,7 @@ class 끝까지시험(unittest.TestCase):
         self.assertFalse(p['단계'][0]['AI'])
         self.assertTrue(all(s.get('시작') and s.get('끝') for s in p['단계']))
         self.assertIsNone(p['일하는중'])
-        self.assertEqual([a for a, _ in 본], ['.claude/agents/수요요약.md', '.claude/agents/코스검토.md', '.claude/agents/코스검토.md', '.claude/agents/검증.md', '.claude/agents/총괄.md'])
+        self.assertEqual([a for a, _ in 본], ['.claude/agents/수요요약.md', '.claude/agents/코스주문.md', '.claude/agents/코스주문.md', '.claude/agents/검증.md'])
         self.assertIn('B안보완요청', 본[2][1])  # 예전 A-only 저장 응답에는 B만 한 번 보완한다
         폴더 = Path(self.d.name) / 시작['기획id']
         for 이름 in ['1단계_선택.json', '2단계_선택.json']:

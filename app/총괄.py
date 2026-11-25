@@ -277,6 +277,8 @@ def 모의응답():
     횟수 = {'검증': 0}
 
     def fn(지침, 입력글):
+        if 지침.endswith('코스주문.md'):
+            return '{"안":{"칸":[],"식사":[]}}'
         if 지침.endswith('코스검토.md'):
             return json.dumps({'칸목록': [], '식사목록': [], '메모': '모의 코스'}, ensure_ascii=False)
         if 지침.endswith('자료수집.md'):

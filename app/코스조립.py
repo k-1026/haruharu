@@ -77,7 +77,7 @@ def _장소고르기(입력, 이전코스, 장소행, 상한):
 
 
 def _근거고르기(입력, 장소이름들):
-    목록 = 입력.get('근거목록') or []
+    목록 = [r for r in 입력.get('근거목록') or [] if isinstance(r, dict) and r.get('근거ID')]
     우선 = ((입력.get('코드근거추출') or {}).get('AI전달근거ID')) or []
     순서 = {id: i for i, id in enumerate(우선)}
     def 점수(r):
@@ -148,7 +148,7 @@ def 주문요청(후보표, 입력, 한안, 추가=None):
     """AI에게 보낼 사용자 글: 짧은 조건 JSON + 후보표. 근거 원문·지침 전문은 보내지 않는다."""
     import json
     조건 = {k: v for k, v in (입력.get('코스작성조건') or {}).items() if k != '결정기록'}
-    짧은 = {'조건': 입력.get('조건'), '확정체류기간': 입력.get('확정체류기간'), '기획모드': 입력.get('기획모드'),
+    짧은 = {'조건': 입력.get('조건'), '확정체류기간': 체류기간(입력), '기획모드': 입력.get('기획모드'),
           '담당자선택': 조건, '목표희망': 입력.get('담당자목표희망') or 입력.get('희망'),
           '2단계요약': str(입력.get('요약') or '')[:800]}
     짧은.update(추가 or {})
@@ -170,9 +170,13 @@ def _가족인가(입력):
     return '가족' in str((입력.get('조건') or {}).get('동행') or '')
 
 
+def 체류기간(입력):
+    return 입력.get('확정체류기간') or (입력.get('조건') or {}).get('체류기간')
+
+
 def _칸검사(이름, 칸들, 후보표, 입력, 근거들, 운영들):
     문제, 본 = [], set()
-    당일 = 입력.get('확정체류기간') == '당일'
+    당일 = 체류기간(입력) == '당일'
     for r in 칸들:
         if not isinstance(r, dict):
             문제.append(f'{이름}: 칸 형식 오류'); continue
@@ -201,14 +205,22 @@ def 주문서_검사(주문서, 후보표, 입력, 한안=False):
     """틀린 곳을 고치지 않고 문제 문장으로 돌려준다. 빈 목록이면 통과."""
     if not isinstance(주문서, dict):
         return ['주문서 JSON을 읽지 못함']
-    근거들 = {r['근거ID'] for r in 입력.get('근거목록') or []}
+    근거들 = {r.get('근거ID') for r in 입력.get('근거목록') or [] if isinstance(r, dict)}
     운영들 = {x['O번호'] for x in 후보표.get('운영주체') or []}
     키 = '안' if 한안 else 'A'
     안 = 주문서.get(키)
     if not isinstance(안, dict) or not isinstance(안.get('칸'), list):
         return ['주문서에 안이 없음']
     문제, a칸 = _칸검사(키, 안['칸'], 후보표, 입력, 근거들, 운영들)
-    if 한안:
+    for m in 안.get('식사') or []:
+        if not isinstance(m, dict):
+            문제.append(f'{키}: 식사 형식 오류'); continue
+        if m.get('권역') not in 후보표['장소']:
+            문제.append(f"{키} {m.get('칸ID')}: 후보표에 없는 식사 권역 {m.get('권역')}")
+        for x in m.get('후보') or []:
+            if x not in 후보표['장소']:
+                문제.append(f"{키} {m.get('칸ID')}: 후보표에 없는 식사 후보 {x}")
+    if 한안 or 'B' not in 주문서:  # B 키 누락은 문제 아님: B안 보완 단계가 다시 요청한다
         return 문제
     b = 주문서.get('B')
     if b is None:
@@ -314,7 +326,7 @@ def _빈칸(id, 일차, 시간칸, 이름):
 
 def _고정칸추가(행들, 입력):
     """CSV에 없는 칸(숙박·2일차 오전 자유시간)은 코드가 정해진 문장으로 넣는다."""
-    if 입력.get('확정체류기간') != '1박2일':
+    if 체류기간(입력) != '1박2일':
         return 행들
     구 = '·'.join((입력.get('조건') or {}).get('지역') or []) or '대구'
     첫날 = [r for r in 행들 if r.get('일차') == 1]
@@ -349,7 +361,7 @@ def _식사행(m, 행들, 위치, 후보표, 입력, 안이름):
 def 안_조립(안, 후보표, 입력, 안이름='공통', 고정=None):
     """주문서 한 안 → 칸목록·식사목록·시작종료·확정조건. 사실 값은 후보표에서만 가져온다."""
     조건 = 입력.get('코스작성조건') or {}
-    체류 = 입력.get('확정체류기간')
+    체류 = 체류기간(입력)
     행들 = []
     for r in 안.get('칸') or []:
         p = 후보표['장소'][r['장소']]
@@ -483,7 +495,7 @@ def 파생_채우기(코스, 후보표, 입력, 안이름='공통'):
     """남은경고·미확인사항·장소별근거·겹침이력·체크리스트·대체후보. 코스 칸은 바꾸지 않는다."""
     코스 = dict(코스)
     번호들 = dict(코스.get('_장소번호') or {})
-    근거 = {r['근거ID']: r for r in 입력.get('근거목록') or []}
+    근거 = {r.get('근거ID'): r for r in 입력.get('근거목록') or [] if isinstance(r, dict)}
     운영설명 = {x['O번호']: x['설명'] for x in 후보표.get('운영주체') or []}
     칸목록 = [dict(r) for r in 코스['칸목록']]
     칸들 = {r['칸ID']: r for r in 칸목록}
@@ -573,9 +585,10 @@ def 이전_주문서(이전코스, 후보표):
         ks = 번호.get(_이름(이름 or ''))
         return ks[0] if ks and len(ks) == 1 else None
     칸들 = []
-    for r in 이전코스.get('칸목록') or []:
+    for i, r in enumerate(이전코스.get('칸목록') or [], 1):
         if p(r.get('장소명')):
-            칸들.append({'칸ID': r['칸ID'], '일차': r['일차'], '시간칸': r['시간칸'], '장소': p(r['장소명']),
+            칸들.append({'칸ID': r.get('칸ID') or f"{r.get('시간칸', '칸')}-{i}", '일차': r.get('일차', 1),
+                       '시간칸': r.get('시간칸', ''), '장소': p(r['장소명']),
                        '머무는분': r.get('머무는시간'), '근거': list(r.get('근거ID') or []),
                        '운영': list(r.get('운영주체후보') or []), '이유': ''})
     있는 = {r['칸ID'] for r in 칸들}
@@ -587,7 +600,9 @@ def 이전_주문서(이전코스, 후보표):
 
 def _유지합치기(새안, 이전안, 유지시간칸):
     """유지할 시간칸은 이전 주문 그대로, 나머지 자리는 새 주문으로. 순서는 이전 코스 순서."""
-    새칸 = list(새안.get('칸') or [])
+    전체 = list(새안.get('칸') or [])
+    새칸 = [n for n in 전체 if n.get('시간칸') not in 유지시간칸]
+    되돌림 = len(전체) - len(새칸)  # AI가 유지할 칸을 건드린 수: 쓰지 않고 센다
     out, 쓴 = [], set()
     for r in 이전안['칸']:
         if r['시간칸'] in 유지시간칸:
@@ -600,7 +615,7 @@ def _유지합치기(새안, 이전안, 유지시간칸):
     out += [n for n in 새칸 if n not in out]
     유지id = {r['칸ID'] for r in out if r['시간칸'] in 유지시간칸}
     식사 = [m for m in 이전안['식사'] if m['칸ID'] in 유지id] + [m for m in 새안.get('식사') or [] if m.get('칸ID') not in 유지id]
-    return {**새안, '칸': out, '식사': 식사}
+    return {**새안, '칸': out, '식사': 식사}, 되돌림
 
 
 def _B주문(a, b):
@@ -631,10 +646,14 @@ def 조립(주문서, 후보표, 입력, 이전코스=None, 유지시간칸=None
     안 = 주문서['안' if 한안 else 'A']
     고정 = None
     if 유지시간칸 and 이전코스:
-        안 = _유지합치기(안, 이전_주문서(이전코스, 후보표), set(유지시간칸))
+        안, 되돌림 = _유지합치기(안, 이전_주문서(이전코스, 후보표), set(유지시간칸))
         고정 = {r['칸ID']: r for r in 이전코스.get('칸목록') or [] if r.get('시간칸') in 유지시간칸}
     코스 = _완성(안, 후보표, 입력, 고정)
+    if 유지시간칸 and 이전코스:
+        코스['부분수정_되돌린칸'] = 되돌림
     if 한안:
+        return 코스, []
+    if 'B' not in 주문서:
         return 코스, []
     b = 주문서.get('B')
     if b is None:

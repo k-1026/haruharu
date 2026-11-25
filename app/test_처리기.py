@@ -27,10 +27,14 @@ class 코스시험(unittest.TestCase):
             (t/'3단계_입력.json').write_text(json.dumps({'조건':{'계절':'봄'},'근거목록':[]},ensure_ascii=False),encoding='utf-8')
             r=rec();기록모듈.추가(r,'코스안',{'안id':'A','코스':{'칸목록':[]},'출처시험id':'r/01회차/통합시험_1'},'코드:가져오기')
             기록모듈.추가(r,'후보',{'이름':'향촌문화관'},'에이전트:수집');seen={}
-            def fn(p,i):seen['p']=p;seen['i']=json.loads(i);return '{"칸목록":[{"칸ID":"낮"}]}'
+            def fn(p,i):
+                seen['p']=p;seen['i']=json.loads(i)
+                return '{"안":{"칸":[{"칸ID":"낮-1","일차":1,"시간칸":"낮","장소":"P1","머무는분":60,"근거":[],"운영":[],"이유":""}],"식사":[]}}'
             self.assertTrue(처리기.코스짜기(r,'A',root,['야시장 월~목 휴무'],실행함수=fn))
             self.assertEqual(len(r['코스안']),2);self.assertEqual(r['코스안'][-1]['버전'],2)
-            self.assertEqual(seen['p'],'.claude/agents/코스검토.md')
+            self.assertEqual(seen['p'],'.claude/agents/코스주문.md')
+            self.assertIn('P1|근대골목',seen['i']['후보표'])
+            self.assertIn('체크리스트',r['코스안'][-1]['코스'])
             self.assertEqual(seen['i']['보완요청'],['야시장 월~목 휴무']);self.assertEqual(seen['i']['후보'][0]['이름'],'향촌문화관')
             self.assertEqual(seen['i']['조건'],{'계절':'봄'})
 
@@ -38,6 +42,22 @@ class 코스시험(unittest.TestCase):
         r=rec()
         self.assertFalse(처리기.코스짜기(r,'A',Path('.'),[],실행함수=lambda p,i:'{"설명":"x"}'))
         self.assertEqual(r['코스안'],[]);self.assertEqual(r['실행'][-1]['결과'],'실패')
+
+
+class 부분수정시험(unittest.TestCase):
+    def test_부분수정은_유지칸_시각을_고정한다(self):
+        r=rec()
+        첫={'안':{'칸':[{'칸ID':'낮-1','일차':1,'시간칸':'낮','장소':'P1','머무는분':90,'근거':[],'운영':[],'이유':''},
+                     {'칸ID':'저녁-1','일차':1,'시간칸':'저녁','장소':'P6','머무는분':90,'근거':[],'운영':[],'이유':''}],'식사':[]}}
+        self.assertTrue(처리기.코스짜기(r,'A',Path('.'),[],실행함수=lambda p,i:json.dumps(첫,ensure_ascii=False)))
+        이전=r['코스안'][-1]['코스']
+        새={'안':{'칸':[{'칸ID':'저녁-1','일차':1,'시간칸':'저녁','장소':'P5','머무는분':80,'근거':[],'운영':[],'이유':''}],'식사':[]}}
+        self.assertTrue(처리기.부분수정(r,'A',Path('.'),['낮'],['저녁'],'저녁만 다른 찜갈비',실행함수=lambda p,i:json.dumps(새,ensure_ascii=False)))
+        코스=r['코스안'][-1]['코스']
+        낮=lambda c:next(x for x in c['칸목록'] if x['칸ID']=='낮-1')
+        self.assertEqual(낮(코스)['시각'],낮(이전)['시각'])
+        self.assertIn('봉산찜갈비',next(x for x in 코스['칸목록'] if x['칸ID']=='저녁-1')['장소명'])
+        self.assertEqual(코스['부분수정기록']['코드가_되돌린_유지칸'],0)
 
 
 class 검증시험(unittest.TestCase):
@@ -89,7 +109,7 @@ class 안별입력시험(unittest.TestCase):
         기록모듈.추가(self.r,'코스안',{'안id':'A','버전':2,'코스':{'칸목록':[{'칸ID':'v2'}]}},'에이전트:코스')
         i=처리기.코스입력(self.r,'A',self.root,['고칠 점'])
         self.assertEqual(i['이전버전'],2);self.assertEqual(i['이전코스'],{'칸목록':[{'칸ID':'v2'}]})
-        self.assertTrue(처리기.코스짜기(self.r,'A',self.root,['고칠 점'],실행함수=lambda p,x:'{"칸목록":[]}'))
+        self.assertTrue(처리기.코스짜기(self.r,'A',self.root,['고칠 점'],실행함수=lambda p,x:'{"안":{"칸":[],"식사":[]}}'))
         self.assertEqual(기록모듈.버전목록(self.r,'A'),[1,2,3])
 
 
