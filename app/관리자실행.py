@@ -93,7 +93,8 @@ def _저장(폴더, 이름, 값):
     경로 = 폴더 / 이름
     임시 = 경로.with_suffix(경로.suffix + '.tmp')
     임시.write_text(json.dumps(값, ensure_ascii=False, indent=2), encoding='utf-8')
-    임시.replace(경로)
+    from 파일쓰기 import 바꿔쓰기
+    바꿔쓰기(임시, 경로)
 
 
 def _해시(경로):

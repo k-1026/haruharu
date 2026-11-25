@@ -43,7 +43,8 @@ def _쓰기(폴더, 이름, 값):
     폴더.mkdir(parents=True, exist_ok=True)
     임시 = 폴더 / (이름 + '.tmp')
     임시.write_text(값 if isinstance(값, str) else json.dumps(값, ensure_ascii=False, indent=2), encoding='utf-8')
-    임시.replace(폴더 / 이름)
+    from 파일쓰기 import 바꿔쓰기
+    바꿔쓰기(임시, 폴더 / 이름)
 
 
 def _시각(값, 이름):

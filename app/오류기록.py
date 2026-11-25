@@ -57,7 +57,8 @@ def 저장(folder,error,**context):
         data['오류'].append(result)
         temporary=path.with_suffix('.json.tmp')
         temporary.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
-        temporary.replace(path)
+        from 파일쓰기 import 바꿔쓰기
+        바꿔쓰기(temporary, path)
     except (OSError,ValueError,TypeError,KeyError):
         result['기록주의']='진단 파일 저장 실패'
     return result
