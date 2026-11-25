@@ -204,6 +204,9 @@ def 요약입력(r):
         groups[key].append(row)
     chosen = []
     for rows in groups.values():
+        if rows[0].get('업로드'):
+            chosen += rows
+            continue
         if rows[0]['파일 · 행 위치'].startswith(관심파일):
             rows = sorted(rows, key=lambda x: _숫자(x['수치'][:-1]), reverse=True)
         chosen += rows[:3] + [x for x in rows[3:] if '닭' in x['원자료 항목명'] or '치킨' in x['원자료 항목명']]

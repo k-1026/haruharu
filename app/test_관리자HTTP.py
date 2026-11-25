@@ -11,6 +11,27 @@ import test_관리자실행 as fixtures
 
 
 class HTTP시험(unittest.TestCase):
+    def test_HTTP_CSV_엑셀_업로드는_미리보기만하고_토큰검사(self):
+        import base64
+        from pathlib import Path
+        token=self.request('GET','/api/session')[1]['token']
+        for ext in ['csv','xlsx']:
+            p=Path(__file__).parent/'시험자료'/('시연용_가상설문_일본인커플_중구_가을.'+ext)
+            value={'파일명':p.name,'내용':base64.b64encode(p.read_bytes()).decode()}
+            self.assertEqual(self.request('POST','/api/plan/upload',value)[0],403)
+            code,data=self.request('POST','/api/plan/upload',value,{'X-Admin-Token':token})
+            self.assertEqual(code,201,data)
+            self.assertEqual(data['시트'][0]['행수'],13)
+            self.assertIn('실제 조사 아님',str(data))
+        self.assertEqual(self.calls,[])
+
+    def test_HTTP_업로드_과대본문과_잘못된형식_거부(self):
+        token=self.request('GET','/api/session')[1]['token'];h={'X-Admin-Token':token}
+        code,data=self.request('POST','/api/plan/upload',{'파일명':'a.pdf','내용':'YQ=='},h)
+        self.assertEqual(code,400);self.assertIn('CSV',data['오류'])
+        code,_=self.request('POST','/api/plan/upload',{'파일명':'a.csv','내용':'a'*1450000},h)
+        self.assertEqual(code,413)
+
     def test_HTTP_후보자료와_상시기획_초안_저장재조회(self):
         import test_단계연결 as course_fixtures
         code,places=self.request('GET','/api/places')

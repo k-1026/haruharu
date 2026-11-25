@@ -169,11 +169,20 @@ test('운영 입력 화면으로 보내지 않고 자율 이용과 없는 B안�
   const html=render();
   assert.match(html,/A안 · 내 요청을 우선한 안/);
   assert.match(html,/B안 · 구성을 조정한 안/);
-  assert.match(html,/아직 없음/);
+  assert.match(html,/미생성/);
   assert.match(html,/어디까지 자유롭게 이용하나요/);
   assert.match(html,/예약이나 이용권에 실제로 정해진 시간/);
   assert.doesNotMatch(html,/코스 수정 화면|href=["'][^"']*admin\/(?:course|edit)/);
   assert.doesNotMatch(html.split('팀 검토용 상세')[0],/href=["'][^"']*admin/);
+});
+
+test('B안 미생성 이유와 가상 업로드 경고를 생략하거나 HTML로 실행하지 않는다',()=>{
+  const reason='후보가 부족합니다. '+ '사유 '.repeat(80)+'<script>oops</script>';
+  const html=render({정리:{안:[{안id:'A',버전:4,버전들:[4],검증:'검증 전'}],대안상태:{상태:'미생성',이유:reason}},
+    기관업로드:{파일명:'가상.csv',적용행수:13,가상자료:true,경고:['실제 조사 아님']}});
+  assert.match(html,/&lt;script&gt;oops&lt;\/script&gt;/);
+  assert.match(html,/시연용 가상 자료 · 실제 조사 아님/);
+  assert.match(html,/적용 13행/);
 });
 
 test('저장된 실제 B안은 미생성 안내 대신 비교 카드로 표시한다',()=>{
