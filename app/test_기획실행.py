@@ -79,7 +79,8 @@ class 끝까지시험(unittest.TestCase):
         self.assertFalse(p['단계'][0]['AI'])
         self.assertTrue(all(s.get('시작') and s.get('끝') for s in p['단계']))
         self.assertIsNone(p['일하는중'])
-        self.assertEqual([a for a, _ in 본], ['.claude/agents/수요요약.md', '.claude/agents/코스검토.md', '.claude/agents/검증.md', '.claude/agents/총괄.md'])
+        self.assertEqual([a for a, _ in 본], ['.claude/agents/수요요약.md', '.claude/agents/코스검토.md', '.claude/agents/코스검토.md', '.claude/agents/검증.md', '.claude/agents/총괄.md'])
+        self.assertIn('B안보완요청', 본[2][1])  # 예전 A-only 저장 응답에는 B만 한 번 보완한다
         폴더 = Path(self.d.name) / 시작['기획id']
         for 이름 in ['1단계_선택.json', '2단계_선택.json']:
             self.assertIn('자동 진행', json.loads((폴더 / 이름).read_text(encoding='utf-8'))['자동처리'])

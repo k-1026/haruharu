@@ -25,6 +25,8 @@ class 전체총괄시험(unittest.TestCase):
         from 기획실행 import 기획실행
         from test_단계연결 import 코스
         a=코스();a['확정조건']={k:False for k in a['확정조건']}
+        day2=copy.deepcopy(a['칸목록'][0]);day2.update({'일차':2,'칸ID':'2일-오전-1','시간칸':'2일차오전'})
+        a['칸목록'].append(day2)
         a['코스시작종료']={k:'미확인' for k in a['코스시작종료']}
         a['2일차오전구성']='미선택'
         b=copy.deepcopy(a);b['칸목록'][0]['장소명']='대구광역시 중구 향촌문화관'
@@ -92,7 +94,8 @@ class 대안시험(unittest.TestCase):
 
     def test_차이가있는_B안만_이유와함께_등록하고_원본은_보존한다(self):
         r,a=self.준비();before=copy.deepcopy(a)
-        b={'칸목록':[{'칸ID':'낮','일차':1,'시간칸':'낮','장소명':'서문시장','시각':{'값':'11:00'}}]}
+        b={'칸목록':[{'칸ID':'낮','일차':1,'시간칸':'낮','장소명':'서문시장','시각':{'값':'11:00'}},
+                    {'칸ID':'오전','일차':2,'시간칸':'오전','장소명':'향촌문화관'}]}
         self.assertTrue(등록(r,{'코스':b,'이유':'식사 권역에 가까운 구성','무엇을':'낮 관광지 조정'},'r/01회차/통합시험_1'))
         self.assertEqual(r['안'][1]['안id'],'B');self.assertEqual(r['코스안'][0]['코스'],before)
         self.assertEqual(r['원래요청']['조건']['지역'],['중구'])
