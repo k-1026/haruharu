@@ -201,6 +201,24 @@ def _칸검사(이름, 칸들, 후보표, 입력, 근거들, 운영들):
     return 문제, 본
 
 
+식사칸 = {'점심', '저녁'}
+
+
+def _같은장소(이름, 칸들, 볼칸=None):
+    """식사 칸이 아닌 칸에 같은 장소가 두 번 나오면 문제. 볼칸이 있으면 그 칸ID만 문제로 적는다(B안 바꾼 칸)."""
+    문제, 본 = [], {}
+    관광 = [r for r in 칸들 if isinstance(r, dict) and r.get('시간칸') not in 식사칸 and r.get('장소')]
+    for r in 관광:
+        다른 = [x for x in 관광 if x is not r and x.get('장소') == r.get('장소')]
+        if not 다른:
+            continue
+        if 볼칸 is None and r['장소'] not in 본:
+            본[r['장소']] = r; continue   # 처음 나온 칸은 두고, 다시 나온 칸을 문제로 적는다
+        if 볼칸 is None or r.get('칸ID') in 볼칸:
+            문제.append(f"{이름} {r.get('칸ID')}: 같은 장소 두 번 {r['장소']}")
+    return 문제
+
+
 def 주문서_검사(주문서, 후보표, 입력, 한안=False):
     """틀린 곳을 고치지 않고 문제 문장으로 돌려준다. 빈 목록이면 통과."""
     if not isinstance(주문서, dict):
@@ -212,6 +230,7 @@ def 주문서_검사(주문서, 후보표, 입력, 한안=False):
     if not isinstance(안, dict) or not isinstance(안.get('칸'), list):
         return ['주문서에 안이 없음']
     문제, a칸 = _칸검사(키, 안['칸'], 후보표, 입력, 근거들, 운영들)
+    문제 += _같은장소(키, 안['칸'])
     for m in 안.get('식사') or []:
         if not isinstance(m, dict):
             문제.append(f'{키}: 식사 형식 오류'); continue
@@ -235,6 +254,9 @@ def 주문서_검사(주문서, 후보표, 입력, 한안=False):
     for id in [r.get('칸ID') for r in 바꾼 if isinstance(r, dict)] + list(b.get('뺀칸') or []):
         if id not in a칸:
             문제.append(f'B: A안에 없는 칸 {id}')
+    if not 문제:
+        b안 = _B주문(안, b)['칸']
+        문제 += _같은장소('B', b안, {r.get('칸ID') for r in 바꾼 if isinstance(r, dict)})
     return 문제
 
 
@@ -647,6 +669,12 @@ def 조립(주문서, 후보표, 입력, 이전코스=None, 유지시간칸=None
     """주문서 → (완성 코스, 문제목록). 문제가 있으면 (None, 문제): 추측해서 고치지 않는다."""
     한안 = isinstance(주문서, dict) and '안' in 주문서
     문제 = 주문서_검사(주문서, 후보표, 입력, 한안)
+    B문제 = []
+    if 문제 and not 한안 and isinstance(주문서, dict) and 'B' in 주문서:
+        # B안만 틀렸으면 A안은 살리고 B안은 빼서, B안 보완 단계가 한 번 다시 요청하게 한다
+        a만 = {k: v for k, v in 주문서.items() if k not in ['B', '대안불가이유']}
+        if not 주문서_검사(a만, 후보표, 입력):
+            B문제, 문제, 주문서 = 문제, [], a만
     if 문제:
         return None, 문제
     안 = 주문서['안' if 한안 else 'A']
@@ -660,6 +688,8 @@ def 조립(주문서, 후보표, 입력, 이전코스=None, 유지시간칸=None
     if 한안:
         return 코스, []
     if 'B' not in 주문서:
+        if B문제:
+            코스['B안문제'] = B문제
         return 코스, []
     b = 주문서.get('B')
     if b is None:
