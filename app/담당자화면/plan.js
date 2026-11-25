@@ -436,8 +436,9 @@ function draw(stops){
     for(const node of $('mapView').querySelectorAll('[data-route-time]')){
       const leg=controller.routes?.find(leg=>leg.from===Number(node.dataset.routeTime));
       if(!leg){const i=stops.findIndex(x=>x.순번===Number(node.dataset.routeTime));node.textContent=코스지도모델.legFallbackLabel(stops[i],stops[i+1]);continue;}
-      const alt=leg.mode==='transit'?코스지도모델.timeLabel(leg.walkSeconds):leg.transitSeconds?'대중교통 약 '+Math.round(leg.transitSeconds/60)+'분':'대중교통 자료 없음';
-      node.innerHTML=`<b class="mode-primary ${leg.mode==='transit'?'transit':'foot'}">${esc(코스지도모델.legTimeLabel(leg))}</b><small class="mode-alt">${esc(alt)}</small>`;
+      const bus=leg.mode==='transit'||leg.mode==='ride';
+      const alt=bus?코스지도모델.timeLabel(leg.walkSeconds):leg.transitSeconds?'대중교통 약 '+Math.round(leg.transitSeconds/60)+'분':'대중교통 자료 없음';
+      node.innerHTML=`<b class="mode-primary ${bus?'transit':'foot'}">${esc(코스지도모델.legTimeLabel(leg))}</b><small class="mode-alt">${esc(alt)}</small>`;
       const t=leg.transport||{};node.title=[t.노선,t.출처,t.기준요일,t.기준출발시각,t.확인일,t.비고].filter(Boolean).join(' · ');
     }
     for(const button of $('mapView').querySelectorAll('[data-play-segment]')){

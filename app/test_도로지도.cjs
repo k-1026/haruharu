@@ -230,3 +230,24 @@ test('대중교통 구간은 두 장소 사이를 점선 조각으로 잇는다'
   assert.ok(rows.every(r => r.length === 2 && r[1][0] <= 100));
   assert.deepEqual(m.dashRows([0, 0], [0, 0], 10, 6), []);
 });
+
+test('도로 선이 있는 대중교통 구간은 기다리지 않고 버스로 타고 가는 구간으로 재생한다', () => {
+  const m = require('./담당자화면/map-model.js');
+  const s = [1, 2, 3, 4].map(순번 => ({순번, 일차: 1}));
+  const road = [[35.86, 128.6], [35.87, 128.61]];
+  const legs = m.playableLegs([
+    {from: s[0], to: s[1], mode: 'foot', canWalk: true, path: road},
+    {from: s[1], to: s[2], mode: 'transit', canWalk: false, path: null, roadPath: road, durationSeconds: 1020},
+    {from: s[2], to: s[3], mode: 'transit', canWalk: false, path: null, roadPath: null, durationSeconds: 600}]);
+  assert.equal(legs[1].ride, true); assert.equal(legs[1].canWalk, true); assert.deepEqual(legs[1].path, road);
+  assert.equal(legs[2].ride, undefined); assert.equal(legs[2].mode, 'transit');   // 도로 선이 없으면 예전처럼 안내만
+  assert.match(m.legTimeLabel(legs[1]), /대중교통 약 17분/);
+  const p = m.playback(legs); p.startAll(); p.advance(1);
+  assert.equal(p.state.index, 1); assert.equal(p.state.waiting, false);   // 버스 구간에서 멈춰 기다리지 않는다
+  p.advance(1); assert.equal(p.state.waiting, true);                     // 도로 선 없는 구간만 기다린다
+});
+
+test('목록에 넘기는 구간 정보(mode만 있음)도 버스 구간이면 대중교통 시간으로 쓴다', () => {
+  const m = require('./담당자화면/map-model.js');
+  assert.match(m.legTimeLabel({mode: 'ride', durationSeconds: 1200}), /대중교통 약 20분/);
+});

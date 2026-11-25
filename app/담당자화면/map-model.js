@@ -60,7 +60,12 @@
     if(to&&to.시간칸==='숙박'&&!to.좌표)return '숙소를 정하면 이동 안내';
     return tableLabel(from&&from.다음이동)||'경로 미확인';
   }
-  function legTimeLabel(leg){return leg.mode==='transit'?'대중교통 약 '+Math.round(leg.durationSeconds/60)+'분':timeLabel(leg.durationSeconds);}
+  // 도로 선이 있는 대중교통 구간은 '버스로 타고 가는 구간'(ride)으로 재생한다: 기다리지 않고 도로 선을 따라 빠르게 이동.
+  // 도로 선이 없는 구간만 예전처럼 안내 후 '도착지로 넘어가기'를 기다린다. 지도에 그리는 선(roadPath)은 그대로다.
+  function playableLegs(legs){
+    return legs.map(leg=>leg.mode==='transit'&&leg.roadPath?{...leg,mode:'ride',ride:true,canWalk:true,path:leg.roadPath,distance:null}:leg);
+  }
+  function legTimeLabel(leg){return leg.mode==='transit'||leg.mode==='ride'||leg.ride?'대중교통 약 '+Math.round(leg.durationSeconds/60)+'분':timeLabel(leg.durationSeconds);}
   // 도로 굽이를 보존하고 거의 일직선인 잔점만 정리한다. 원본·이동시간은 건드리지 않는다.
   function simplifyPath(points,toleranceMeters=2){
     const copy=points.map(p=>p.slice());if(copy.length<3||toleranceMeters<=0)return copy;
@@ -171,6 +176,6 @@
         return arrive();
       }};
   }
-  root.코스지도모델={model,preview,valid,label,motionView,routeKey,routesFor,track,sample,timeLabel,playback,roadStrip,clockMinutes,courseMinutes,sceneTime,previewSeconds,travelInfo,legTimeLabel,tableLabel,legFallbackLabel,dashRows,simplifyPath,characterMotion,walkingRoadRows};
+  root.코스지도모델={model,preview,valid,label,motionView,routeKey,routesFor,track,sample,timeLabel,playback,roadStrip,clockMinutes,courseMinutes,sceneTime,previewSeconds,travelInfo,legTimeLabel,tableLabel,legFallbackLabel,dashRows,playableLegs,simplifyPath,characterMotion,walkingRoadRows};
   if(typeof module!=='undefined')module.exports=root.코스지도모델;
 })(typeof globalThis!=='undefined'?globalThis:this);
