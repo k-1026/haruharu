@@ -42,6 +42,12 @@
     return {mode,canWalk:mode==='foot',walkSeconds:walking,transitSeconds,transport:source,
       durationSeconds:mode==='transit'?transitSeconds:walking};
   }
+  // 좌표·도보 경로가 아직 없어 지도 선을 그릴 수 없을 때, 이동표(CSV) 시간만으로 안내한다.
+  function tableLabel(info){
+    const t=travelInfo(info);const s=t.mode==='transit'?t.transitSeconds:t.walkSeconds;
+    if(!s)return null;
+    return (t.mode==='transit'?'대중교통 약 ':'도보 약 ')+Math.round(s/60)+'분 · 지도 경로 준비 중';
+  }
   function legTimeLabel(leg){return leg.mode==='transit'?'대중교통 약 '+Math.round(leg.durationSeconds/60)+'분':timeLabel(leg.durationSeconds);}
   // 도로 굽이를 보존하고 거의 일직선인 잔점만 정리한다. 원본·이동시간은 건드리지 않는다.
   function simplifyPath(points,toleranceMeters=2){
@@ -152,6 +158,6 @@
         return arrive();
       }};
   }
-  root.코스지도모델={model,preview,valid,label,motionView,routeKey,routesFor,track,sample,timeLabel,playback,roadStrip,clockMinutes,courseMinutes,sceneTime,previewSeconds,travelInfo,legTimeLabel,simplifyPath,characterMotion,walkingRoadRows};
+  root.코스지도모델={model,preview,valid,label,motionView,routeKey,routesFor,track,sample,timeLabel,playback,roadStrip,clockMinutes,courseMinutes,sceneTime,previewSeconds,travelInfo,legTimeLabel,tableLabel,simplifyPath,characterMotion,walkingRoadRows};
   if(typeof module!=='undefined')module.exports=root.코스지도모델;
 })(typeof globalThis!=='undefined'?globalThis:this);
