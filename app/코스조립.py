@@ -141,3 +141,71 @@ def 후보표_글(후보표):
     줄.append('# 운영주체 (번호|설명)')
     줄 += [f"{x['O번호']}|{x['설명']}" for x in 후보표['운영주체']]
     return '\n'.join(줄)
+
+
+술표현 = re.compile(r'맥주|치맥|술|주점')
+
+
+def 주문서_읽기(원문):
+    from 에이전트실행 import JSON_꺼내기
+    return JSON_꺼내기(원문)
+
+
+def _가족인가(입력):
+    return '가족' in str((입력.get('조건') or {}).get('동행') or '')
+
+
+def _칸검사(이름, 칸들, 후보표, 입력, 근거들, 운영들):
+    문제, 본 = [], set()
+    당일 = 입력.get('확정체류기간') == '당일'
+    for r in 칸들:
+        if not isinstance(r, dict):
+            문제.append(f'{이름}: 칸 형식 오류'); continue
+        id = r.get('칸ID') or '?'
+        if id in 본:
+            문제.append(f'{이름}: 칸ID 중복 {id}')
+        본.add(id)
+        if r.get('장소') not in 후보표['장소']:
+            문제.append(f"{이름} {id}: 후보표에 없는 장소 {r.get('장소')}")
+        for x in r.get('근거') or []:
+            if x not in 근거들:
+                문제.append(f'{이름} {id}: 없는 근거ID {x}')
+        for x in r.get('운영') or []:
+            if x not in 운영들:
+                문제.append(f'{이름} {id}: 없는 운영주체 {x}')
+        if 당일 and r.get('일차') == 2:
+            문제.append(f'{이름} {id}: 당일 코스에 2일차')
+        if r.get('일차') not in [1, 2]:
+            문제.append(f'{이름} {id}: 일차 오류')
+        if _가족인가(입력) and 술표현.search(str(r.get('이유') or '')):
+            문제.append(f'{이름} {id}: 가족 코스에 술 표현')
+    return 문제, 본
+
+
+def 주문서_검사(주문서, 후보표, 입력, 한안=False):
+    """틀린 곳을 고치지 않고 문제 문장으로 돌려준다. 빈 목록이면 통과."""
+    if not isinstance(주문서, dict):
+        return ['주문서 JSON을 읽지 못함']
+    근거들 = {r['근거ID'] for r in 입력.get('근거목록') or []}
+    운영들 = {x['O번호'] for x in 후보표.get('운영주체') or []}
+    키 = '안' if 한안 else 'A'
+    안 = 주문서.get(키)
+    if not isinstance(안, dict) or not isinstance(안.get('칸'), list):
+        return ['주문서에 안이 없음']
+    문제, a칸 = _칸검사(키, 안['칸'], 후보표, 입력, 근거들, 운영들)
+    if 한안:
+        return 문제
+    b = 주문서.get('B')
+    if b is None:
+        if not str(주문서.get('대안불가이유') or '').strip():
+            문제.append('B: 대안불가이유 필요')
+        return 문제
+    if not isinstance(b, dict):
+        return 문제 + ['B: 형식 오류']
+    바꾼 = b.get('바꾼칸') or []
+    b문제, _ = _칸검사('B', 바꾼, 후보표, 입력, 근거들, 운영들)
+    문제 += b문제
+    for id in [r.get('칸ID') for r in 바꾼 if isinstance(r, dict)] + list(b.get('뺀칸') or []):
+        if id not in a칸:
+            문제.append(f'B: A안에 없는 칸 {id}')
+    return 문제
