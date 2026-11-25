@@ -547,3 +547,85 @@ def 파생_채우기(코스, 후보표, 입력, 안이름='공통'):
     코스['확정조건'] = {**코스['확정조건'], '겹침처리': not any(x['종류'] == '노선 겹침' for x in 코스['겹침이력'])}
     코스['체크리스트'] = _체크리스트(코스, 후보표, 입력, 안이름, 번호들, 이동결과, 저녁충돌)
     return 코스
+
+
+def 이전_주문서(이전코스, 후보표):
+    """완성 코스 → 주문서 모양(P번호). 고쳐 쓰기·부분수정 입력용. CSV 밖 칸(숙박·자유시간)은 코드가 다시 넣으므로 뺀다."""
+    번호 = {}
+    for k, r in 후보표['장소'].items():
+        번호.setdefault(_이름(r['장소명']), []).append(k)
+    def p(이름):
+        ks = 번호.get(_이름(이름 or ''))
+        return ks[0] if ks and len(ks) == 1 else None
+    칸들 = []
+    for r in 이전코스.get('칸목록') or []:
+        if p(r.get('장소명')):
+            칸들.append({'칸ID': r['칸ID'], '일차': r['일차'], '시간칸': r['시간칸'], '장소': p(r['장소명']),
+                       '머무는분': r.get('머무는시간'), '근거': list(r.get('근거ID') or []),
+                       '운영': list(r.get('운영주체후보') or []), '이유': ''})
+    있는 = {r['칸ID'] for r in 칸들}
+    식사 = [{'칸ID': m['칸ID'], '방식': m.get('방식', '미선택'), '권역': next(r['장소'] for r in 칸들 if r['칸ID'] == m['칸ID']),
+           '후보': [x for x in (p(n) for n in m.get('추천후보') or []) if x]}
+          for m in 이전코스.get('식사목록') or [] if m.get('칸ID') in 있는]
+    return {'칸': 칸들, '식사': 식사}
+
+
+def _유지합치기(새안, 이전안, 유지시간칸):
+    """유지할 시간칸은 이전 주문 그대로, 나머지 자리는 새 주문으로. 순서는 이전 코스 순서."""
+    새칸 = list(새안.get('칸') or [])
+    out, 쓴 = [], set()
+    for r in 이전안['칸']:
+        if r['시간칸'] in 유지시간칸:
+            out.append(r)
+            continue
+        키 = (r['일차'], r['시간칸'])
+        if 키 not in 쓴:
+            out += [n for n in 새칸 if (n.get('일차'), n.get('시간칸')) == 키]
+            쓴.add(키)
+    out += [n for n in 새칸 if n not in out]
+    유지id = {r['칸ID'] for r in out if r['시간칸'] in 유지시간칸}
+    식사 = [m for m in 이전안['식사'] if m['칸ID'] in 유지id] + [m for m in 새안.get('식사') or [] if m.get('칸ID') not in 유지id]
+    return {**새안, '칸': out, '식사': 식사}
+
+
+def _B주문(a, b):
+    바꾼 = {r['칸ID']: r for r in b.get('바꾼칸') or []}
+    뺀 = set(b.get('뺀칸') or [])
+    칸들 = [바꾼.get(r['칸ID'], r) for r in a['칸'] if r['칸ID'] not in 뺀]
+    식사 = []
+    for m in a.get('식사') or []:
+        if m['칸ID'] in 뺀:
+            continue
+        식사.append({**m, '권역': 바꾼[m['칸ID']]['장소'], '후보': []} if m['칸ID'] in 바꾼 else m)
+    return {'칸': 칸들, '식사': 식사}
+
+
+def _완성(안, 후보표, 입력, 고정=None):
+    코스 = 파생_채우기(안_조립(안, 후보표, 입력, '공통', 고정), 후보표, 입력)
+    for k in ['_장소번호', '장소이유']:
+        코스.pop(k, None)
+    return 코스
+
+
+def 조립(주문서, 후보표, 입력, 이전코스=None, 유지시간칸=None):
+    """주문서 → (완성 코스, 문제목록). 문제가 있으면 (None, 문제): 추측해서 고치지 않는다."""
+    한안 = isinstance(주문서, dict) and '안' in 주문서
+    문제 = 주문서_검사(주문서, 후보표, 입력, 한안)
+    if 문제:
+        return None, 문제
+    안 = 주문서['안' if 한안 else 'A']
+    고정 = None
+    if 유지시간칸 and 이전코스:
+        안 = _유지합치기(안, 이전_주문서(이전코스, 후보표), set(유지시간칸))
+        고정 = {r['칸ID']: r for r in 이전코스.get('칸목록') or [] if r.get('시간칸') in 유지시간칸}
+    코스 = _완성(안, 후보표, 입력, 고정)
+    if 한안:
+        return 코스, []
+    b = 주문서.get('B')
+    if b is None:
+        코스['대안제안'] = None
+        코스['대안불가이유'] = 주문서.get('대안불가이유', '')
+    else:
+        코스['대안제안'] = {'이유': b.get('이유', ''), '무엇을': b.get('무엇을', ''), '바꾼희망': b.get('바꾼희망') or {},
+                        '코스': _완성(_B주문(안, b), 후보표, 입력)}
+    return 코스, []

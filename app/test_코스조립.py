@@ -365,5 +365,84 @@ class 파생시험(unittest.TestCase):
         self.assertNotIn('대구광역시 중구 김광석길', r['대체후보'])  # 이미 코스에 쓴 장소는 대체후보가 아님
 
 
+class 전체조립시험(unittest.TestCase):
+    def 조립(self, 주문, 입력=None, **kw):
+        입력 = 입력 or 시험입력()
+        return 코스조립.조립(주문, 후보(입력), 입력, **kw)
+
+    def test_A와_B를_함께_조립한다(self):
+        코스, 문제 = self.조립(정상주문())
+        self.assertEqual(문제, [])
+        b = 코스['대안제안']['코스']
+        self.assertEqual(칸(b, '낮-2')['장소명'], '대구광역시 중구 봉산문화거리')
+        self.assertEqual(칸(코스, '낮-2')['장소명'], '대구광역시 중구 김광석길')
+        self.assertEqual(코스['대안제안']['이유'], '이동 줄이기')
+        self.assertIn('체크리스트', b)
+        self.assertNotIn('_장소번호', 코스); self.assertNotIn('_장소번호', b)
+
+    def test_B안은_시각을_다시_계산한다(self):
+        이동행 = 시험이동() + [이동('서문시장', '봉산문화거리', '20', '9')]
+        입력 = 시험입력(); 표 = 후보(입력, 이동행=이동행)
+        코스, _ = 코스조립.조립(정상주문(), 표, 입력)
+        self.assertEqual(칸(코스, '낮-2')['시각']['값'], '13:01')
+        self.assertEqual(칸(코스['대안제안']['코스'], '낮-2')['시각']['값'], '12:50')
+
+    def test_B가_null이면_대안제안_null과_이유(self):
+        주문 = 정상주문(); 주문['B'] = None; 주문['대안불가이유'] = '후보가 부족함'
+        코스, 문제 = self.조립(주문)
+        self.assertEqual(문제, [])
+        self.assertIsNone(코스['대안제안'])
+        self.assertEqual(코스['대안불가이유'], '후보가 부족함')
+
+    def test_한안_주문서도_조립한다(self):
+        코스, 문제 = self.조립({'안': 정상주문()['A']})
+        self.assertEqual(문제, [])
+        self.assertNotIn('대안제안', 코스)
+
+    def test_문제가_있으면_조립하지_않는다(self):
+        주문 = 정상주문(); 주문['A']['칸'][0]['장소'] = 'P99'
+        코스, 문제 = self.조립(주문)
+        self.assertIsNone(코스)
+        self.assertTrue([p for p in 문제 if 'P99' in p])
+
+    def test_이전코스를_주문서로_되돌린다(self):
+        입력 = 시험입력(); 표 = 후보(입력)
+        코스, _ = 코스조립.조립({'안': 정상주문()['A']}, 표, 입력)
+        다시 = 코스조립.이전_주문서(코스, 표)
+        self.assertEqual([r['장소'] for r in 다시['칸']], ['P1', 'P2', 'P3', 'P6', 'P11'])
+        코스2, 문제 = 코스조립.조립({'안': 다시}, 표, 입력)
+        self.assertEqual(문제, [])
+        self.assertEqual([r['장소명'] for r in 코스2['칸목록']], [r['장소명'] for r in 코스['칸목록']])
+
+    def test_유지시간칸은_이전코스_그대로_두고_나머지만_바꾼다(self):
+        입력 = 시험입력(); 표 = 후보(입력)
+        이전, _ = 코스조립.조립({'안': 정상주문()['A']}, 표, 입력)
+        새 = {'칸': [{'칸ID': '저녁-1', '일차': 1, '시간칸': '저녁', '장소': 'P5', '머무는분': 80, '근거': [], '운영': [], '이유': '다른 찜갈비'}],
+             '식사': [{'칸ID': '저녁-1', '방식': '지정식', '권역': 'P5', '후보': []}]}
+        코스, 문제 = 코스조립.조립({'안': 새}, 표, 입력, 이전코스=이전, 유지시간칸={'낮', '점심'})
+        self.assertEqual(문제, [])
+        self.assertEqual(칸(코스, '낮-1')['시각'], 칸(이전, '낮-1')['시각'])
+        self.assertEqual(칸(코스, '낮-2')['장소명'], '대구광역시 중구 김광석길')
+        self.assertEqual(칸(코스, '저녁-1')['장소명'], '대구광역시 중구 봉산찜갈비')
+
+    def test_1122_성공본과_장소순서가_같다(self):
+        폴더 = Path(__file__).parent / 'runs/20261122_223324/01회차/통합시험_120954_056532'
+        if not (폴더 / '3단계_구조화.json').is_file():
+            self.skipTest('11/22 성공본 없음')
+        원 = json.loads((폴더 / '3단계_구조화.json').read_text(encoding='utf-8'))
+        입력 = json.loads((폴더 / '3단계_입력.json').read_text(encoding='utf-8'))
+        표 = 코스조립.후보표_만들기(입력, 원)
+        주문 = 코스조립.이전_주문서(원, 표)
+        코스, 문제 = 코스조립.조립({'안': 주문}, 표, 입력)
+        self.assertEqual(문제, [])
+        for r in 주문['칸']:
+            새, 옛 = 칸(코스, r['칸ID']), 칸(원, r['칸ID'])
+            self.assertEqual((_이름(새['장소명']), 새['머무는시간'], 새['근거ID']), (_이름(옛['장소명']), 옛['머무는시간'], 옛['근거ID']))
+        self.assertGreaterEqual(len(주문['칸']), 4)
+
+
+from 장소정보 import _이름
+
+
 if __name__ == '__main__':
     unittest.main()
