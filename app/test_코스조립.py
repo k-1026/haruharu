@@ -444,5 +444,37 @@ class 전체조립시험(unittest.TestCase):
 from 장소정보 import _이름
 
 
+class 지시문시험(unittest.TestCase):
+    def test_주문지침은_동봉없이_짧다(self):
+        import run_stage
+        본문, 도구 = run_stage.에이전트_읽기(코스조립.주문지침)
+        self.assertLess(len(본문), 4000)
+        self.assertEqual(도구, [])
+        self.assertNotIn('첨부 CSV 데이터', 본문)
+        self.assertIn('"A"', 본문)
+
+    def test_주문지침_제한초는_60(self):
+        import run_stage
+        self.assertEqual(run_stage.제한초_읽기({'AI_TIMEOUT_SECONDS': '900'}, 코스조립.주문지침), 60)
+
+    def test_요청글에는_후보표와_조건이_있고_형식을_알린다(self):
+        입력 = 시험입력(); 표 = 후보(입력)
+        글 = 코스조립.주문요청(표, 입력, 한안=False)
+        self.assertIn('P1|근대골목', 글)
+        self.assertIn('"A"', 글)
+        self.assertIn('1박2일', 글)
+        self.assertIn('"안"', 코스조립.주문요청(표, 입력, 한안=True))
+
+    def test_시연입력_요청글은_15000자_이하(self):
+        p = Path(__file__).parent / 'runs/20261125_155826/01회차/통합시험_155847_423675/3단계_입력.json'
+        if not p.is_file():
+            self.skipTest('시연 입력 없음')
+        import run_stage
+        입력 = json.loads(p.read_text(encoding='utf-8'))
+        본문, _ = run_stage.에이전트_읽기(코스조립.주문지침)
+        글 = 코스조립.주문요청(코스조립.후보표_만들기(입력), 입력, 한안=False)
+        self.assertLessEqual(len(본문) + len(글), 15000, (len(본문), len(글)))
+
+
 if __name__ == '__main__':
     unittest.main()
