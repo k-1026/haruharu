@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>하루하루 · 코스 기획 (시안)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1d1d1f;--sub:#6b6b70;--line:#e4e2dc;--accent:#d2552b;--accent2:#2b6fd2;--soft:#fdf1ec;--ok:#2f8a4c;--warn:#b7791f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--card);border-bottom:1px solid var(--line)}
+.brand{display:flex;gap:10px;align-items:center;font-weight:700}.logo{width:30px;height:30px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center}
+.tag{font-size:12px;color:var(--warn);background:#fff7e6;border:1px solid #f3d9a4;border-radius:999px;padding:3px 10px}
+.wrap{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 59px)}
+aside{background:var(--card);border-right:1px solid var(--line);padding:18px}
+aside h3{font-size:13px;color:var(--sub);margin:0 0 10px}
+.btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer}
+.primary{background:var(--accent);color:#fff}.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.full{width:100%}
+.saved{margin-top:14px;display:grid;gap:8px}.saved div{border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;cursor:pointer}.saved .on{border-color:var(--accent);background:var(--soft)}
+main{padding:24px;display:grid;gap:18px;max-width:1180px}
+.cond{display:flex;gap:8px;flex-wrap:wrap}.chip{background:#efeee9;border-radius:999px;padding:4px 12px;font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.ai{border:2px solid var(--accent);background:linear-gradient(180deg,var(--soft),#fff 120px)}
+.aihead{display:flex;gap:10px;align-items:center;margin-bottom:6px}.aibadge{background:var(--accent);color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700}
+.think{font-size:13px;color:var(--sub);margin:4px 0 14px;padding-left:12px;border-left:3px solid var(--line)}
+.think li{margin:2px 0}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.plan{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;cursor:pointer}
+.plan.on{border:2px solid var(--accent2);box-shadow:0 0 0 3px #e3edfb}
+.plan h4{margin:0 0 6px;display:flex;justify-content:space-between}.rec{font-size:12px;color:var(--ok)}
+.why{font-size:13px;margin:8px 0 0;padding-left:18px}.src{color:var(--accent2);font-size:12px}
+.mapgrid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
+#map{height:460px;border-radius:12px;border:1px solid var(--line)}
+.timeline{display:grid;gap:6px;max-height:460px;overflow:auto}
+.stop{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:8px;border-radius:10px}.stop:hover{background:#f3f2ee}
+.num{width:26px;height:26px;border-radius:50%;background:var(--accent2);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700}
+.num.d2{background:#7a4fd0}.num.meal{background:var(--accent)}
+.stop small{color:var(--sub)}.stop a{font-size:12px;color:#03a94d;text-decoration:none}
+.daylabel{font-size:12px;font-weight:700;color:var(--sub);margin-top:6px}
+.rowbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.note{font-size:12px;color:var(--sub)}
+dialog{border:0;border-radius:16px;padding:22px;width:min(440px,92vw)}dialog::backdrop{background:#0006}
+label{display:block;margin:10px 0 4px;font-size:13px;color:var(--sub)}select{width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);font:inherit}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}.plans,.mapgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">하</div>하루하루 · 코스 기획</div><span class="tag">시안 · AI 미실행 · 12:10 저장본 데이터 사용</span></header>
+<div class="wrap">
+<aside>
+  <button class="btn primary full" id="newBtn">＋ 새 코스 만들기</button>
+  <h3 style="margin-top:20px">저장된 코스</h3>
+  <div class="saved"><div class="on">봄 · 일본어 · 중구 · 1박2일<br><small>2026-11-23 12:10 · 초안</small></div><div>봄 · 일본어 · 중구 · 1박2일<br><small>2026-11-22 13:19 · 검사 실패</small></div></div>
+</aside>
+<main>
+  <div class="cond"><span class="chip">봄</span><span class="chip">일본어권</span><span class="chip">대구 중구</span><span class="chip">1박2일</span><span class="chip">시작·종료: 향촌문화관 → 국채보상운동기념관</span></div>
+
+  <section class="card ai">
+    <div class="aihead"><span class="aibadge">AI 추천</span><strong>이 조건으로 코스 2개를 만들었어요</strong></div>
+    <ul class="think">
+      <li>수요 근거 200건, 경고 13건을 검토했어요. <span class="note">(2단계 결과)</span></li>
+      <li>서문시장 야시장은 금·토·일만 열고, 종료 지점 국채보상운동기념관은 월요일에 쉬어요 → <b>금·토 출발</b>로 맞췄어요.</li>
+      <li>"일본어권"만으로는 근거가 적은 항목이 있어, 조건을 넓힌 B안도 함께 만들었어요. <span class="note">(시안 예시 문장)</span></li>
+    </ul>
+    <div class="plans">
+      <div class="plan on" data-plan="A"><h4>A안 · 요청한 조건대로 <span class="rec">추천</span></h4>
+        <div>향촌문화관 → 서문시장 → 김광석길 → 찜갈비 → 서문시장 야시장 → 숙박</div>
+        <ul class="why"><li>저녁 뒤 야시장으로 밤 체류를 이어요</li><li>출발 가능: 금 · 토 <span class="src">[앱 요일 검사]</span></li></ul></div>
+      <div class="plan" data-plan="B"><h4>B안 · 조건을 바꿔 본 안</h4>
+        <div>향촌문화관 → 근대골목 → 서문시장 → 김광석길 → 찜갈비 → 숙박</div>
+        <ul class="why"><li>야시장이 없어 <b>매일 출발</b> 가능하게 바꿔 봤어요</li><li>밤 일정은 비어 있어 숙박 연계가 약해요</li></ul></div>
+    </div>
+    <div class="rowbtns"><button class="btn primary" id="pickBtn">A안으로 진행</button><span class="note">고른 안을 아래에서 고친 뒤 저장해요. 저장해도 확정되지 않아요.</span></div>
+  </section>
+
+  <section class="card">
+    <div class="aihead"><strong id="routeTitle">A안 동선 · 1안</strong><span class="note" id="routeMeta"></span></div>
+    <div class="mapgrid"><div id="map"></div><div class="timeline" id="timeline"></div></div>
+    <div class="rowbtns"><button class="btn ghost" id="altBtn">↻ 다른 동선으로 다시 만들기</button><button class="btn ghost" id="revBtn">⇄ 반대 방향</button><span class="note">시안: 낮 관광지 순서만 바꿔 보여 줘요. 좌표는 대략값, 거리는 직선거리예요.</span></div>
+  </section>
+</main>
+</div>
+
+<dialog id="newDlg"><h3 style="margin-top:0">새 코스 만들기</h3>
+  <label>계절</label><select><option>봄</option><option>여름</option><option>가을</option><option>겨울</option></select>
+  <label>대상 언어권</label><select><option>일본어</option><option>영어</option><option>중국어</option></select>
+  <label>지역</label><select><option>중구</option><option>동구</option><option>중구 + 동구</option></select>
+  <label>체류 기간</label><select><option>1박2일</option><option>당일</option></select>
+  <p class="note">실제 앱에서는 AI가 자료를 찾고 A·B안을 만들어 위 추천 카드로 보여 줘요. 시안에서는 실행하지 않아요.</p>
+  <div class="rowbtns"><button class="btn primary" onclick="newDlg.close()">AI에게 맡기기 (시안)</button><button class="btn ghost" onclick="newDlg.close()">취소</button></div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// 시안용 대략 좌표 (실제 앱에서는 장소 CSV에 좌표 열을 추가해 씀)
+const P={
+ '향촌문화관':[35.8711,128.5953],'근대골목':[35.8676,128.5876],'서문시장':[35.8690,128.5807],'김광석길':[35.8608,128.6064],
+ '찜갈비 (산호·봉산)':[35.8700,128.6060],'서문시장 야시장':[35.8684,128.5818],'숙박 (반월당역 권역)':[35.8658,128.5932],'국채보상운동기념관':[35.8696,128.6013]};
+const A={day1Sights:[['향촌문화관','11:34'],['서문시장','13:15','점심'],['김광석길','14:50']],
+ rest:[['찜갈비 (산호·봉산)','19:34','저녁'],['서문시장 야시장','20:05','밤'],['숙박 (반월당역 권역)','22:00','숙박'],['국채보상운동기념관','11:00','2일차 종료']]};
+const B={day1Sights:[['향촌문화관','11:00'],['근대골목','12:00'],['서문시장','13:30','점심'],['김광석길','15:10']],
+ rest:[['찜갈비 (산호·봉산)','18:30','저녁'],['숙박 (반월당역 권역)','21:00','숙박'],['국채보상운동기념관','11:00','2일차 종료']]};
+let plan='A',variant=0,reversed=false;
+const map=L.map('map').setView([35.867,128.594],15);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+let layer=L.layerGroup().addTo(map);
+function perms(a){if(a.length<2)return[a];return a.flatMap((x,i)=>perms([...a.slice(0,i),...a.slice(i+1)]).map(p=>[x,...p]))}
+function km(a,b){const R=6371,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r;return 2*R*Math.asin(Math.sqrt(Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2))}
+function route(){
+  const base=plan==='A'?A:B;
+  // 첫 칸(시작 지점)은 고정하고 나머지 낮 일정 순서를 바꾼다. 시각은 원래 칸 시각을 그대로 씀(시안).
+  const head=base.day1Sights[0],tail=base.day1Sights.slice(1),options=perms(tail);
+  let order=options[variant%options.length];if(reversed)order=[...order].reverse();
+  const times=tail.map(x=>x[1]);
+  const day1=[head,...order.map((x,i)=>[x[0],times[i],x[2]])];
+  return [...day1.map(x=>[x[0],x[1],x[2]||'',1]),...base.rest.map(x=>[x[0],x[1],x[2]||'',x[2]==='2일차 종료'?2:1])];
+}
+function draw(){
+  const stops=route();layer.clearLayers();const tl=document.getElementById('timeline');tl.innerHTML='';
+  let dist=0,lastDay=0;
+  stops.forEach((s,i)=>{
+    const [name,time,kind,day]=s,ll=P[name];if(i)dist+=km(P[stops[i-1][0]],ll);
+    const cls=day===2?'d2':['점심','저녁'].includes(kind)?'meal':'';
+    const color=day===2?'#7a4fd0':cls==='meal'?'#d2552b':'#2b6fd2';
+    L.marker(ll,{icon:L.divIcon({className:'',html:`<div class="num ${cls}">${i+1}</div>`,iconSize:[26,26],iconAnchor:[13,13]})}).bindPopup(`${i+1}. ${name}<br>${day}일차 ${time}`).addTo(layer);
+    if(day!==lastDay){tl.insertAdjacentHTML('beforeend',`<div class="daylabel">${day}일차</div>`);lastDay=day}
+    tl.insertAdjacentHTML('beforeend',`<div class="stop"><div class="num ${cls}">${i+1}</div><div><b>${time}</b> ${name}${kind?` <small>· ${kind}</small>`:''}<br><a target="_blank" href="https://map.naver.com/p/search/${encodeURIComponent('대구 '+name.replace(/\s*\(.*\)/,''))}">네이버 지도에서 열기 ↗</a></div></div>`);
+  });
+  const lls=stops.map(s=>P[s[0]]);
+  const i2=stops.findIndex(s=>s[3]===2);
+  L.polyline(i2>0?lls.slice(0,i2):lls,{color:'#2b6fd2',weight:4,opacity:.75}).addTo(layer);if(i2>0)L.polyline([lls[i2-1],lls[i2]],{color:'#7a4fd0',weight:4,dashArray:'6 8'}).addTo(layer);
+  map.fitBounds(L.latLngBounds(lls).pad(.15));
+  document.getElementById('routeTitle').textContent=`${plan}안 동선 · ${variant+1}안${reversed?' (반대 방향)':''}`;
+  document.getElementById('routeMeta').textContent=` · 장소 ${stops.length}곳 · 직선거리 합 약 ${dist.toFixed(1)}km`;
+}
+document.querySelectorAll('.plan').forEach(el=>el.onclick=()=>{document.querySelectorAll('.plan').forEach(x=>x.classList.remove('on'));el.classList.add('on');plan=el.dataset.plan;variant=0;reversed=false;document.getElementById('pickBtn').textContent=plan+'안으로 진행';draw()});
+document.getElementById('altBtn').onclick=()=>{variant++;draw()};
+document.getElementById('revBtn').onclick=()=>{reversed=!reversed;draw()};
+document.getElementById('newBtn').onclick=()=>newDlg.showModal();
+document.getElementById('pickBtn').onclick=()=>alert('시안: 실제 앱에서는 고른 안을 수정 화면으로 넘겨요.');
+draw();
+</script>
+</body>
+</html>
