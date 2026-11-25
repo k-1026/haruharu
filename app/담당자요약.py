@@ -3,7 +3,7 @@
 import json
 import re
 from urllib.parse import quote
-from 장소정보 import 좌표, 진입안내, 권역위치, 대표위치, 장소안내
+from 장소정보 import 좌표, 진입안내, 권역위치, 대표위치, 장소안내, 이동안내
 from 단계연결 import JSON_읽기
 from 운영검토 import 출발가능요일
 
@@ -57,6 +57,9 @@ def 코스요약(코스, 조건):
         일정[-1]['장소안내']=장소안내(row.get('장소명',''),시간칸=row.get('시간칸',''))
         if not 시각:확인.append(f"{미정이름.get(row.get('시간칸'),표시명)} 미정")
         if point is None and not 자유식 and row.get('시간칸') not in ['숙박','2일차오전']:확인.append('좌표 미확인: '+표시명)
+    for 앞,뒤 in zip(일정,일정[1:]):
+        if 앞['일차']==뒤['일차']:
+            앞['다음이동']=이동안내(앞['장소명'],뒤['장소명'])
     try:
         days=출발가능요일(코스,코스.get('운영검토기록') or {},None,조건)['안별']
         가능=days.get('공통') if '공통' in days else next(iter(days.values()),None)

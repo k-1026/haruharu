@@ -6,6 +6,16 @@ from test_운영검토 import example
 
 
 class 장소정보시험(unittest.TestCase):
+    def test_이동안내는_방향과_장소쌍을_정확히_대조한다(self):
+        from 장소정보 import 이동안내
+        row=이동안내('김광석길 (대구광역시 중구)','식사 방식 미선택 · 권역 후보: 평화시장 닭똥집골목 (동구) — 운영시간 확인 중')
+        self.assertEqual((row['도보분'],row['대중교통분'],row['노선']),(60,39,'401'))
+        self.assertEqual(row['확인일'],'2026-11-19')
+        self.assertEqual(row['기준출발시각'],'15:24')
+        self.assertIsNone(이동안내('평화시장 닭똥집골목','김광석길'))
+        self.assertIsNone(이동안내('서문시장 야시장','동성로 권역'))
+        self.assertEqual(이동안내('서문시장 야시장','반월당역')['대중교통분'],10)
+
     def test_입구미확정이어도_검토된_대표위치를_찾는다(self):
         from 장소정보 import 대표위치
         for name in ['근대골목 (대구광역시 중구)','대구광역시 중구 서문시장','서문시장 야시장',
