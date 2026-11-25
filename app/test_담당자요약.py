@@ -15,6 +15,15 @@ def course():
 
 
 class 담당자요약시험(unittest.TestCase):
+    def test_같은날_다음장소_이동안내를_저장변경없이_연결한다(self):
+        import copy
+        c={'칸목록':[{'일차':1,'장소명':'서문시장'},{'일차':1,'장소명':'김광석길'},
+                         {'일차':2,'장소명':'평화시장 닭똥집골목'}]}
+        before=copy.deepcopy(c);result=담당자요약.코스요약(c,{})
+        self.assertEqual(result['일정'][0]['다음이동']['대중교통분'],20)
+        self.assertNotIn('다음이동',result['일정'][1])
+        self.assertEqual(c,before)
+
     def test_야시장소개와_자료기준_이용정보를_원본변경없이_제공한다(self):
         c={'칸목록':[{'일차':1,'시간칸':'밤','장소명':'서문시장 야시장 (대구광역시 중구)'}]}
         result=담당자요약.코스요약(c,{})['일정'][0]['장소안내']

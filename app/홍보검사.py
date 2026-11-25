@@ -43,19 +43,26 @@ def 내용검사(promo,course,evidence=None):
         for name in sorted(known|excluded):
             if name and name in text and (name in excluded or not any(name in x for x in allowed)):
                 problems.append(f'{field}: 3단계 추천후보·지정식당에 없는 상호 {name}')
-    glossary=list(_표(ROOT/'지침/4_홍보검토/12_번역_용어집.md'))
-    columns={'영어':1,'일본어':2,'중국어 간체':3,'중국어 번체':4}
+    # 용어집 표마다 머리줄이 다르다(장소 표: 영어가 2번째 칸, 용어 표: 로마자 다음). 표마다 머리줄로 언어 칸을 찾는다.
+    # 한 칸에 '표기 (쓰임) / 표기 (쓰임)'처럼 여러 표기가 있으면 그중 하나만 맞아도 통과한다.
+    glossary=[];header=None
+    for row in _표(ROOT/'지침/4_홍보검토/12_번역_용어집.md'):
+        if all(set(x)<=set('-: ') for x in row):continue
+        if '일본어' in row and ('영어' in row):header={name:i for i,name in enumerate(row)};continue
+        if any(x in ('공식표기','상태') for x in row):header=None;continue
+        if header and len(row)>=len(header):glossary.append((header,row))
     for row in promo.get('번역목록',[]):
-        column=columns.get(row.get('언어'))
-        if column is None:continue
+        language={'영어권':'영어'}.get(row.get('언어'),row.get('언어'))
         source=next((r for r in promo.get('문구목록',[]) if (r.get('안','공통'),r.get('장면ID'))==(row.get('안','공통'),row.get('장면ID'))),{})
         original=_문장([source.get('제목',''),source.get('본문','')])
         translated=str(row.get('번역',''))
-        for term in glossary:
-            if len(term)<7:continue
+        for header,term in glossary:
+            if language not in header:continue
             name=term[0].split('(')[0].strip()
-            expected=term[column].strip('` ')
-            if name and name in original and expected not in ['','미확인','—'] and not expected.startswith('미확인') and expected not in translated:
+            expected=term[header[language]].strip('` ')
+            if not name or name not in original or expected in ['','—'] or expected.startswith('미확인'):continue
+            choices=[re.sub(r'\s*\([^)]*\)\s*$','',x).strip('` ') for x in expected.split(' / ')]
+            if not any(x and x in translated for x in choices):
                 problems.append(f'번역 용어집 표기 불일치: {name} / {row.get("언어")} = {expected}')
     story=(ROOT/'지침/4_홍보검토/11_스토리_검증.md').read_text(encoding='utf-8')
     story_ids=set(re.findall(r'^\|\s*([A-Z]+-[A-Z0-9-]+)\s*\|',story,re.M))

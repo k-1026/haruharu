@@ -162,25 +162,27 @@ class 결과저장소:
                 '형식': 경로.suffix.lstrip('.'), '경로': 키}
 
 
-def 핸들러(저장소, 실행서비스=None, 기획서비스=None):
+def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서비스=None):
     from 관리자실행 import 코스시험
     from 기획실행 import 기획실행
+    from 홍보실행 import 홍보실행
     실행서비스 = 실행서비스 or 코스시험(저장소)
     기획서비스 = 기획서비스 or 기획실행(실행서비스)
+    홍보서비스 = 홍보서비스 or 홍보실행(기획서비스)
     토큰 = secrets.token_urlsafe(32)
 
     class Handler(BaseHTTPRequestHandler):
         def 호스트확인(self):
             return self.headers.get('Host') in [f'127.0.0.1:{self.server.server_port}', f'localhost:{self.server.server_port}']
 
-        def 응답(self, 상태, 본문, 타입='application/json; charset=utf-8'):
+        def 응답(self, 상태, 본문, 타입='application/json; charset=utf-8', 보안=None):
             데이터 = 본문 if isinstance(본문, bytes) else json.dumps(본문, ensure_ascii=False).encode('utf-8')
             self.send_response(상태)
             self.send_header('Content-Type', 타입)
             self.send_header('Content-Length', str(len(데이터)))
             self.send_header('Cache-Control', 'no-store')
             self.send_header('X-Content-Type-Options', 'nosniff')
-            self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-ancestors 'none'")
+            self.send_header('Content-Security-Policy', 보안 or "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-ancestors 'none'")
             self.end_headers()
             self.wfile.write(데이터)
 
@@ -207,6 +209,16 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None):
                     return self.응답(200, 기획서비스.기록보기(인자.get('id', [''])[0], 인자.get('안', [None])[0], 인자.get('버전', [None])[0]))
                 if 경로.path == '/api/plan/latest':
                     return self.응답(200, {'기획': 기획서비스.최근()})
+                if 경로.path == '/api/promo/prepare':
+                    return self.응답(200, 홍보서비스.준비(인자.get('id', [''])[0], 인자.get('안', ['A'])[0], 인자.get('버전', [None])[0]))
+                if 경로.path == '/api/promo/list':
+                    return self.응답(200, {'목록': 홍보서비스.목록(인자.get('id', [''])[0])})
+                if 경로.path == '/api/promo/result':
+                    return self.응답(200, 홍보서비스.결과(인자.get('id', [''])[0]))
+                if 경로.path == '/plan/doc':
+                    # 산출물 HTML은 내려받아도 혼자 열리도록 스타일·그림을 파일 안에 담는다. 스크립트는 허용하지 않는다.
+                    return self.응답(200, 홍보서비스.문서(인자.get('id', [''])[0], 인자.get('kind', [''])[0]), 'text/html; charset=utf-8',
+                                   "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'")
                 if 경로.path == '/api/plan/course':
                     from 담당자요약 import 요약_불러오기
                     키 = 인자.get('id', [''])[0]
@@ -217,6 +229,10 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None):
                     '/plan/three-map.js':('three-map.js','text/javascript; charset=utf-8'),
                     '/plan/map-data.json':('map-data.json','application/json; charset=utf-8'),
                     '/plan/road-routes.json':('road-routes.json','application/json; charset=utf-8'),
+                    '/plan/promo.js':('promo.js','text/javascript; charset=utf-8'),
+                    '/plan/promo.css':('promo.css','text/css; charset=utf-8'),
+                    '/plan/characters/promo/raccoon-front.png':('characters/promo/raccoon-front.png','image/png'),
+                    '/plan/characters/promo/weasel-front.png':('characters/promo/weasel-front.png','image/png'),
                     '/plan/vendor/three/three.module.js':('vendor/three/three.module.js','text/javascript; charset=utf-8'),
                     '/plan/vendor/three/three.core.js':('vendor/three/three.core.js','text/javascript; charset=utf-8')}
                 for character in ('raccoon','weasel'):
@@ -255,7 +271,7 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None):
                     return self.응답(200, (기준 / '관리자화면' / 이름).read_bytes(), 타입)
                 return self.응답(404, {'오류': '없는 페이지'})
             except ValueError as 오류:
-                return self.응답(400, {'오류': str(오류) if 경로.path.startswith(('/api/course', '/api/plan/status', '/api/plan/record')) else '기록 형식을 확인하세요.'})
+                return self.응답(400, {'오류': str(오류) if 경로.path.startswith(('/api/course', '/api/plan/status', '/api/plan/record', '/api/promo', '/plan/doc')) else '기록 형식을 확인하세요.'})
             except (OSError, UnicodeError):
                 return self.응답(404, {'오류': '기록을 읽을 수 없습니다. 경로와 저장 완료 여부를 확인하세요.'})
 
@@ -283,6 +299,10 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None):
                     raise ValueError('입력 형식을 확인하세요.')
                 if self.path == '/api/plan/revise':
                     return self.응답(202, 기획서비스.수정시작(값))
+                if self.path == '/api/promo/start':
+                    return self.응답(202, 홍보서비스.시작(값))
+                if self.path == '/api/promo/deliver':
+                    return self.응답(201, 홍보서비스.산출물(값))
                 if self.path == '/api/plan/start':
                     return self.응답(202, 기획서비스.시작(값))
                 if self.path == '/api/course/save':

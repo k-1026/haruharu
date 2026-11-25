@@ -40,6 +40,28 @@ def 장소찾기(name):
     return matches[0] if len(matches)==1 else None
 
 
+def 이동안내(출발, 도착):
+    """기존 이동표의 같은 방향·정확한 장소 쌍만 반환한다. 역방향/유사 권역을 추정하지 않는다."""
+    def 이름(value):
+        text=re.sub(r'^식사 방식 미선택\s*·\s*권역 후보:\s*','',str(value or ''))
+        return _이름(re.split(r'\s+[—–]\s+',text,maxsplit=1)[0])
+    def 분(value):
+        return int(value) if re.fullmatch(r'\d+',str(value or '').strip()) and int(value)>0 else None
+    if not 이름(출발) or not 이름(도착):return None
+    path=자료_파일(설정_읽기(),'HARUHARU_TRAVEL_FILE',이동_기본파일)
+    try:
+        with path.open(encoding='utf-8-sig',newline='') as f:
+            rows=[r for r in csv.DictReader(f) if 이름(r.get('출발장소'))==이름(출발)
+                  and 이름(r.get('도착장소'))==이름(도착) and r.get('상태')=='확인']
+    except OSError:return None
+    if len(rows)!=1:return None
+    row=rows[0]
+    return {'도보분':분(row.get('도보_분')),'대중교통분':분(row.get('대중교통_분')),
+            '노선':row.get('이용노선',''),'출처':row.get('도구',''),'확인일':row.get('확인일',''),
+            '기준요일':row.get('기준요일',''),'기준출발시각':row.get('기준출발시각',''),
+            '비고':row.get('비고',''),'자료파일':path.name,'도보기준분':20}
+
+
 def 진입안내(name):
     """선택한 시연 진입 방향만 안내한다. 미확인 입구 좌표를 만들지 않는다."""
     path=자료_파일(설정_읽기(),'HARUHARU_PLACES_FILE',장소_기본파일).with_name('시연_진입기준.json')

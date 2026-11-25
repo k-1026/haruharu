@@ -27,12 +27,52 @@
     const right=dx*Math.cos(azimuth)-dz*Math.sin(azimuth);
     return {view:Math.abs(toward)>Math.abs(right)?(toward>=0?'front':'back'):'side',flip:right<0};
   }
+  function characterMotion(type,dx,dz,azimuth,cameraMode){
+    const motion=cameraMode==='front'?{view:'front',flip:false}:motionView(dx,dz,azimuth);
+    // 두 원본 정면 클립의 사선 시선이 반대이므로 족제비 표시만 반전한다.
+    return {...motion,flip:motion.view==='front'&&type==='weasel'?!motion.flip:motion.flip};
+  }
   const routeKey=(a,b)=>[a,b].map(p=>p.map(v=>v.toFixed(6)).join(',')).join(';');
+  function travelInfo(info,walkSeconds){
+    const seconds=n=>typeof n==='number'&&Number.isFinite(n)&&n>0?n*60:null;
+    const source=info||{},tableWalk=seconds(source.도보분),transitSeconds=seconds(source.대중교통분);
+    const walking=typeof walkSeconds==='number'&&Number.isFinite(walkSeconds)&&walkSeconds>0?walkSeconds:tableWalk;
+    const limit=typeof source.도보기준분==='number'&&source.도보기준분>0?source.도보기준분:20;
+    const mode=transitSeconds&&(!tableWalk||tableWalk>limit*60)?'transit':'foot';
+    return {mode,canWalk:mode==='foot',walkSeconds:walking,transitSeconds,transport:source,
+      durationSeconds:mode==='transit'?transitSeconds:walking};
+  }
+  function legTimeLabel(leg){return leg.mode==='transit'?'대중교통 약 '+Math.round(leg.durationSeconds/60)+'분':timeLabel(leg.durationSeconds);}
+  // 도로 굽이를 보존하고 거의 일직선인 잔점만 정리한다. 원본·이동시간은 건드리지 않는다.
+  function simplifyPath(points,toleranceMeters=2){
+    const copy=points.map(p=>p.slice());if(copy.length<3||toleranceMeters<=0)return copy;
+    const origin=copy[0],kx=111320*Math.cos(origin[0]*Math.PI/180);
+    const metric=copy.map(p=>[(p[1]-origin[1])*kx,(p[0]-origin[0])*111320]);
+    const keep=new Set([0,copy.length-1]),pending=[[0,copy.length-1]];
+    while(pending.length){
+      const [first,last]=pending.pop(),a=metric[first],b=metric[last];
+      const dx=b[0]-a[0],dy=b[1]-a[1],length2=dx*dx+dy*dy;
+      let largest=toleranceMeters*toleranceMeters,index=-1;
+      for(let i=first+1;i<last;i++){
+        const p=metric[i],t=length2?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/length2)):0;
+        const distance2=(p[0]-a[0]-t*dx)**2+(p[1]-a[1]-t*dy)**2;
+        if(distance2>largest){largest=distance2;index=i;}
+      }
+      if(index>=0){keep.add(index);pending.push([first,index],[index,last]);}
+    }
+    return copy.filter((_,i)=>keep.has(i));
+  }
+  // 바닥 지도에 빠진 보행길도 같은 보유 도보 좌표로 보완한다.
+  function walkingRoadRows(routed,origin){
+    return routed.legs.filter(leg=>leg.canWalk&&leg.path).map(leg=>leg.path.map(p=>[(p[1]-origin.lon)*origin.kx,(p[0]-origin.lat)*origin.ky]));
+  }
   function routesFor(data,cache){
     const legs=[],missing=[];
     for(const leg of data.legs){
       const route=cache?.routes?.[routeKey(leg.from.point,leg.to.point)];
-      if(route?.profile==='foot'&&route.points?.length>=2&&route.points.every(valid))legs.push({...leg,path:route.points,distance:route.distance,durationSeconds:route.durationSeconds});
+      const info=travelInfo(leg.from.다음이동,route?.durationSeconds);
+      if(info.mode==='transit')legs.push({...leg,...info,path:null,distance:null});
+      else if(route?.profile==='foot'&&route.points?.length>=2&&route.points.every(valid))legs.push({...leg,...info,path:simplifyPath(route.points),distance:route.distance});
       else missing.push(leg);
     }
     return {legs,missing};
@@ -95,19 +135,23 @@
     return seconds/(Number.isFinite(speed)&&speed>0?speed:1);
   }
   function playback(legs){
-    const state={index:0,progress:0,playing:false,mode:'all',finished:false};
-    return {state,startAll(){if(!legs.length)return false;Object.assign(state,{index:0,progress:0,playing:true,mode:'all',finished:false});return true;},
-      playLeg(number){const index=legs.findIndex(leg=>leg.from.순번===number);if(index<0)return false;Object.assign(state,{index,progress:0,playing:true,mode:'single',finished:false});return true;},
+    const state={index:0,progress:0,playing:false,mode:'all',finished:false,waiting:false};
+    function arrive(){
+      const leg=legs[state.index],next=legs[state.index+1];
+      const gap=!!next&&(next.from.순번!==leg.to.순번||next.from.일차!==leg.to.일차),done=state.mode==='single'||!next||gap;
+      if(done){state.playing=false;state.finished=true;state.waiting=false;}
+      else{state.index++;state.progress=0;state.waiting=next.mode==='transit';}
+      return {arrived:leg.to,done,gap};
+    }
+    return {state,startAll(){if(!legs.length)return false;Object.assign(state,{index:0,progress:0,playing:true,mode:'all',finished:false,waiting:legs[0].mode==='transit'});return true;},
+      playLeg(number){const index=legs.findIndex(leg=>leg.from.순번===number);if(index<0)return false;Object.assign(state,{index,progress:0,playing:true,mode:'single',finished:false,waiting:legs[index].mode==='transit'});return true;},
       pause(){state.playing=false;},toggle(){if(!state.finished&&legs.length)state.playing=!state.playing;},
+      confirmTransit(){if(!state.waiting)return null;state.playing=true;state.progress=1;return arrive();},
       advance(delta){
-        if(!state.playing)return null;state.progress=Math.min(1,state.progress+delta);if(state.progress<1)return null;
-        const leg=legs[state.index],next=legs[state.index+1];
-        const gap=!!next&&(next.from.순번!==leg.to.순번||next.from.일차!==leg.to.일차);
-        const done=state.mode==='single'||!next||gap;
-        if(done){state.playing=false;state.finished=true;}else{state.index++;state.progress=0;}
-        return {arrived:leg.to,done,gap};
+        if(!state.playing||state.waiting)return null;state.progress=Math.min(1,state.progress+delta);if(state.progress<1)return null;
+        return arrive();
       }};
   }
-  root.코스지도모델={model,preview,valid,label,motionView,routeKey,routesFor,track,sample,timeLabel,playback,roadStrip,clockMinutes,courseMinutes,sceneTime,previewSeconds};
+  root.코스지도모델={model,preview,valid,label,motionView,routeKey,routesFor,track,sample,timeLabel,playback,roadStrip,clockMinutes,courseMinutes,sceneTime,previewSeconds,travelInfo,legTimeLabel,simplifyPath,characterMotion,walkingRoadRows};
   if(typeof module!=='undefined')module.exports=root.코스지도모델;
 })(typeof globalThis!=='undefined'?globalThis:this);

@@ -2,6 +2,78 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const UI=require('./담당자화면/map-model.js');
 
+test('표시 동선은 작은 횡단 꺾임을 줄이되 출발·도착과 큰 회전을 보존한다',()=>{
+  const ll=(x,y)=>[35.87+y/111320,128.59+x/(111320*Math.cos(35.87*Math.PI/180))];
+  const points=[[0,0],[30,0],[30,1.5],[45,1.5],[45,0],[100,0],[100,80],[100,100]].map(p=>ll(...p));
+  const before=JSON.stringify(points),path=UI.simplifyPath(points);
+  assert.ok(path.length<points.length);assert.deepEqual(path,[points[0],points[5],points[7]]);
+  assert.equal(JSON.stringify(points),before);assert.notEqual(path[0],points[0]);
+  const loop=[[0,0],[100,0],[100,100],[0,100],[0,0]].map(p=>ll(...p));
+  assert.equal(UI.simplifyPath(loop).length,5);
+});
+
+test('그리는 선과 캐릭터가 쓸 동선만 정리하고 원본 이동시간·거리는 보존한다',()=>{
+  const points=[[35.86,128.6],[35.86001,128.6003],[35.86,128.6006],[35.86,128.601]];
+  const data=UI.model([{일차:1,좌표:points[0]},{일차:1,좌표:points.at(-1)}]);
+  const cache={routes:{[UI.routeKey(points[0],points.at(-1))]:{profile:'foot',points,durationSeconds:720,distance:950}}};
+  const before=JSON.stringify(cache),leg=UI.routesFor(data,cache).legs[0];
+  assert.equal(leg.path.length,2);assert.equal(leg.durationSeconds,720);assert.equal(leg.distance,950);
+  const motion=UI.track(leg.path);
+  assert.deepEqual(UI.sample(motion,0).point,leg.path[0]);assert.deepEqual(UI.sample(motion,1).point,leg.path.at(-1));
+  assert.equal(JSON.stringify(cache),before);
+});
+
+test('도로에서 벗어날 정도로 굽이를 직선화하지 않는다',()=>{
+  const ll=(x,y)=>[35.87+y/111320,128.59+x/(111320*Math.cos(35.87*Math.PI/180))];
+  const road=[[0,0],[20,8],[40,10],[60,8],[80,0]].map(p=>ll(...p));
+  assert.ok(UI.simplifyPath(road).length>=3);
+});
+
+test('보완한 바닥 보행길과 선·캐릭터는 같은 경로를 쓰고 대중교통은 제외한다',()=>{
+  const origin={lat:35,lon:128,kx:100000,ky:100000};
+  const path=[[35,128],[35.001,128],[35.001,128.001]];
+  const routed={legs:[{canWalk:true,path},{canWalk:false,path:null}]};
+  const before=JSON.stringify(routed),rows=UI.walkingRoadRows(routed,origin);
+  assert.equal(rows.length,1);assert.equal(rows[0].length,path.length);
+  assert.deepEqual(rows[0],path.map(p=>[(p[1]-origin.lon)*origin.kx,(p[0]-origin.lat)*origin.ky]));
+  assert.equal(JSON.stringify(routed),before);
+});
+
+test('정면 걷기는 두 캐릭터의 원본 정면 모션 시선을 같은 쪽으로 맞춘다',()=>{
+  const raccoon=UI.characterMotion('raccoon',1,0,0,'front');
+  const weasel=UI.characterMotion('weasel',-1,0,0,'front');
+  assert.equal(raccoon.view,'front');assert.equal(weasel.view,'front');
+  assert.equal(raccoon.flip,false);assert.equal(weasel.flip,true);
+  assert.equal(UI.characterMotion('raccoon',0,-1,0,'follow').view,'back');
+});
+
+test('대중교통에는 도보 geometry를 붙이지 않고 시간·노선만 전달한다',()=>{
+  const data=UI.model([{일차:1,좌표:[35.86,128.6],다음이동:{도보분:60,대중교통분:39,노선:'401',확인일:'2026-11-19'}},{일차:1,좌표:[35.88,128.62]}]);
+  const cache={routes:{[UI.routeKey(data.entries[0].point,data.entries[1].point)]:{profile:'foot',points:[[35.86,128.6],[35.88,128.62]],durationSeconds:3600}}};
+  const before=JSON.stringify(data),result=UI.routesFor(data,cache);
+  assert.equal(result.legs[0].mode,'transit');assert.equal(result.legs[0].durationSeconds,2340);
+  assert.equal(result.legs[0].path,null);assert.equal(result.legs[0].canWalk,false);
+  assert.equal(UI.routesFor(data,{}).legs[0].mode,'transit');
+  assert.match(UI.legTimeLabel(result.legs[0]),/대중교통.*39분/);
+  assert.equal(JSON.stringify(data),before);
+});
+
+test('짧은 도보는 도보로 표시하고 다른 교통 시간도 함께 남긴다',()=>{
+  const info=UI.travelInfo({도보분:17,대중교통분:11,노선:'232 / 402'},720);
+  assert.equal(info.mode,'foot');assert.equal(info.walkSeconds,720);assert.equal(info.transitSeconds,660);
+  assert.match(UI.legTimeLabel(info),/도보.*12분/);
+  assert.equal(UI.travelInfo(null,720).transitSeconds,null);
+});
+
+test('전체 재생은 대중교통에서 기다리며 명시적 도착지 이동 후 도보를 이어간다',()=>{
+  const stops=[1,2,3,4].map(순번=>({순번,일차:1}));
+  const p=UI.playback([{from:stops[0],to:stops[1],mode:'foot'},{from:stops[1],to:stops[2],mode:'transit'},{from:stops[2],to:stops[3],mode:'foot'}]);
+  p.startAll();p.advance(1);assert.equal(p.state.waiting,true);
+  assert.equal(p.advance(100),null);assert.equal(p.state.progress,0);assert.equal(p.state.index,1);
+  p.pause();assert.equal(p.confirmTransit().arrived.순번,3);assert.equal(p.state.playing,true);assert.equal(p.state.waiting,false);assert.equal(p.state.index,2);
+  assert.equal(p.advance(1).done,true);
+});
+
 test('걷기 미리보기는 거리 비례 속도로 진행하고 긴 구간을 24초에 압축하지 않는다',()=>{
   assert.equal(UI.previewSeconds(1000),40);
   assert.equal(UI.previewSeconds(4000),160);
