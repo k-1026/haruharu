@@ -2,6 +2,11 @@
 // 코스 화면 아래에 '다음 단계' 카드를 붙이고, 확인 → 홍보 초안 → 산출물 순서로 보여 준다.
 // 원본 코스·검사 기록은 고치지 않는다. 확정값은 담당자가 이 화면에서 직접 고른 것만 보낸다.
 (function(){
+// 지침의 캐릭터 이름(포롱이=너구리, 여울이=족제비)이 바뀌어도 같은 그림을 고른다
+const 캐릭터별칭={너구리:'너구리',포롱이:'너구리',raccoon:'너구리',족제비:'족제비',여울이:'족제비',weasel:'족제비'};
+const 캐릭터=n=>캐릭터별칭[String(n??'').trim()]||null;
+const 그림=n=>캐릭터(n)==='너구리'?'raccoon':'weasel';
+if(typeof module!=='undefined')module.exports={캐릭터,그림};
 if(typeof document==='undefined')return;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -100,12 +105,12 @@ function 진행화면(r,ctx){
   $('backCourse').onclick=()=>{clearInterval(poll);ctx.돌아가기();};
 }
 function 장면카드(c,시안,칸,번역,lang,톤){
-  const 주연=(시안&&시안.주연)||'동등';const 밤=['저녁','밤','숙박'].includes(칸?.시간칸);
+  const 주연=캐릭터(시안&&시안.주연)||'동등';const 밤=['저녁','밤','숙박'].includes(칸?.시간칸);
   const cls=톤==='B'||(톤==='A+B'&&밤)?'night':'';
-  const img=(n,k)=>`<img class="${k}" src="/plan/characters/promo/${n==='너구리'?'raccoon':'weasel'}-front.png" alt="${n}">`;
+  const img=(n,k)=>`<img class="${k}" src="/plan/characters/promo/${그림(n)}-front.png" alt="${n}">`;
   const chars=주연==='너구리'?img('너구리','lead')+img('족제비','side'):주연==='족제비'?img('족제비','lead')+img('너구리','side'):img('너구리','both r')+img('족제비','both w');
   const tr=lang!=='한국어'?번역.find(t=>t.언어===lang):null;
-  const bubble=c.말풍선&&typeof c.말풍선==='object'?Object.entries(c.말풍선).filter(([,v])=>v).map(([k,v])=>`<div class="bubble b-${k==='너구리'?'r':'w'}"><b>${esc(k)}</b>${esc(v)}</div>`).join(''):'';
+  const bubble=c.말풍선&&typeof c.말풍선==='object'?Object.entries(c.말풍선).filter(([,v])=>v).map(([k,v])=>`<div class="bubble b-${캐릭터(k)==='너구리'?'r':'w'}"><b>${esc(k)}</b>${esc(v)}</div>`).join(''):'';
   return `<article class="scene ${cls}"><div class="chars">${chars}</div><div class="scene-body">
     <div class="tags"><span>${esc(c.장면ID)}</span><span>${esc(칸?.시간칸||'')}${칸?.시각?' · 약 '+esc(칸.시각):''}</span><span>${esc((칸?.장소명||'').replace(/\s*\(.*?\)/g,''))}</span></div>
     ${tr?(()=>{const m=String(tr.번역||'').match(/^\s*[【\[][^】\]]+[】\]]\s*([\s\S]*?)\s*[【\[][^】\]]+[】\]]\s*([\s\S]*)$/);const l=lang==='일본어'?'ja':lang==='영어권'||lang==='영어'?'en':'zh';return m?`<h4 lang="${l}">${esc(m[1])}</h4><p lang="${l}">${esc(m[2])}</p>`:`<h4 lang="${l}">${esc(tr.번역)}</h4>`;})()+`<p class="note">역번역(참고): ${esc(tr.역번역||'')} · <b>${esc(tr.상태||'AI 초안')}</b></p>`
