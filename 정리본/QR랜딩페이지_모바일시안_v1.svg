@@ -1,0 +1,306 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1760" height="1410" viewBox="0 0 1760 1410">
+  <defs>
+    <clipPath id="scr"><rect x="0" y="0" width="360" height="760" rx="32"/></clipPath>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7f4ee" stop-opacity="0"/>
+      <stop offset="1" stop-color="#f7f4ee" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .kr{font-family:'Malgun Gothic','Noto Sans KR',Arial,sans-serif;fill:#202a49}
+    .muted{fill:#6e7280;font-family:'Malgun Gothic','Noto Sans KR',Arial,sans-serif}
+    .white{fill:#fff;font-family:'Malgun Gothic','Noto Sans KR',Arial,sans-serif}
+    .or{fill:#e98c19;font-family:'Malgun Gothic','Noto Sans KR',Arial,sans-serif}
+    .b{font-weight:700}
+  </style>
+  <rect width="1760" height="1410" fill="#efe9df"/>
+
+  <text x="60" y="80" class="kr b" font-size="34">QR 전용 랜딩페이지 · 모바일 시안 v1</text>
+  <text x="60" y="116" class="muted" font-size="18">리플렛·포스터·스탬프 북 QR이 연결되는 코스 전용 페이지 · 화면 폭 360px 기준 · 한 페이지를 위에서 아래로 스크롤하는 구조</text>
+
+  <!-- 화면 라벨 -->
+  <g font-size="20">
+    <text x="60" y="160" class="kr b">① 첫 화면</text>
+    <text x="480" y="160" class="kr b">② 일정 · 장소 카드</text>
+    <text x="900" y="160" class="kr b">③ 지도 · 스탬프 투어</text>
+    <text x="1320" y="160" class="kr b">④ 하단부</text>
+  </g>
+  <g font-size="14">
+    <text x="60" y="186" class="muted">from=poster · 처음 보는 사람이 여기서 시작</text>
+    <text x="480" y="186" class="muted">from=leaflet · 요약을 이미 본 사람은 여기로 이동</text>
+    <text x="900" y="186" class="muted">from=stampbook · 코스를 도는 중인 사람은 여기로 이동</text>
+    <text x="1320" y="186" class="muted">이야기 · 확인사항 · 저장·공유 · 사진 출처</text>
+  </g>
+
+  <!-- 휴대폰 프레임 -->
+  <g fill="#202a49">
+    <rect x="60" y="200" width="380" height="800" rx="44"/>
+    <rect x="480" y="200" width="380" height="800" rx="44"/>
+    <rect x="900" y="200" width="380" height="800" rx="44"/>
+    <rect x="1320" y="200" width="380" height="800" rx="44"/>
+  </g>
+
+  <!-- ========== 화면 1 : 첫 화면 ========== -->
+  <g transform="translate(70,220)">
+    <g clip-path="url(#scr)">
+      <rect width="360" height="760" fill="#f7f4ee"/>
+      <rect y="0" width="360" height="24" fill="#fff"/>
+      <text x="22" y="17" class="kr b" font-size="12">9:41</text>
+      <rect y="24" width="360" height="56" fill="#fff"/>
+      <line x1="0" y1="80" x2="360" y2="80" stroke="#ece6da"/>
+      <text x="16" y="58" class="kr b" font-size="14">포롱이와 여울이의 대구 탐험</text>
+      <rect x="236" y="38" width="112" height="28" rx="14" fill="#fff" stroke="#e2dccf"/>
+      <text x="248" y="57" font-size="12"><tspan class="or b">한국어</tspan><tspan class="muted"> | 日本語</tspan></text>
+
+      <rect y="80" width="360" height="370" fill="#273251"/>
+      <rect x="16" y="96" width="328" height="170" rx="18" fill="#e9a15c" opacity=".9"/>
+      <circle cx="120" cy="172" r="46" fill="#c7773b"/>
+      <circle cx="240" cy="172" r="46" fill="#b66a37"/>
+      <text x="180" y="252" class="white" font-size="12" text-anchor="middle">포롱이·여울이 대표 이미지 · 낮: 크로스백</text>
+      <text x="16" y="296" class="white" font-size="13" opacity=".8">대구 중구·동구 1박 2일 코스</text>
+      <text x="16" y="332" class="white b" font-size="26">포롱이와 여울이의</text>
+      <text x="16" y="366" class="b" font-size="26" fill="#ffd15c" font-family="'Malgun Gothic','Noto Sans KR',Arial,sans-serif">대구 탐험</text>
+      <text x="16" y="394" class="white" font-size="13">가을 대구, 골목과 시장을 따라 탐험을 시작해요.</text>
+      <rect x="16" y="410" width="70" height="26" rx="13" fill="#e98c19"/>
+      <text x="51" y="428" class="white b" font-size="12" text-anchor="middle">1박 2일</text>
+      <rect x="94" y="410" width="50" height="26" rx="13" fill="#fff" opacity=".14"/>
+      <text x="119" y="428" class="white" font-size="12" text-anchor="middle">7곳</text>
+      <rect x="152" y="410" width="84" height="26" rx="13" fill="#fff" opacity=".14"/>
+      <text x="194" y="428" class="white" font-size="12" text-anchor="middle">중구·동구</text>
+
+      <rect x="16" y="466" width="160" height="48" rx="24" fill="#e98c19"/>
+      <text x="96" y="495" class="white b" font-size="15" text-anchor="middle">코스 따라가기</text>
+      <rect x="184" y="466" width="160" height="48" rx="24" fill="#fff" stroke="#273251" stroke-width="1.5"/>
+      <text x="264" y="495" class="kr b" font-size="15" text-anchor="middle">지도 열기</text>
+
+      <text x="16" y="550" class="kr b" font-size="17">코스 한눈에 보기</text>
+      <rect x="16" y="564" width="160" height="36" rx="18" fill="#273251"/>
+      <text x="96" y="587" class="white b" font-size="13" text-anchor="middle">DAY 1</text>
+      <rect x="184" y="564" width="160" height="36" rx="18" fill="#fff" stroke="#e2dccf"/>
+      <text x="264" y="587" class="muted b" font-size="13" text-anchor="middle">DAY 2</text>
+      <line x1="40" y1="626" x2="40" y2="760" stroke="#e98c19" stroke-width="3"/>
+      <g fill="#e98c19"><circle cx="40" cy="632" r="7"/><circle cx="40" cy="672" r="7"/><circle cx="40" cy="712" r="7"/><circle cx="40" cy="752" r="7"/></g>
+      <g font-size="13" class="or b"><text x="60" y="637">10:00</text><text x="60" y="677">11:40</text><text x="60" y="717">오후</text><text x="60" y="757">저녁</text></g>
+      <g font-size="14" class="kr"><text x="112" y="637">근대골목</text><text x="112" y="677">서문시장 권역</text><text x="112" y="717">김광석 다시그리기길</text><text x="112" y="757">평화시장 닭똥집골목</text></g>
+      <rect y="690" width="360" height="70" fill="url(#fade)"/>
+    </g>
+    <rect x="150" y="6" width="60" height="12" rx="6" fill="#202a49"/>
+  </g>
+
+  <!-- ========== 화면 2 : 일정 · 장소 카드 ========== -->
+  <g transform="translate(490,220)">
+    <g clip-path="url(#scr)">
+      <rect width="360" height="760" fill="#f7f4ee"/>
+      <rect y="0" width="360" height="24" fill="#fff"/>
+      <text x="22" y="17" class="kr b" font-size="12">9:41</text>
+      <rect y="24" width="360" height="56" fill="#fff"/>
+      <text x="16" y="58" class="kr b" font-size="14">포롱이와 여울이의 대구 탐험</text>
+      <rect x="236" y="38" width="112" height="28" rx="14" fill="#fff" stroke="#e2dccf"/>
+      <text x="248" y="57" font-size="12"><tspan class="or b">한국어</tspan><tspan class="muted"> | 日本語</tspan></text>
+
+      <rect y="80" width="360" height="52" fill="#fff"/>
+      <line x1="0" y1="132" x2="360" y2="132" stroke="#ece6da"/>
+      <text x="90" y="112" class="or b" font-size="15" text-anchor="middle">DAY 1</text>
+      <rect x="16" y="128" width="148" height="4" rx="2" fill="#e98c19"/>
+      <text x="270" y="112" class="muted b" font-size="15" text-anchor="middle">DAY 2</text>
+      <text x="16" y="153" class="muted" font-size="11">탭은 스크롤해도 상단에 고정</text>
+
+      <rect x="16" y="162" width="328" height="204" rx="16" fill="#fff"/>
+      <g font-size="13" class="or b">
+        <text x="32" y="194">10:00</text><text x="32" y="224">11:40</text><text x="32" y="254">오후</text>
+        <text x="32" y="284">저녁</text><text x="32" y="314">밤</text><text x="32" y="344">숙박</text>
+      </g>
+      <g font-size="14" class="kr">
+        <text x="92" y="194">근대골목</text><text x="92" y="224">서문시장 권역</text><text x="92" y="254">김광석 다시그리기길</text>
+        <text x="92" y="284">평화시장 닭똥집골목</text><text x="92" y="314">서문시장 야시장</text><text x="92" y="344">중구 동성로 일대</text>
+      </g>
+      <g font-size="11" text-anchor="end">
+        <text x="328" y="194" class="muted">크로스백</text><text x="328" y="224" class="muted">크로스백</text><text x="328" y="254" class="muted">크로스백</text>
+        <text x="328" y="284" class="or b">★ 별랜턴</text><text x="328" y="314" class="or b">★ 별랜턴</text>
+      </g>
+
+      <rect x="16" y="382" width="328" height="374" rx="18" fill="#fff"/>
+      <rect x="16" y="382" width="328" height="140" rx="18" fill="#dccdb4"/>
+      <rect x="16" y="490" width="328" height="32" fill="#dccdb4"/>
+      <text x="180" y="456" class="muted" font-size="13" text-anchor="middle">계산성당 사진 후보</text>
+      <circle cx="308" cy="498" r="22" fill="#b66a37"/>
+      <text x="308" y="502" class="white" font-size="10" text-anchor="middle">여울이</text>
+      <text x="32" y="546" class="or b" font-size="12">01 · 오전 10:00 · 체류 약 1시간</text>
+      <text x="32" y="574" class="kr b" font-size="20">근대골목</text>
+      <text x="32" y="598" class="kr" font-size="13">대구의 근대 역사와 골목 풍경을 만나는 시간</text>
+      <g fill="#fff1db"><rect x="32" y="610" width="64" height="24" rx="12"/><rect x="104" y="610" width="64" height="24" rx="12"/><rect x="176" y="610" width="78" height="24" rx="12"/></g>
+      <g font-size="12" class="kr" text-anchor="middle"><text x="64" y="627">청라언덕</text><text x="136" y="627">계산성당</text><text x="215" y="627">이상화 고택</text></g>
+      <text x="32" y="656" class="muted" font-size="12">→ 다음 장소 서문시장 권역 · 도보 15분</text>
+      <rect x="32" y="668" width="296" height="34" rx="17" fill="#fff1db"/>
+      <text x="46" y="690" class="kr" font-size="11"><tspan class="b">여울이</tspan> “골목마다 근대 이야기가 숨어 있어.”</text>
+      <g fill="#fff" stroke="#273251"><rect x="32" y="714" width="92" height="30" rx="15"/><rect x="132" y="714" width="92" height="30" rx="15"/><rect x="232" y="714" width="96" height="30" rx="15"/></g>
+      <g font-size="11" class="kr b" text-anchor="middle"><text x="78" y="733">카카오맵</text><text x="178" y="733">네이버지도</text><text x="280" y="733">Google Maps</text></g>
+    </g>
+    <rect x="150" y="6" width="60" height="12" rx="6" fill="#202a49"/>
+  </g>
+
+  <!-- ========== 화면 3 : 지도 · 스탬프 ========== -->
+  <g transform="translate(910,220)">
+    <g clip-path="url(#scr)">
+      <rect width="360" height="760" fill="#f7f4ee"/>
+      <rect y="0" width="360" height="24" fill="#fff"/>
+      <text x="22" y="17" class="kr b" font-size="12">9:41</text>
+      <rect y="24" width="360" height="56" fill="#fff"/>
+      <line x1="0" y1="80" x2="360" y2="80" stroke="#ece6da"/>
+      <text x="16" y="58" class="kr b" font-size="14">포롱이와 여울이의 대구 탐험</text>
+      <rect x="236" y="38" width="112" height="28" rx="14" fill="#fff" stroke="#e2dccf"/>
+      <text x="248" y="57" font-size="12"><tspan class="or b">한국어</tspan><tspan class="muted"> | 日本語</tspan></text>
+
+      <text x="16" y="110" class="kr b" font-size="17">전체 탐험 지도</text>
+      <line x1="226" y1="105" x2="246" y2="105" stroke="#e98c19" stroke-width="3"/>
+      <text x="250" y="109" class="muted" font-size="10">DAY 1</text>
+      <line x1="286" y1="105" x2="306" y2="105" stroke="#273251" stroke-width="3" stroke-dasharray="4 3"/>
+      <text x="310" y="109" class="muted" font-size="10">DAY 2</text>
+
+      <rect x="16" y="122" width="328" height="280" rx="18" fill="#fff9ed" stroke="#f2d6a5"/>
+      <polyline points="60,170 160,160 270,180 280,260 170,270" fill="none" stroke="#e98c19" stroke-width="3"/>
+      <line x1="170" y1="270" x2="70" y2="330" stroke="#b9b2a4" stroke-width="2" stroke-dasharray="2 4"/>
+      <line x1="70" y1="330" x2="230" y2="350" stroke="#273251" stroke-width="3" stroke-dasharray="6 4"/>
+      <g fill="#e98c19"><circle cx="60" cy="170" r="13"/><circle cx="160" cy="160" r="13"/><circle cx="270" cy="180" r="13"/></g>
+      <g fill="#273251"><circle cx="280" cy="260" r="13"/><circle cx="170" cy="270" r="13"/></g>
+      <g fill="#fff" stroke="#273251" stroke-width="2"><circle cx="70" cy="330" r="12"/><circle cx="230" cy="350" r="12"/></g>
+      <g class="white b" font-size="12" text-anchor="middle"><text x="60" y="174">1</text><text x="160" y="164">2</text><text x="270" y="184">3</text><text x="280" y="264">★</text><text x="170" y="274">★</text></g>
+      <g class="kr b" font-size="12" text-anchor="middle"><text x="70" y="334">6</text><text x="230" y="354">7</text></g>
+      <g class="kr" font-size="11" text-anchor="middle">
+        <text x="60" y="198">근대골목</text><text x="160" y="146">서문시장</text><text x="270" y="208">김광석길</text>
+        <text x="300" y="288">4 평화시장</text><text x="170" y="298">5 야시장</text>
+        <text x="70" y="358">동성로</text><text x="240" y="376">신천 → 근대골목 종료</text>
+      </g>
+      <text x="116" y="314" class="muted" font-size="10">숙박</text>
+      <text x="32" y="394" class="muted" font-size="10">도식 지도 · 실제 위치·축척과 다름</text>
+
+      <rect x="16" y="414" width="328" height="40" rx="20" fill="#fff" stroke="#273251" stroke-width="1.5"/>
+      <text x="180" y="439" class="kr b" font-size="13" text-anchor="middle">지도 앱에서 전체 코스 열기</text>
+
+      <text x="16" y="486" class="kr b" font-size="17">스탬프 투어</text>
+      <rect x="16" y="498" width="328" height="88" rx="16" fill="#fff"/>
+      <g fill="#e98c19"><circle cx="71" cy="526" r="16"/><circle cx="180" cy="526" r="16"/><circle cx="289" cy="526" r="16"/></g>
+      <g class="white b" font-size="14" text-anchor="middle"><text x="71" y="531">1</text><text x="180" y="531">2</text><text x="289" y="531">3</text></g>
+      <g class="muted" font-size="18" text-anchor="middle"><text x="125" y="532">›</text><text x="235" y="532">›</text></g>
+      <g class="kr" font-size="12" text-anchor="middle"><text x="71" y="566">장소 방문</text><text x="180" y="566">미션 수행</text><text x="289" y="566">스탬프 기록</text></g>
+
+      <rect x="16" y="598" width="328" height="104" rx="16" fill="#fff"/>
+      <text x="32" y="624" class="kr b" font-size="14">내 별빛 탐험 기록</text>
+      <text x="32" y="642" class="muted" font-size="11">이 휴대폰에만 저장돼요 · 로그인 없음</text>
+      <g font-size="26" text-anchor="middle">
+        <text x="50" y="686" class="or">★</text><text x="94" y="686" class="or">★</text><text x="138" y="686" class="or">★</text>
+        <text x="182" y="686" fill="#c9c2b4">☆</text><text x="226" y="686" fill="#c9c2b4">☆</text><text x="270" y="686" fill="#c9c2b4">☆</text><text x="314" y="686" fill="#c9c2b4">☆</text>
+      </g>
+
+      <rect x="16" y="714" width="328" height="40" rx="14" fill="#fff1db"/>
+      <text x="180" y="739" class="kr" font-size="12" text-anchor="middle">스탬프 북 받는 곳 · 장소 확정 후 기재</text>
+    </g>
+    <rect x="150" y="6" width="60" height="12" rx="6" fill="#202a49"/>
+  </g>
+
+  <!-- ========== 화면 4 : 하단부 ========== -->
+  <g transform="translate(1330,220)">
+    <g clip-path="url(#scr)">
+      <rect width="360" height="760" fill="#f7f4ee"/>
+      <rect y="0" width="360" height="24" fill="#fff"/>
+      <text x="22" y="17" class="kr b" font-size="12">9:41</text>
+      <rect y="24" width="360" height="56" fill="#fff"/>
+      <line x1="0" y1="80" x2="360" y2="80" stroke="#ece6da"/>
+      <text x="16" y="58" class="kr b" font-size="14">포롱이와 여울이의 대구 탐험</text>
+      <rect x="236" y="38" width="112" height="28" rx="14" fill="#fff" stroke="#e2dccf"/>
+      <text x="248" y="57" font-size="12"><tspan class="or b">한국어</tspan><tspan class="muted"> | 日本語</tspan></text>
+
+      <text x="16" y="110" class="kr b" font-size="17">포롱이와 여울이 이야기</text>
+      <rect x="16" y="122" width="328" height="174" rx="16" fill="#fff"/>
+      <circle cx="52" cy="166" r="22" fill="#c7773b"/>
+      <text x="86" y="160" class="kr b" font-size="14">포롱이</text>
+      <text x="86" y="180" class="muted" font-size="12">먼저 발견하고 직접 체험하는 탐험가</text>
+      <circle cx="52" cy="222" r="22" fill="#b66a37"/>
+      <text x="86" y="216" class="kr b" font-size="14">여울이</text>
+      <text x="86" y="236" class="muted" font-size="12">장소를 조사하고 이야기를 기록하는 탐험가</text>
+      <line x1="32" y1="254" x2="328" y2="254" stroke="#ece6da"/>
+      <text x="32" y="274" class="kr" font-size="12">신천에서 함께 자란 두 친구가</text>
+      <text x="32" y="290" class="kr" font-size="12">다시 대구로 돌아왔어요.</text>
+
+      <text x="16" y="328" class="kr b" font-size="17">여행 전 확인해요</text>
+      <rect x="16" y="340" width="328" height="118" rx="16" fill="#fff"/>
+      <g class="kr" font-size="12">
+        <text x="32" y="366">• 운영시간과 휴무일은 방문 전 확인하세요.</text>
+        <text x="32" y="390">• 편한 신발을 준비하세요.</text>
+        <text x="32" y="414">• 시장과 골목은 천천히 둘러보세요.</text>
+        <text x="32" y="438">• 밤 코스는 별랜턴과 함께 즐겨요.</text>
+      </g>
+
+      <text x="16" y="490" class="kr b" font-size="17">코스 저장 · 공유</text>
+      <rect x="16" y="502" width="104" height="44" rx="22" fill="#e98c19"/>
+      <rect x="128" y="502" width="104" height="44" rx="22" fill="#273251"/>
+      <rect x="240" y="502" width="104" height="44" rx="22" fill="#fff" stroke="#273251" stroke-width="1.5"/>
+      <g font-size="13" class="b" text-anchor="middle"><text x="68" y="529" class="white">★ 코스 저장</text><text x="180" y="529" class="white">공유하기</text><text x="292" y="529" class="kr">링크 복사</text></g>
+      <text x="16" y="570" class="muted" font-size="11">홈 화면에 추가하면 앱처럼 바로 열 수 있어요.</text>
+
+      <rect y="590" width="360" height="170" fill="#273251"/>
+      <text x="16" y="618" class="white b" font-size="13">사진 출처 · 라이선스</text>
+      <g class="white" font-size="11" opacity=".78">
+        <text x="16" y="642">계산성당 · 작성자 · CC BY-SA · 원본 페이지 ↗</text>
+        <text x="16" y="662">서문시장 입구 · 작성자 · 라이선스 · 원본 ↗</text>
+        <text x="16" y="682">서문시장 야간 · 작성자 · 라이선스 · 원본 ↗</text>
+        <text x="16" y="702">동성로 · 신천 · 작성자 · 라이선스 · 원본 ↗</text>
+        <text x="16" y="732">포롱이·여울이 대구 탐험 · 문의처 확정 후 기재</text>
+      </g>
+    </g>
+    <rect x="150" y="6" width="60" height="12" rx="6" fill="#202a49"/>
+  </g>
+
+  <!-- ========== 설명 박스 ========== -->
+  <g fill="#fff">
+    <rect x="60" y="1040" width="380" height="330" rx="20"/>
+    <rect x="480" y="1040" width="380" height="330" rx="20"/>
+    <rect x="900" y="1040" width="380" height="330" rx="20"/>
+    <rect x="1320" y="1040" width="380" height="330" rx="20"/>
+  </g>
+  <g font-size="19" class="kr b">
+    <text x="84" y="1080">from= 파라미터</text>
+    <text x="504" y="1080">QR 인쇄 규칙</text>
+    <text x="924" y="1080">공개 화면에서 뺄 것 · 고칠 것</text>
+    <text x="1344" y="1080">캐릭터 · 언어 · 지도</text>
+  </g>
+  <g font-size="14" class="kr">
+    <text x="84" y="1116">• 같은 페이지, 첫 스크롤 위치만 다름</text>
+    <text x="84" y="1146"><tspan class="or b">poster</tspan> → 맨 위 (① 첫 화면)</text>
+    <text x="84" y="1176"><tspan class="or b">leaflet</tspan> → #schedule (② 일정)</text>
+    <text x="84" y="1206"><tspan class="or b">stampbook</tspan> → #stamp (③ 스탬프)</text>
+    <text x="84" y="1236"><tspan class="or b">sns</tspan> → 맨 위</text>
+    <text x="84" y="1266">• 내용은 유입 경로와 관계없이 동일</text>
+    <text x="84" y="1296">• 유입 수 집계에만 사용</text>
+
+    <text x="504" y="1116">• QR에는 단축 주소(리디렉트)를 넣기</text>
+    <text x="504" y="1146">  → 페이지가 바뀌어도 재인쇄 불필요</text>
+    <text x="504" y="1176">• QR 아래에 짧은 URL을 글자로 표기</text>
+    <text x="504" y="1206">• 리플렛·스탬프 북: 최소 2cm</text>
+    <text x="504" y="1236">• 포스터는 더 크게 (멀리서 스캔)</text>
+    <text x="504" y="1266">• 오류 정정 레벨 M~Q</text>
+    <text x="504" y="1296">• 인쇄 전 여러 휴대폰으로 스캔 테스트</text>
+
+    <text x="924" y="1116">• '홍보 초안' 라벨 · 홍보물 만들기 버튼</text>
+    <text x="924" y="1146">• 번역 AI 초안·검토 전 표시</text>
+    <text x="924" y="1176">• 장면 ID · 내부 경고 코드</text>
+    <text x="924" y="1206">• 원문 JSON · 장소 검수 메모</text>
+    <text x="924" y="1236">• 화자 이름은 '포롱이·여울이'로 통일</text>
+    <text x="924" y="1266">• 장소 수 7곳 (공통 목업 '8개' 수정)</text>
+    <text x="924" y="1296">• 지도 순서를 시안 전체에서 하나로</text>
+
+    <text x="1344" y="1116">• 낮 카드 크로스백 · 저녁·밤 별랜턴</text>
+    <text x="1344" y="1146">• 캐릭터는 가장자리 · 본문 안 가림</text>
+    <text x="1344" y="1176">• 언어 전환은 상단 헤더에 고정</text>
+    <text x="1344" y="1206">• 브라우저가 일본어면 日本語로 시작</text>
+    <text x="1344" y="1236">• 지도 버튼: 카카오·네이버·Google</text>
+    <text x="1344" y="1266">  (일본어 화면은 Google Maps 앞으로)</text>
+    <text x="1344" y="1296">• 말풍선 문구는 예시 · 4단계 검토 후 확정</text>
+  </g>
+  <g font-size="12" class="muted">
+    <text x="84" y="1346">QR 링크 예: …/daegu?from=leaflet</text>
+    <text x="504" y="1346">다음 작업 순서 3번(QR URL 확정)과 연결</text>
+    <text x="924" y="1346">11.25 정리본 5장 '숨길 내용' 기준</text>
+    <text x="1344" y="1346">사진 없는 김광석길·평화시장은 '준비 중'</text>
+  </g>
+</svg>
