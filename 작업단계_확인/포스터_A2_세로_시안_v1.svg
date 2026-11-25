@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420mm" height="594mm" viewBox="0 0 1000 1414">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff9ed"/><stop offset="1" stop-color="#f2d6a5"/></linearGradient>
+    <linearGradient id="night" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#273251"/><stop offset="1" stop-color="#10172f"/></linearGradient>
+  </defs>
+  <rect width="1000" height="1414" fill="url(#bg)"/>
+  <style>
+    .t{font-family:'Malgun Gothic','Noto Sans KR',Arial,sans-serif;fill:#202a49}.w{font-family:'Malgun Gothic','Noto Sans KR',Arial,sans-serif;fill:#fff}.m{font-family:'Malgun Gothic','Noto Sans KR',Arial,sans-serif;fill:#6f7482}.sm{font-size:19px}.md{font-size:27px}.lg{font-size:42px;font-weight:700}.xl{font-size:68px;font-weight:700}.orange{fill:#e98c19}.navy{fill:#273251}.cream{fill:#fff8ea}
+  </style>
+
+  <!-- header -->
+  <rect x="55" y="50" width="180" height="44" rx="22" class="orange"/><text x="87" y="80" class="w sm">대구 여행 코스</text>
+  <text x="55" y="165" class="t lg">가을 대구, 골목과 시장을 따라</text>
+  <text x="55" y="245" class="t xl">포롱이와 여울이의</text>
+  <text x="55" y="320" class="t xl">대구 탐험</text>
+  <text x="58" y="365" class="m md">대구 중구·동구 1박 2일 코스</text>
+
+  <!-- hero image zone -->
+  <rect x="55" y="410" width="890" height="390" rx="35" fill="#273251"/>
+  <circle cx="350" cy="610" r="135" fill="#e8a15c"/><circle cx="650" cy="610" r="135" fill="#c77a48"/>
+  <text x="125" y="760" class="w sm">포롱이·여울이 대표 이미지 삽입 영역</text>
+  <text x="610" y="475" class="w md">낮에는 크로스백</text><text x="610" y="515" class="w sm">근대골목 · 서문시장 · 동성로</text>
+  <text x="610" y="690" class="w md">밤에는 별랜턴</text><text x="610" y="730" class="w sm">평화시장 · 서문시장 야시장</text>
+  <circle cx="875" cy="700" r="34" fill="#ffd15c"/><text x="862" y="710" class="t md">★</text>
+
+  <!-- route -->
+  <text x="55" y="870" class="t lg">1박 2일 탐험 코스</text>
+  <line x1="85" y1="955" x2="915" y2="955" stroke="#e98c19" stroke-width="8"/>
+  <g fill="#e98c19"><circle cx="85" cy="955" r="18"/><circle cx="290" cy="955" r="18"/><circle cx="495" cy="955" r="18"/><circle cx="700" cy="955" r="18"/><circle cx="915" cy="955" r="18"/></g>
+  <g class="t sm" text-anchor="middle"><text x="85" y="925">10:00</text><text x="85" y="1005">근대골목</text><text x="290" y="925">11:40</text><text x="290" y="1005">서문시장</text><text x="495" y="925">오후</text><text x="495" y="1005">김광석길</text><text x="700" y="925">저녁</text><text x="700" y="1005">평화시장</text><text x="915" y="925">밤</text><text x="915" y="1005">야시장</text></g>
+
+  <!-- key copy -->
+  <rect x="55" y="1065" width="610" height="195" rx="26" class="cream"/>
+  <text x="90" y="1115" class="t md">역사 · 먹거리 · 음악 · 야경</text>
+  <text x="90" y="1160" class="t sm">두 친구와 함께 대구의 골목과 시장을 탐험해보세요.</text>
+  <text x="90" y="1200" class="m sm">DAY 2에는 동성로 자유시간과 신천 산책까지 이어집니다.</text>
+  <text x="90" y="1235" class="m sm">포롱이: 발견과 체험 · 여울이: 기록과 안내</text>
+
+  <!-- QR -->
+  <rect x="710" y="1065" width="235" height="195" rx="26" class="navy"/>
+  <rect x="755" y="1095" width="105" height="105" fill="#fff"/><path d="M770 1110h24v24h-24zM820 1110h24v24h-24zM770 1160h24v24h-24zM810 1145h12v12h-12zM838 1160h12v12h-12z" fill="#273251"/>
+  <text x="758" y="1230" class="w sm">전체 코스 보기</text><text x="735" y="1253" class="w sm">QR 코드 삽입 영역</text>
+
+  <!-- footer -->
+  <rect x="55" y="1300" width="890" height="62" rx="31" class="orange"/><text x="275" y="1340" class="w md">대구 탐험을 저장하고 다음 여행을 시작해보세요</text>
+</svg>
