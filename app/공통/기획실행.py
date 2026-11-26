@@ -120,13 +120,13 @@ class 기획실행:
 
     def 최근(self):
         """가장 최근 기획의 진행 상황. 새로고침 뒤 화면이 이어서 보여 줄 때 쓴다."""
-        파일들 = sorted(self.runs.glob('*/*/' + 진행파일), key=lambda p: p.parent.relative_to(self.runs).as_posix(), reverse=True)
-        for p in 파일들:
+        기획들 = []
+        for p in self.runs.glob('*/*/' + 진행파일):
             try:
-                return self.상태(p.parent.relative_to(self.runs).as_posix())
+                기획들.append(self.상태(p.parent.relative_to(self.runs).as_posix()))
             except (ValueError, OSError):
                 continue
-        return None
+        return max(기획들, key=lambda v: (v.get('시작시각') or '', v.get('기획id') or ''), default=None)
 
     def 기록보기(self, 시험id, 안id=None, 버전=None):
         """화면의 코스 보기용: 안(A·B…)·버전별 요약, 세 가지 분류, 대안 설명, 희망 반영, 사람이 정할 것."""
@@ -156,8 +156,10 @@ class 기획실행:
                 '필수조건반영': 필수조건반영(코스, 기록모듈.적용조건(기록, 안id)['조건']),
                 '분류': 최신분류(기록, 안id, 버전),
                 '검사함': any(x.get('종류') == '코드점검' and x.get('안id') == 안id and x.get('버전', 1) == 버전 for x in 기록['경고']),
-                '요약': 코스요약(코스, 기록['조건'].get('코스작성조건', {})),
+                '요약': 코스요약(코스, {**기록모듈.적용조건(기록,안id)['조건'], **기록['조건'].get('코스작성조건', {})}),
                 '부분수정기록': 코스.get('부분수정기록'), '시간칸': list(dict.fromkeys(r.get('시간칸') for r in 코스.get('칸목록', []) if r.get('시간칸'))),
+                '식사선택기록': 코스.get('식사선택기록'),
+                '식사후보묶음기록': 코스.get('식사후보묶음기록'),
                 '기관업로드': 기록.get('기관업로드'),
                 '기획id': '/'.join(시험id.split('/')[:2])}
 
@@ -372,6 +374,70 @@ class 기획실행:
         _쓰기(폴더, 진행파일, 진행)
 
     # ---------- 부분 수정 ----------
+    def _식사기록(self, 값):
+        from app.공통 import 기획기록 as 기록모듈
+        from app.단계3_코스검토.처리기 import 최신안
+        if not isinstance(값,dict):raise ValueError('식사 선택 내용을 확인하세요.')
+        시험id=값.get('시험id');self.코스._시험(시험id)
+        기록=기록모듈.읽기(self.runs,시험id.split('/')[-1])
+        안id=값.get('안id','A');안=최신안(기록,안id)
+        if type(값.get('기준버전')) is not int or 값['기준버전']!=안.get('버전',1):
+            raise ValueError('보고 있는 코스가 최신 버전이 아닙니다. 다시 열어 선택해 주세요.')
+        return 기록,안id,안
+
+    def 식사비교(self, 값):
+        from app.단계3_코스검토.식사선택 import 비교, 경로보완
+        from app.공통.기획기록 import 적용조건
+        기록,안id,안=self._식사기록(값)
+        조건={**적용조건(기록,안id)['조건'],**기록['조건'].get('코스작성조건',{})}
+        경로보완(안['코스'],값.get('칸ID'),값.get('장소명'),조건)
+        return 비교(안['코스'],값.get('칸ID'),값.get('장소명'),조건)
+
+    def 관광객식사(self, 값):
+        from app.단계3_코스검토.식사선택 import 관광객묶음
+        from app.공통.기획기록 import 적용조건
+        from app.서버.담당자요약 import 코스요약
+        기록,안id,안=self._식사기록(값)
+        조건={**적용조건(기록,안id)['조건'],**기록['조건'].get('코스작성조건',{})}
+        일정=코스요약(안['코스'],조건)['일정']
+        packs=관광객묶음(안['코스'],조건)
+        # QR에는 저장한 후보만 제공한다. 직원용 후보 확장·수정 요청·내부 근거는 제외한다.
+        keys=['순번','칸ID','일차','시간칸','시각','종료시각','머무는시간','장소명','표시명',
+              '좌표','경로좌표','식사권역','권역표시','다음이동','후보경로']
+        return {'형식버전':1,'코스키':기록['기록id'],'안id':안id,'버전':안.get('버전',1),
+                '일정':[{k:r[k] for k in keys if k in r} for r in 일정], '식사묶음':packs,
+                '공개준비':bool(packs) and all(p['공개준비'] for p in packs),
+                '안내':'관광객 개인 선택용 데이터입니다. 공통 코스는 변경하지 않습니다.'}
+
+    def 식사묶음반영(self, 값):
+        return self.식사반영(값,묶음=True)
+
+    def 식사반영(self, 값, 묶음=False):
+        from app.단계3_코스검토.식사선택 import 반영, 묶음반영, 경로보완
+        from app.공통 import 기획기록 as 기록모듈, 기록도구
+        with self.잠금:
+            if self.작업 and self.작업.is_alive():raise ValueError('다른 작업이 진행 중입니다. 완료 후 선택하세요.')
+            if getattr(self.코스,'작업',None) and self.코스.작업.is_alive():raise ValueError('코스 작업 완료 후 선택하세요.')
+            기록,안id,안=self._식사기록(값)
+            조건={**기록모듈.적용조건(기록,안id)['조건'],**기록['조건'].get('코스작성조건',{})}
+            if 묶음:
+                names=값.get('후보')
+                if not isinstance(names,list) or not 2<=len(names)<=12 or any(not isinstance(n,str) for n in names):
+                    raise ValueError('점심 후보를 2개 이상 12개 이하로 선택하세요.')
+                for name in names:경로보완(안['코스'],값.get('칸ID'),name,조건)
+                새코스=묶음반영(안['코스'],값.get('칸ID'),names,조건,값.get('미확인동의') is True)
+            else:
+                새코스=반영(안['코스'],값.get('칸ID'),값.get('장소명'),조건,값.get('미확인동의') is True)
+            버전=안.get('버전',1)+1
+            recordkey='식사후보묶음기록' if 묶음 else '식사선택기록'
+            새코스[recordkey]['버전']=버전
+            기록모듈.추가(기록,'코스안',{'안id':안id,'버전':버전,'코스':새코스},'사람:담당자','점심 후보 묶음 구성' if 묶음 else '식사 후보 비교 후 경로 기준 선택')
+            기록도구.코스_점검(기록,안id)
+            기록모듈.실행_기록(기록,'코드:식사선택','식사 후보 반영',f'{안id}안 {버전}버전','식사 시간·권역·다른 일정 보존','성공',AI호출=0)
+            기록모듈.저장(기록,self.runs)
+            return {'버전':버전,'안id':안id,recordkey:새코스[recordkey],
+                    '안내':새코스[recordkey]['안내']}
+
     def 수정시작(self, 값):
         """'저녁만 다시 만들어 줘' 같은 요청. 새 버전을 만들고 다시 검사·검증한다. 이전 버전은 남는다."""
         if not isinstance(값, dict):

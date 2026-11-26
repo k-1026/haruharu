@@ -12,6 +12,169 @@ from app.단계3_코스검토 import 코스조립
 from test_코스조립 import 시험입력, 후보, 정상주문
 
 
+class 식사후보시험(unittest.TestCase):
+    def test_점심_후보묶음은_방문전체를_보존하고_선택주체만_관광객으로_분리(self):
+        self.c['칸목록'][1]['시간칸']='점심'
+        before=copy.deepcopy(self.c)
+        result=self.m.묶음반영(self.c,'m',['식당A','식당B'],{'지역':['중구']},미확인동의=True)
+        self.assertEqual(self.c,before)
+        self.assertEqual(result['칸목록'],before['칸목록'])
+        self.assertEqual(result['식사목록'][0]['권역'],before['식사목록'][0]['권역'])
+        self.assertEqual(result['식사목록'][0]['후보묶음']['선택주체'],'관광객')
+        self.assertEqual(result['식사목록'][0]['후보묶음']['후보'],['식당A','식당B'])
+        self.assertNotIn('경로선택후보',result['식사목록'][0])
+        with self.assertRaisesRegex(ValueError,'2개'):self.m.묶음반영(self.c,'m',['식당A'],{},True)
+        with self.assertRaises(ValueError):self.m.묶음반영(self.c,'m',['식당A','식당A'],{},True)
+
+    def test_점심은_직원의_단일식당반영을_막고_확인안된_묶음은_공개준비중(self):
+        self.c['칸목록'][1]['시간칸']='점심'
+        with self.assertRaisesRegex(ValueError,'후보 묶음'):self.m.반영(self.c,'m','식당B',{},True)
+        result=self.m.묶음반영(self.c,'m',['식당A','식당B'],{},True)
+        pack=self.m.관광객묶음(result,{})[0]
+        self.assertEqual(pack['선택주체'],'관광객')
+        self.assertFalse(pack['공개준비'])
+        self.assertTrue(all(not c['선택가능'] for c in pack['후보']))
+        for p in self.places:p['마지막입장']='21:00'
+        ready=self.m.관광객묶음(result,{'방문시작일':'2026-11-26'})[0]
+        self.assertTrue(ready['공개준비'])
+        self.assertTrue(all(c['선택가능'] for c in ready['후보']))
+        self.c['칸목록'][2]['시각']['값']='19:25'
+        with self.assertRaisesRegex(ValueError,'다음 일정'):self.m.묶음반영(self.c,'m',['식당A','식당B'],{},True)
+
+    def test_저장된_후보경로는_서버재시작후에도_쓰되_인접일정변경시_재사용하지않는다(self):
+        self.c['칸목록'][1]['시간칸']='점심'
+        saved=self.m.묶음반영(self.c,'m',['식당A','식당B'],{},True)
+        with patch.object(self.m,'구간',return_value=None):
+            rows=self.m.관광객묶음(saved,{})[0]['후보']
+            self.assertTrue(all(c['반영가능'] for c in rows))
+            saved['칸목록'][2]['장소명']='바뀐 다음장소'
+            self.assertTrue(all(not c['반영가능'] for c in self.m.관광객묶음(saved,{})[0]['후보']))
+        saved['칸목록'][2]['장소명']='뒤'
+        with patch.object(self.m,'구간',side_effect=lambda a,b:{'출발':a,'도착':b,'분':10,'경로':None}):
+            self.assertTrue(all(c['후보이동'][0]['경로'] for c in self.m.관광객묶음(saved,{})[0]['후보']))
+
+    def test_관광객공개는_휴무와_인접일정시각이_비면_막는다(self):
+        self.c['칸목록'][1]['시간칸']='점심'
+        for p in self.places:p['마지막입장']='21:00'
+        saved=self.m.묶음반영(self.c,'m',['식당A','식당B'],{},True)
+        conditions={'방문시작일':'2026-11-26'}
+        self.assertTrue(self.m.관광객묶음(saved,conditions)[0]['공개준비'])
+        self.places[0]['정기휴무']=''
+        self.assertFalse(self.m.관광객묶음(saved,conditions)[0]['공개준비'])
+        self.places[0]['정기휴무']='연중무휴'
+        saved['칸목록'][0]['종료시각']['값']=''
+        self.assertFalse(self.m.관광객묶음(saved,conditions)[0]['공개준비'])
+
+    def setUp(self):
+        from app.단계3_코스검토 import 식사선택
+        self.m=식사선택
+        def row(id,slot,name,start,end):
+            return {'칸ID':id,'안':'공통','일차':1,'시간칸':slot,'장소명':name,
+                    '시각':{'값':start,'종류':'가정'},'종료시각':{'값':end,'종류':'가정'},'머무는시간':60}
+        self.c={'칸목록':[row('a','낮','앞','17:00','18:00'),row('m','저녁','식당A','18:20','19:20'),row('b','밤','뒤','19:40','20:40')],
+                '식사목록':[{'칸ID':'m','안':'공통','방식':'미선택','권역':'도심 권역','추천후보':['식당A'],'식비포함':'미정'}]}
+        self.places=[{'장소명':n,'구':'중구','코스칸':'점심·저녁' if not chicken else '저녁','장소유형':'식당',
+                      '운영시간':hours,'정기휴무':'연중무휴','출처ID':'S1','확인일':'2026-11-26',
+                      '출처URL':'https://example.org/food'} for n,chicken,hours in [('식당A',False,'10:00-22:00'),('식당B',False,'10:00-22:00'),('치킨C (치킨 옵션)',True,'11:00-22:00'),('치킨D (치킨 옵션)',True,'11:00-18:30')]]
+        self.patches=[patch.object(self.m,'장소목록',return_value=self.places),patch.object(self.m,'좌표',return_value=(35.87,128.59)),
+                      patch.object(self.m,'구간',side_effect=lambda a,b:{'출발':a,'도착':b,'분':10,'경로':[[35.87,128.59],[35.871,128.591]],'출처':'시험 경로','확인일':'2026-11-26'})]
+        for p in self.patches:p.start();self.addCleanup(p.stop)
+
+    def test_저녁은_다른음식과_치킨을_같이_제시하고_늦은마감충돌_구분(self):
+        rows=self.m.후보목록(self.c,self.c['칸목록'][1],{'지역':['중구']})
+        self.assertGreaterEqual(len(rows),3)
+        self.assertTrue(any(x['치킨'] for x in rows))
+        late=next(x for x in rows if '치킨D' in x['장소명'])
+        self.assertFalse(late['반영가능'])
+
+    def test_선택한_식사만_수정하고_시간권역과_나머지_전부_보존(self):
+        before=copy.deepcopy(self.c)
+        result=self.m.반영(self.c,'m','식당B',{'지역':['중구']},미확인동의=True)
+        self.assertEqual(self.c,before)
+        self.assertEqual(result['칸목록'][::2],before['칸목록'][::2])
+        for key in ['시각','종료시각','머무는시간','일차','칸ID']:
+            self.assertEqual(result['칸목록'][1][key],before['칸목록'][1][key])
+        self.assertEqual(result['식사목록'][0]['권역'],'도심 권역')
+        self.assertEqual(result['식사목록'][0]['방식'],'자유식')
+        self.assertEqual(result['식사목록'][0]['경로선택후보'],'식당B')
+
+    def test_경로누락과_다음일정_충돌은_반영불가(self):
+        with patch.object(self.m,'구간',return_value=None):
+            with self.assertRaisesRegex(ValueError,'이동'):self.m.반영(self.c,'m','식당B',{'지역':['중구']},미확인동의=True)
+        self.c['칸목록'][2]['시각']['값']='19:25'
+        with self.assertRaisesRegex(ValueError,'다음 일정'):self.m.반영(self.c,'m','식당B',{'지역':['중구']},미확인동의=True)
+
+    def test_점심은_치킨과_다른구를_빼고_자료부족을_성공으로_바꾸지않음(self):
+        self.c['칸목록'][1]['시간칸']='점심'
+        self.places.append({**self.places[0],'장소명':'동구식당','구':'동구'})
+        rows=self.m.후보목록(self.c,self.c['칸목록'][1],{'지역':['중구']})
+        self.assertFalse(any(x['치킨'] or x['장소명']=='동구식당' for x in rows))
+        self.c['칸목록'][1]['시각']['값']=''
+        self.assertNotIn('영업시간 상세 확인 필요',self.m.비교(self.c,'m','식당B',{'지역':['중구']})['확인필요'])
+        with self.assertRaisesRegex(ValueError,'확인'):self.m.묶음반영(self.c,'m',['식당A','식당B'],{'지역':['중구']})
+
+    def test_서비스_후보묶음_저장과_QR조회는_개인선택으로_공통기록을_쓰지않는다(self):
+        from app.공통.기획실행 import 기획실행
+        self.c['칸목록'][1]['시간칸']='점심'
+        with TemporaryDirectory() as folder:
+            root=Path(folder)
+            r=기획기록.새_기록({'지역':['중구']},'사람:시험',기록id='meal-pack')
+            기획기록.추가(r,'코스안',{'안id':'A','버전':1,'코스':self.c},'코드:시험')
+            기획기록.저장(r,root)
+            service=기획실행(SimpleNamespace(저장소=SimpleNamespace(루트=root)))
+            service.코스._시험=lambda key:root
+            request={'시험id':'x/y/meal-pack','안id':'A','기준버전':1,'칸ID':'m','후보':['식당A','식당B'],'미확인동의':True}
+            with patch('app.공통.기록도구.코스_점검'):
+                self.assertEqual(service.식사묶음반영(request)['버전'],2)
+            stored=기획기록.읽기(root,'meal-pack')
+            self.assertEqual(stored['코스안'][0],r['코스안'][0])
+            self.assertEqual(stored['코스안'][-1]['코스']['칸목록'],self.c['칸목록'])
+            source=root/'기획/meal-pack/기획기록.json';before=source.read_bytes()
+            pack=service.관광객식사({**request,'기준버전':2})
+            self.assertEqual(pack['버전'],2)
+            self.assertEqual(pack['코스키'],'meal-pack')
+            self.assertEqual(len(pack['식사묶음']),1)
+            self.assertNotIn('원래요청',pack)
+            self.assertEqual(source.read_bytes(),before)
+            with self.assertRaisesRegex(ValueError,'최신'):service.식사묶음반영(request)
+
+    def test_서비스_비교는_저장없이_반영은_최신버전만_새로_추가(self):
+        from app.공통.기획실행 import 기획실행
+        with TemporaryDirectory() as folder:
+            root=Path(folder)
+            r=기획기록.새_기록({'지역':['중구']},'사람:시험',기록id='meal-test')
+            기획기록.추가(r,'코스안',{'안id':'A','버전':1,'코스':self.c},'코드:시험')
+            기획기록.저장(r,root)
+            source=root/'기획/meal-test/기획기록.json';before=source.read_bytes()
+            service=기획실행(SimpleNamespace(저장소=SimpleNamespace(루트=root)))
+            service.코스._시험=lambda key:root
+            request={'시험id':'x/y/meal-test','안id':'A','기준버전':1,'칸ID':'m','장소명':'식당B','미확인동의':True}
+            preview=service.식사비교(request)
+            self.assertTrue(preview['반영가능']);self.assertEqual(source.read_bytes(),before)
+            with patch('app.공통.기록도구.코스_점검'):
+                result=service.식사반영(request)
+            stored=기획기록.읽기(root,'meal-test')
+            self.assertEqual(result['버전'],2)
+            self.assertEqual(stored['코스안'][0],r['코스안'][0])
+            self.assertEqual(stored['원래요청'],r['원래요청'])
+            self.assertEqual(stored['코스안'][-1]['코스']['칸목록'][::2],self.c['칸목록'][::2])
+            with self.assertRaisesRegex(ValueError,'최신'):service.식사반영(request)
+
+    def test_저장_이동시간은_식사이후_방향을_쓰며_이전방향과_섞지않는다(self):
+        def leg(a,b):return {'출발':a,'도착':b,'분':13 if b=='식당B' else 11,'경로':[[35.87,128.59],[35.871,128.591]]}
+        with patch.object(self.m,'구간',side_effect=leg):
+            result=self.m.반영(self.c,'m','식당B',{'지역':['중구']},미확인동의=True)
+        self.assertEqual(result['식사목록'][0]['이동시간']['분'],11)
+        self.assertEqual(result['식사목록'][0]['이후연결'],'뒤')
+
+    def test_검토가_무효화된_같은_식당은_재확인_반영할수있다(self):
+        self.c['식사목록'][0].update({'경로선택후보':'식당B','선택검토':{}})
+        report=self.m.비교(self.c,'m','식당B',{'지역':['중구']})
+        self.assertFalse(report['경로선택됨'])
+        result=self.m.반영(self.c,'m','식당B',{'지역':['중구']},미확인동의=True)
+        self.assertTrue(result['식사목록'][0]['선택검토'])
+
+
 class 범위시험(unittest.TestCase):
     def setUp(self):
         self.입력 = 시험입력()
@@ -30,6 +193,17 @@ class 범위시험(unittest.TestCase):
         v = self.검사()
         self.assertEqual(v['바꿀칸ID'], ['점심-2'])
         self.assertIn('점심-1', v['유지칸ID'])
+
+    def test_다른_일정_수정에서도_잠근_식사_선택과_원래권역을_보존한다(self):
+        meal=next(m for m in self.이전['식사목록'] if m['칸ID']=='점심-1')
+        fields={'식사기준장소':'원래 기준점','권역반경m':1200,'경로선택후보':meal.get('식당') or '선택식당',
+                '선택검토':{'후보이동':[],'확인필요':['방문일 확인']}}
+        meal.update(copy.deepcopy(fields))
+        order=코스조립.이전_주문서(self.이전,self.표)
+        result,issues=코스조립.조립({'안':order},self.표,{**self.입력,'부분수정':self.검사(재방문허용=True)},self.이전)
+        self.assertEqual(issues,[])
+        saved=next(m for m in result['식사목록'] if m['칸ID']=='점심-1')
+        for key,value in fields.items():self.assertEqual(saved.get(key),value)
 
     def test_하루와_전체_범위(self):
         self.assertEqual(self.검사(범위='하루', 일차=2)['허용일차'], [2])

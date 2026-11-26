@@ -1,3 +1,4 @@
 claude-agent-sdk>=0.2.187
 google-genai
 openpyxl
+qrcode==8.2

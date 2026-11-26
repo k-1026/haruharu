@@ -1,6 +1,6 @@
 (function(root){
   const valid=p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==='number'&&Number.isFinite(n))&&Math.abs(p[0])<=90&&Math.abs(p[1])<=180;
-  const label=s=>s.표시명||s.장소명||'일정';
+  const label=s=>s.개인선택후보?`내 ${s.시간칸||'식사'} · ${s.개인선택후보}`:s.표시명||s.장소명||'일정';
   function model(input){
     const stops=input.map((s,i)=>({...s,순번:s.순번??i+1}));
     const places=[],areas=[],missing=[],entries=[];
@@ -10,7 +10,7 @@
       if(meal){
         const candidates=(s.식당후보||[]).map(c=>({...c,좌표:valid(c.좌표)?c.좌표.slice():null}));
         const points=candidates.filter(c=>c.좌표).map(c=>c.좌표),official=valid(s.권역표시?.중심);
-        point=official?s.권역표시.중심.slice():point|| (points.length?[0,1].map(k=>points.reduce((sum,p)=>sum+p[k],0)/points.length):null);
+        point=valid(s.경로좌표)?s.경로좌표.slice():official?s.권역표시.중심.slice():point|| (points.length?[0,1].map(k=>points.reduce((sum,p)=>sum+p[k],0)/points.length):null);
         item={...s,point,candidates,kind:'area',basis:s.위치설명||(official?s.권역표시.근거:'후보 분포 참고 중심 · 입구/방문 식당 아님')};
         areas.push(item);
       }else{item={...s,point,kind:s.위치유형==='권역대표점'?'region':'place'};if(point)places.push(item);}
@@ -22,6 +22,63 @@
     return {stops,entries,places,areas,missing,legs};
   }
   function preview(data,number,index){const candidate=data.areas.find(s=>s.순번===number)?.candidates[index];return candidate?{...candidate,확정:false}:null;}
+  function candidateStops(stops,number,candidate){
+    const result=stops.map(s=>({...s})),i=result.findIndex(s=>s.순번===number);if(i<0)return result;
+    result[i]={...result[i],장소명:candidate.장소명,경로좌표:candidate.좌표,경로기준표시:candidate.이름};
+    for(const leg of candidate.후보이동||[]){
+      const from=leg.도착===candidate.장소명?i-1:i;
+      if(from<0||!result[from+1]||result[from].일차!==result[from+1].일차)continue;
+      result[from]={...result[from],다음이동:{도보분:leg.분,출처:leg.출처,확인일:leg.확인일},후보경로:leg};
+    }
+    return result;
+  }
+  // QR 페이지에서 재사용하는 개인 지도 상태. 공통 코스 저장 API·AI 호출 없음.
+  function personalMeals(bundle,storage,{preview=false}={}){
+    if(bundle?.형식버전!==1||!Array.isArray(bundle.일정)||!Array.isArray(bundle.식사묶음))throw Error('지원하는 식사 후보 데이터가 아닙니다.');
+    const clone=v=>JSON.parse(JSON.stringify(v));
+    const base=clone(bundle),key='haruharu:meal:'+JSON.stringify([base.코스키,base.안id,base.버전,preview?'preview':'tourist']);
+    let choices={};
+    function candidate(id,name){
+      const pack=base.식사묶음.find(p=>p.칸ID===id),c=pack?.후보.find(c=>c.장소명===name);
+      if(!c)throw Error('저장된 후보 묶음 안에서 선택하세요.');
+      if((c.오류||[]).length)throw Error(c.오류.join(' / '));
+      if(!preview&&(!pack.공개준비||!c.선택가능))throw Error('운영·시간·이동 확인이 남아 있습니다. 직원 확인 후 이용할 수 있습니다.');
+      if(!valid(c.좌표)||(c.후보이동||[]).some(l=>!Number.isFinite(l.분)||l.분<0||!Array.isArray(l.경로)||l.경로.length<2||!l.경로.every(valid)))throw Error('이동 경로 확인이 필요합니다.');
+      return c;
+    }
+    function view(next){
+      let stops=clone(base.일정);
+      for(const [id,name] of Object.entries(next)){
+        const c=candidate(id,name),stop=stops.find(s=>s.칸ID===id);
+        if(!stop)throw Error('식사 일정이 바뀌었습니다. 다시 불러오세요.');
+        stops=candidateStops(stops,stop.순번,c);
+        stops.find(s=>s.칸ID===id).개인선택후보=name;
+      }
+      // 인접 식사의 개인 선택까지 바뀌어 저장 구간과 맞지 않으면 낡은 경로를 사용하지 않는다.
+      for(const [id,name] of Object.entries(next)){
+        const i=stops.findIndex(s=>s.칸ID===id),c=candidate(id,name);
+        for(const leg of c.후보이동||[]){
+          const a=leg.도착===name?stops[i-1]:stops[i],b=leg.도착===name?stops[i]:stops[i+1];
+          if(!a||!b||a.일차!==b.일차||a.장소명!==leg.출발||b.장소명!==leg.도착)throw Error('인접 식사 선택이 달라 경로를 다시 확인해야 합니다.');
+        }
+      }
+      return {선택:clone(next),일정:stops,비공개미리보기:preview};
+    }
+    try{
+      const saved=JSON.parse(storage?.getItem(key)||'{}');
+      if(saved&&typeof saved==='object'&&!Array.isArray(saved))for(const [id,name] of Object.entries(saved)){
+        try{view({...choices,[id]:name});choices={...choices,[id]:name};}catch{}
+      }
+    }catch{}
+    function save(next){
+      const result=view(next);
+      if(!storage?.setItem)throw Error('이 기기에 개인 선택을 저장할 수 없습니다.');
+      try{storage.setItem(key,JSON.stringify(next));}catch{throw Error('개인 선택 저장이 차단되어 있습니다. 브라우저 저장 설정을 확인하세요.');}
+      choices=next;return result;
+    }
+    return {snapshot:()=>view(choices),select:(id,name)=>save({...choices,[id]:name}),
+      clear:id=>{const next={...choices};delete next[id];return save(next);}};
+  }
   function motionView(dx,dz,azimuth){
     const toward=dx*Math.sin(azimuth)+dz*Math.cos(azimuth);
     const right=dx*Math.cos(azimuth)-dz*Math.sin(azimuth);
@@ -92,8 +149,8 @@
   function routesFor(data,cache){
     const legs=[],missing=[];
     for(const leg of data.legs){
-      const route=cache?.routes?.[routeKey(leg.from.point,leg.to.point)];
-      const info=travelInfo(leg.from.다음이동,route?.durationSeconds);
+      const route=leg.from.후보경로?.경로?{profile:'foot',points:leg.from.후보경로.경로,durationSeconds:leg.from.후보경로.분*60}:cache?.routes?.[routeKey(leg.from.point,leg.to.point)];
+      const info=travelInfo(leg.from.다음이동,leg.from.후보경로?leg.from.후보경로.분*60:route?.durationSeconds);
       const road=route?.profile==='foot'&&route.points?.length>=2&&route.points.every(valid)?simplifyPath(route.points):null;
       if(info.mode==='transit')legs.push({...leg,...info,path:null,distance:null,roadPath:road});
       else if(route?.profile==='foot'&&route.points?.length>=2&&route.points.every(valid))legs.push({...leg,...info,path:simplifyPath(route.points),distance:route.distance});
@@ -176,6 +233,6 @@
         return arrive();
       }};
   }
-  root.코스지도모델={model,preview,valid,label,motionView,routeKey,routesFor,track,sample,timeLabel,playback,roadStrip,clockMinutes,courseMinutes,sceneTime,previewSeconds,travelInfo,legTimeLabel,tableLabel,legFallbackLabel,dashRows,playableLegs,simplifyPath,characterMotion,walkingRoadRows};
+  root.코스지도모델={model,preview,candidateStops,personalMeals,valid,label,motionView,routeKey,routesFor,track,sample,timeLabel,playback,roadStrip,clockMinutes,courseMinutes,sceneTime,previewSeconds,travelInfo,legTimeLabel,tableLabel,legFallbackLabel,dashRows,playableLegs,simplifyPath,characterMotion,walkingRoadRows};
   if(typeof module!=='undefined')module.exports=root.코스지도모델;
 })(typeof globalThis!=='undefined'?globalThis:this);

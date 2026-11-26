@@ -12,6 +12,7 @@ import threading
 from app.공통.단계연결 import JSON_읽기, 코스_검사
 from app.공통.stages import STAGES
 from app.공통.흐름 import 전달_검사
+from app.공통.실행경로 import 실행이름_형식
 
 저장소 = Path(__file__).resolve().parents[2]
 
@@ -115,13 +116,13 @@ class 코스시험:
         self.잠금 = threading.Lock()
 
     def _원본(self, 키):
-        if not isinstance(키, str) or not re.fullmatch(r'\d{8}_\d{6}/\d+회차', 키):
+        if not isinstance(키, str) or not re.fullmatch(rf'{실행이름_형식}/\d+회차', 키):
             raise ValueError('저장된 실행과 회차를 선택하세요.')
         self.저장소.상세(키)
         return self.저장소._경로(키)
 
     def _시험(self, 키):
-        if not isinstance(키, str) or not re.fullmatch(r'\d{8}_\d{6}/\d+회차/통합시험_\d{6}_\d+', 키):
+        if not isinstance(키, str) or not re.fullmatch(rf'{실행이름_형식}/\d+회차/통합시험_\d{{6}}_\d+', 키):
             raise ValueError('저장한 3단계 시험을 선택하세요.')
         폴더 = self.저장소._경로(키)
         if not 폴더.is_dir():

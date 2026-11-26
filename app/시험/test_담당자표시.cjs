@@ -41,7 +41,7 @@ test('왼쪽 일정 선택은 지도 이동과 오른쪽 설명을 함께 갱신
   const calls=[],pressed={};let closedFocus=false;
   const close={},button={dataset:{stop:'5'},setAttribute:(key,value)=>pressed[key]=value,focus:()=>closedFocus=true};
   const view={classList:{add(){},remove(){}},querySelectorAll:()=>[button],querySelector:()=>button};
-  const panel={hidden:true,innerHTML:'',querySelector:()=>close,querySelectorAll:()=>[]};
+  const panel={hidden:true,innerHTML:'',querySelector:selector=>selector==='[data-place-close]'?close:null,querySelectorAll:()=>[]};
   const document={getElementById:id=>id==='mapView'?view:panel};
   const fixture=[{순번:5,표시명:'서문시장 야시장',일차:1,좌표:[35.86,128.58],장소안내:{소개:'야시장 설명'}}];
   const source=fs.readFileSync(path.join(path.resolve(__dirname, '..'),'담당자화면/plan.js'),'utf8').split('// ---------- 시작 ----------')[0];
@@ -63,6 +63,17 @@ test('큰 지도는 별도 보기를 열고 돌아가면 원래 화면의 초점
   assert.equal(result.open,true);assert.equal(result.inert,true);assert.equal(result.closed,true);assert.equal(wrap.inert,false);
   assert.deepEqual(calls,['destroy','focus']);assert.equal((result.html.match(/시설·권역의 대표 위치/g)||[]).length,1);
   assert.match(result.html,/class="explorer-list"/);assert.match(result.html,/id="placePanel"[^>]*hidden/);
+});
+
+test('같은 식사 일정을 다시 누르면 미저장 후보 경로를 복원한다',()=>{
+  const calls=[],close={},button={dataset:{stop:'5'},setAttribute(){},focus(){}};
+  const view={classList:{add(){},remove(){}},querySelectorAll:()=>[button],querySelector:()=>button};
+  const panel={hidden:true,innerHTML:'',querySelector:()=>close,querySelectorAll:()=>[]};
+  const document={getElementById:id=>id==='mapView'?view:panel};
+  const fixture=[{순번:5,표시명:'식사 권역',일차:1,좌표:[35.86,128.58]}];
+  const source=fs.readFileSync(path.join(path.resolve(__dirname,'..'),'담당자화면/plan.js'),'utf8').split('// ---------- 시작 ----------')[0];
+  vm.runInNewContext(source+'\nexplorerStops=fixture;selectedStop=5;mealPreview={number:5};draw=()=>calls.push("restore");selectStop(5,true);if(mealPreview!==null)throw Error("후보 경로 잔류");\n}',{document,fixture,calls,console});
+  assert.deepEqual(calls,['restore']);
 });
 
 test('식당 후보는 지도에 표시하되 방문 연결선에는 넣지 않는다',()=>{

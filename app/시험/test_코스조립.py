@@ -500,7 +500,7 @@ class 전체조립시험(unittest.TestCase):
         self.assertEqual(len([r for r in 코스['칸목록'] if r['칸ID'] == '낮-1']), 1)
 
     def test_1122_성공본과_장소순서가_같다(self):
-        폴더 = Path(__file__).parents[1] / 'runs/20261122_223324/01회차/통합시험_120954_056532'
+        폴더 = Path(__file__).parents[1] / 'runs/검사예제_코스/01회차/통합시험_120954_056532'
         if not (폴더 / '3단계_구조화.json').is_file():
             self.skipTest('11/22 성공본 없음')
         원 = json.loads((폴더 / '3단계_구조화.json').read_text(encoding='utf-8'))
@@ -540,7 +540,7 @@ class 지시문시험(unittest.TestCase):
         self.assertIn('"안"', 코스조립.주문요청(표, 입력, 한안=True))
 
     def test_시연입력_요청글은_15000자_이하(self):
-        p = Path(__file__).parents[1] / 'runs/20261125_155826/01회차/통합시험_155847_423675/3단계_입력.json'
+        p = Path(__file__).parents[1] / 'runs/검사예제_입력/01회차/통합시험_155847_423675/3단계_입력.json'
         if not p.is_file():
             self.skipTest('시연 입력 없음')
         from app.공통 import run_stage

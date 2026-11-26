@@ -15,6 +15,25 @@ def course():
 
 
 class 담당자요약시험(unittest.TestCase):
+    def setUp(self):
+        # 구형 사용자 입력 후보의 표시 시험은 보유 식당 자료 확장과 분리한다.
+        p=mock.patch('app.단계3_코스검토.식사선택.후보목록',return_value=[])
+        p.start();self.addCleanup(p.stop)
+
+    def test_과거_미등록후보가_섞여도_등록된_식사후보를_함께_표시한다(self):
+        known={'이름':'등록식당','장소명':'등록식당','좌표':[35.87,128.60],'반영가능':True}
+        with mock.patch('app.단계3_코스검토.식사선택.후보목록',return_value=[known]):
+            rows=담당자요약.코스요약(course(),{})['일정'][1]['식당후보']
+        self.assertTrue(any(x.get('장소명')=='등록식당' for x in rows))
+        self.assertTrue(any(x.get('이름')=='가게A' for x in rows))
+
+    def test_전체주소형_옛후보와_새후보의_중복표시를_막는다(self):
+        c=course();c['식사목록'][0]['추천후보']=['대구광역시 중구 가게A']
+        known={'이름':'가게A','장소명':'가게A','좌표':None,'반영가능':False}
+        with mock.patch('app.단계3_코스검토.식사선택.후보목록',return_value=[known]):
+            rows=담당자요약.코스요약(c,{})['일정'][1]['식당후보']
+        self.assertEqual(len(rows),1)
+
     def test_종료시각과_체류분을_계산없이_그대로_전달하고_원본을_보존한다(self):
         import copy
         c={'칸목록':[{'일차':1,'장소명':'관광지','시각':{'값':'10:00'},

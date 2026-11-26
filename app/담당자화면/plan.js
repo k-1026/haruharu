@@ -41,7 +41,7 @@
       if(/시작|종료/.test(text))add('여행의 시작과 끝','집결·해산 장소와 시각을 정해 주세요.');
       else if(/2일|둘째|오전선택/.test(text))add('둘째 날 오전','관광·자유시간·바로 귀가 중 어떻게 보낼지 골라 주세요.');
       else if(/숙박|숙소/.test(text))add('숙박 일정','숙소와 도착·다음 날 출발 시각을 확인해 주세요.');
-      else if(/식사|식당|식비/.test(text))add('식사 방식','자유식·지정식과 식사 비용의 포함 여부를 정해 주세요.');
+      else if(/식사|식당|식비/.test(text))add('식사 방식','식사 시간과 권역·후보를 확인해 주세요. 식사는 개별 선택·개별 결제입니다.');
       else if(/운영\s*방식|단체|개별/.test(text))add('여행 운영 방식','단체 동행 또는 개별 이동 방식을 골라 주세요.');
       else if(/겹침|노선/.test(text))add('기존 상품과의 겹침','겹치는 구간을 유지할지 조정할지 골라 주세요.');
       else if(text)unknown=true;
@@ -69,6 +69,16 @@
     const map=s.지도링크?`<a href="${safe(s.지도링크)}" target="_blank" rel="noopener">카카오맵에서 보기 ↗</a>`:'';
     return lines||proof||map?`<details class="location-info"><summary>위치 정보</summary>${lines}<p>${[proof,map].filter(Boolean).join(' · ')}</p></details>`:'';
   }
+  function 점심묶음(s){
+    const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const candidates=s.식당후보||[],saved=s.저장후보||[];
+    return `<section class="meal-bundle"><h3>관광객에게 제공할 점심 후보</h3><p class="note">직원은 후보 묶음을 구성합니다. 관광객이 QR에서 골라 자기 지도에 반영하며 공통 일정·점심 시간·권역은 유지합니다. 현재 지도는 경유 예시입니다.</p>
+      ${candidates.map((c,i)=>`<div class="meal-option"><label><input type="checkbox" data-meal-option="${i}" ${saved.includes(c.장소명)?'checked':''} ${c.장소명?'':'disabled'}> ${safe(c.이름)}${saved.includes(c.장소명)?' · 저장됨':''}</label><button type="button" class="btn" data-explore-candidate="${i}">이동·운영 비교</button><small>${safe(c.상태||'자료 확인 필요')}</small></div>`).join('')||'<p>등록된 후보가 없습니다.</p>'}
+      <label class="meal-ack"><input type="checkbox" id="bundleAcknowledge"> 확인이 남은 후보는 초안으로 저장하며 관광객 공개 준비 완료가 아님을 확인합니다.</label>
+      <button type="button" class="btn primary" id="mealBundleSave">후보 묶음 저장</button>
+      ${saved.length?'<button type="button" class="btn" id="mealTouristPreview">관광객 선택 동작 미리보기</button>':'<p class="note">후보를 2개 이상 저장하면 관광객 선택 동작을 미리 볼 수 있습니다.</p>'}
+      <p id="bundleMessage" role="status"></p><div id="candidatePreview" role="status"></div></section>`;
+  }
   function 장소패널(s){
     const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const name=문장((s.표시명||s.장소명||'장소 미정').split(/\s+[—–]\s+/)[0]),info=s.장소안내||{};
@@ -77,15 +87,32 @@
       <h2 tabindex="-1" id="placeTitle">${safe(name)}</h2><p>${safe(info.소개||'아직 장소 소개가 등록되지 않은 일정입니다.')}</p>
       ${info.이용시간||info.휴무?`<section class="place-facts"><h3>이용 참고 <small>보유 자료 기준</small></h3>${info.이용시간?`<p>이용시간 · ${safe(info.이용시간)}</p>`:''}${info.휴무?`<p>휴무 · ${safe(info.휴무)}</p>`:''}<p class="note">운영일·시간은 방문 전에 다시 확인해 주세요.${info.확인일?' 자료 확인일 '+safe(info.확인일):''}</p></section>`:''}
       ${info.주소?`<p class="note">${safe(info.주소)}</p>`:''}
-      ${s.식사권역?`<section><h3>식당 후보</h3><p class="note">후보를 눌러도 방문이 확정되지 않습니다.</p>${candidates.length?candidates.map((c,i)=>`<button type="button" class="candidate-choice" data-explore-candidate="${i}">${safe(c.이름)} <small>미리보기${c.좌표?'':' · 위치 확인 중'}</small></button>`).join(''):'<p class="note">아직 등록된 식당 후보가 없습니다. 권역만 표시합니다.</p>'}<div id="candidatePreview" role="status"></div></section>`:''}
-      ${!s.좌표&&!s.권역표시?.중심?'<p class="note">이 일정은 아직 지도 위치가 정해지지 않았습니다. 목록에는 계속 남겨 둡니다.</p>':''}
+      ${s.식사권역&&s.시간칸==='점심'?점심묶음(s):s.식사권역?`<section><h3>식당 후보</h3><p class="note">시간·권역은 유지하고 식당은 자유롭게 고릅니다. ${s.경로선택후보?'선택한 경로 기준: '+safe(s.경로선택후보):'현재 지도는 기존 식사 기준점 경유 예시입니다. 식당 확정이 아닙니다.'}</p>${s.시간칸==='저녁'&&!candidates.some(c=>c.치킨&&c.반영가능)?'<p class="note">바로 선택할 수 있는 치킨 후보가 없습니다. 아래 후보의 영업·위치·이동 확인 사항을 살펴보세요.</p>':''}${candidates.length?candidates.map((c,i)=>`<button type="button" class="candidate-choice" data-explore-candidate="${i}">${c.치킨?'치킨 · ':''}${safe(c.이름)} <small>${safe(c.상태||'미리보기')}${c.경로선택됨?' · 경로 기준':''}${c.좌표?'':' · 위치 확인 중'}</small></button>`).join(''):'<p class="note">아직 등록된 식당 후보가 없습니다. 권역만 표시합니다.</p>'}<div id="candidatePreview" role="status"></div></section>`:''}
+      ${!s.좌표&&!s.경로좌표&&!s.권역표시?.중심?'<p class="note">이 일정은 아직 지도 위치가 정해지지 않았습니다. 목록에는 계속 남겨 둡니다.</p>':''}
       ${위치안내(s)}${info.출처URL?`<p><a target="_blank" rel="noopener" href="${safe(info.출처URL)}">장소 안내 출처 ↗</a></p>`:''}
       ${s.장소명?`<details class="place-report"><summary>위치가 이상해요</summary><form data-place-report><label for="placeReport">무엇이 이상한지 적어 주세요</label><textarea id="placeReport" name="내용" maxlength="300" required></textarea><button type="submit" class="btn">관리자에게 알리기</button><p class="note" data-report-msg role="status"></p></form></details>`:''}`;
   }
   const 닭=`<svg class="drum" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 14.8 5 20" stroke="#8A4B1F" stroke-width="4.4" stroke-linecap="round"/><circle cx="4.1" cy="19.1" r="1.9" fill="#FFF3DC" stroke="#8A4B1F" stroke-width=".8"/><circle cx="5.9" cy="20.9" r="1.9" fill="#FFF3DC" stroke="#8A4B1F" stroke-width=".8"/><path d="M10.6 14.8 5 20" stroke="#FFF3DC" stroke-width="2.6" stroke-linecap="round"/><path d="M8.6 13.9C7.4 10.6 8.4 6.6 11.5 4.6C12.6 3.9 13.4 4.1 14.4 3.6C15.6 3 16.6 2.9 17.7 3.6C18.7 4.2 19 5.1 19.9 5.8C20.9 6.6 21.6 7.4 21.4 8.8C21.3 9.9 20.5 10.6 20.4 11.7C20.3 12.9 20.1 13.9 19 14.8C17.6 15.9 16.3 15.6 15 16C13.6 16.4 12.6 17 11.2 16.5C10 16 9.2 15.2 8.6 13.9Z" fill="#C8701A" stroke="#8A4B1F" stroke-width=".8" stroke-linejoin="round"/><path d="M11.4 7.2c1.1-1.6 2.8-2.4 4.4-2.2" stroke="#F4BE63" stroke-width="1.1" stroke-linecap="round" fill="none"/><g fill="#F4BE63"><circle cx="16.8" cy="8.2" r=".75"/><circle cx="14" cy="10.6" r=".7"/><circle cx="18.4" cy="11.6" r=".6"/><circle cx="12.4" cy="13.4" r=".55"/></g></svg>`;
   const 치킨장소=name=>/닭|치킨|치맥/.test(String(name||''));
   function 입장화면(){return `<div class="entry-backdrop" aria-hidden="true"><svg class="bk-sky" viewBox="0 0 1440 640" preserveAspectRatio="none"><defs><linearGradient id="bSky" x1="0" x2="1"><stop offset="0" stop-color="#FFF5DD"/><stop offset=".55" stop-color="#FFEBCF"/><stop offset="1" stop-color="#FCD9B8"/></linearGradient><linearGradient id="bNight" x1="0" x2="1"><stop offset=".5" stop-color="#F6C3A0" stop-opacity="0"/><stop offset=".7" stop-color="#E9AE9A" stop-opacity=".7"/><stop offset=".86" stop-color="#A88AA6"/><stop offset="1" stop-color="#5C6290"/></linearGradient></defs><rect width="1440" height="640" fill="url(#bSky)"/><rect class="night-veil" width="1440" height="640" fill="url(#bNight)"/><path class="sky-path" d="M100 84 Q740 -70 1300 110" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="1 13" vector-effect="non-scaling-stroke" opacity=".95"/></svg><svg class="bk-sun" viewBox="0 0 240 240"><g class="sun"><circle cx="120" cy="120" r="96" fill="#FFE7AE" opacity=".55"/><circle cx="120" cy="120" r="50" fill="#FFCF72" opacity=".9"/></g><g fill="#fff" opacity=".7"><ellipse cx="200" cy="190" rx="40" ry="9"/></g></svg><svg class="bk-moon" viewBox="0 0 520 340"><g class="night-sky"><path d="M362 76a34 34 0 1 0 20 62a28 28 0 1 1-20-62z" fill="#FFF1D2"/><g fill="#FFEBB5"><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(446 50) scale(0.9)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(486 186) scale(0.6)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(310 226) scale(0.5)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(410 258) scale(0.5)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(92 48) scale(0.45)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(340 300) scale(0.4)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(108 214) scale(0.45)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(470 110) scale(0.5)"/></g></g></svg><svg class="bk-ridge" viewBox="0 0 1440 140" preserveAspectRatio="none"><defs><linearGradient id="bRidge" x1="0" x2="1"><stop offset="0" stop-color="#EBCFA5"/><stop offset=".55" stop-color="#E7B48F"/><stop offset=".8" stop-color="#9D86A0"/><stop offset="1" stop-color="#6E6A93"/></linearGradient></defs><path d="M0 118C110 96 190 66 300 78S470 34 570 56S700 26 790 48S930 74 1010 64S1170 88 1250 94S1390 104 1440 100V140H0z" fill="url(#bRidge)" opacity=".55"/></svg><svg class="bk-tower" viewBox="0 0 360 180"><g fill="#6E6A93" opacity=".62"><path d="M30 180Q180 124 330 180z"/><rect x="174" y="58" width="12" height="104"/><ellipse cx="180" cy="72" rx="26" ry="14"/><ellipse cx="180" cy="60" rx="12" ry="6"/><rect x="178.5" y="10" width="3" height="46"/><rect x="246" y="136" width="30" height="44"/><rect x="282" y="120" width="26" height="60"/><rect x="314" y="142" width="30" height="38"/><rect x="40" y="146" width="28" height="34"/><rect x="74" y="132" width="24" height="48"/></g><g class="bk-lights" fill="#FFE3A0"><rect x="168" y="70" width="5" height="4" rx="1"/><rect x="178" y="70" width="5" height="4" rx="1"/><rect x="188" y="70" width="5" height="4" rx="1"/><rect x="288" y="130" width="4" height="5"/><rect x="297" y="146" width="4" height="5"/><rect x="254" y="148" width="4" height="5"/><rect x="322" y="154" width="4" height="5"/><rect x="80" y="142" width="4" height="5"/></g></svg><svg class="bk-drumstars" viewBox="176 2 122 84"><g class="drum-stars"><g fill="none" stroke="#FFEBB5" stroke-width="1.3" stroke-linecap="round" opacity=".6"><polygon points="238,20 264,12 288,24 286,50 260,60 236,46"/><path d="M238 44L196 64M196 64L185 55M196 64L189 75"/></g><g fill="#FFF1C8"><circle cx="238" cy="20" r="3.2"/><circle cx="264" cy="12" r="2.6"/><circle cx="288" cy="24" r="3"/><circle cx="286" cy="50" r="2.4"/><circle cx="260" cy="60" r="2.8"/><circle cx="236" cy="46" r="2.6"/><circle cx="196" cy="64" r="2.4"/><circle cx="185" cy="55" r="2.8"/><circle cx="189" cy="75" r="2.6"/></g></g></svg><svg class="bk-cloud" viewBox="0 0 200 60"><g fill="#fff" opacity=".75"><ellipse cx="90" cy="34" rx="64" ry="14"/><ellipse cx="130" cy="24" rx="36" ry="14"/></g></svg></div><section class="entry-screen"><div class="entry-copy"><h1>대구의 낮과 밤을,<br>하나의 여행으로.</h1><p class="entry-lead">조건을 고르면 AI가 낮 관광부터 저녁, 숙박까지 이어지는 대구 코스 초안을 만들어요.</p><div class="entry-actions"><button class="btn primary big" id="entryNew">새 코스 기획하기</button></div></div><section class="entry-recent" aria-labelledby="recentTitle"><div class="recent-head"><h2 id="recentTitle">이어서 보기</h2><button class="btn link" id="entrySaved">지난 코스 전체</button></div><div class="recent-list" id="recentList"><p class="empty">불러오는 중…</p></div><p class="note">저장된 코스와 지도는 AI 실행 없이 다시 볼 수 있어요.</p></section><div class="entry-band"><ol class="entry-flow" aria-label="기획 순서"><li><b>조건 고르기</b><small>계절·언어권·지역·체류 기간</small></li><li><b>AI 초안 받기</b><small>A안과 대안을 함께 만들어요</small></li><li><b>지도로 검토</b><small>동선·운영시간·이동 시간</small></li><li><b>홍보물·결재 파일</b><small>확정한 안으로 이어서</small></li></ol><button type="button" class="scroll-cue" id="toDay">코스가 이어지는 하루 보기<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div></section><h2 class="day-title" id="dayTitle">코스가 이어지는 하루<span>낮 관광에서 저녁, 밤과 숙박까지 이렇게 이어서 기획해요</span></h2><section class="entry-day" aria-label="코스가 이어지는 하루"><div class="day-scene" aria-hidden="true"><svg class="scene-svg" viewBox="0 0 1200 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs><linearGradient id="skyG" x1="0" x2="1"><stop offset="0" stop-color="#FFF4DA"/><stop offset=".42" stop-color="#FFE2BA"/><stop offset=".62" stop-color="#F6B183"/><stop offset=".8" stop-color="#8F5F7B"/><stop offset="1" stop-color="#2A3155"/></linearGradient><linearGradient id="hillG" x1="0" x2="1"><stop offset="0" stop-color="#F4DDB4"/><stop offset=".55" stop-color="#EDB48C"/><stop offset=".8" stop-color="#6E4F6E"/><stop offset="1" stop-color="#363C62"/></linearGradient><linearGradient id="cityG" x1="0" x2="1"><stop offset="0" stop-color="#E7C58F"/><stop offset=".5" stop-color="#D88A5C"/><stop offset=".78" stop-color="#4B3A57"/><stop offset="1" stop-color="#1F2542"/></linearGradient><linearGradient id="groundG" x1="0" x2="1"><stop offset="0" stop-color="#FBEBCB"/><stop offset=".55" stop-color="#F5C9A2"/><stop offset=".8" stop-color="#7A5A74"/><stop offset="1" stop-color="#2C3354"/></linearGradient></defs><rect width="1200" height="260" fill="url(#skyG)"/><circle cx="130" cy="72" r="58" fill="#FFE9B5" opacity=".7"/><circle cx="130" cy="72" r="34" fill="#FFC861"/><g fill="#fff" opacity=".75"><ellipse cx="300" cy="58" rx="48" ry="12"/><ellipse cx="330" cy="50" rx="28" ry="12"/><ellipse cx="470" cy="86" rx="36" ry="9"/></g><path d="M1088 34a26 26 0 1 0 16 47a22 22 0 1 1-16-47z" fill="#FFF0C9"/><g fill="#FFE6A6"><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(980 40) scale(1)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(1040 88) scale(0.7)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(1150 36) scale(0.8)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(1160 110) scale(0.55)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(900 60) scale(0.5)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(1120 140) scale(0.45)"/><path d="M0-7L1.9-1.9 7 0 1.9 1.9 0 7-1.9 1.9-7 0-1.9-1.9z" transform="translate(820 34) scale(0.45)"/></g><path d="M0 196 C120 170 220 184 330 176 S560 160 700 178 S900 150 1010 168 S1140 160 1200 172 V260 H0z" fill="url(#hillG)" opacity=".85"/><g fill="url(#cityG)"><path d="M176 212V148h18v-28l9-26 9 26v28h28v-28l9-26 9 26v28h18v64z"/><rect x="205" y="78" width="2" height="12"/><rect x="200" y="82" width="12" height="2"/><path d="M300 182q50-20 100 0l-8 5q-42-15-84 0z"/><rect x="314" y="186" width="72" height="26"/><path d="M500 212v-38l18-12h204l18 12v38z"/><path d="M880 212q40-46 100-40t60 40z"/><rect x="928" y="96" width="9" height="90"/><ellipse cx="932.5" cy="110" rx="18" ry="10"/><rect x="931.5" y="58" width="2.5" height="42"/><rect x="990" y="160" width="40" height="52"/><rect x="1036" y="146" width="34" height="66"/><rect x="1084" y="166" width="36" height="46"/><rect x="1130" y="154" width="40" height="58"/></g><g fill="#FFD47A"><rect x="1000" y="170" width="5" height="6" rx="1"/><rect x="1012" y="184" width="5" height="6" rx="1"/><rect x="1000" y="198" width="5" height="6" rx="1"/><rect x="1046" y="156" width="5" height="6" rx="1"/><rect x="1058" y="170" width="5" height="6" rx="1"/><rect x="1046" y="184" width="5" height="6" rx="1"/><rect x="1058" y="198" width="5" height="6" rx="1"/><rect x="1094" y="176" width="5" height="6" rx="1"/><rect x="1106" y="190" width="5" height="6" rx="1"/><rect x="1094" y="204" width="5" height="6" rx="1"/><rect x="1140" y="164" width="5" height="6" rx="1"/><rect x="1152" y="178" width="5" height="6" rx="1"/><rect x="1140" y="192" width="5" height="6" rx="1"/><rect x="1152" y="206" width="5" height="6" rx="1"/></g><g class="chick-sign"><rect x="691.5" y="140" width="2.6" height="34" fill="#6b3f22"/><circle cx="693" cy="122" r="19" fill="#C2551F" stroke="#FFD089" stroke-width="2"/><g transform="translate(678 107) scale(1.25)"><path d="M10.6 14.8 5 20" stroke="#8A4B1F" stroke-width="4.4" stroke-linecap="round"/><circle cx="4.1" cy="19.1" r="1.9" fill="#FFF3DC" stroke="#8A4B1F" stroke-width=".8"/><circle cx="5.9" cy="20.9" r="1.9" fill="#FFF3DC" stroke="#8A4B1F" stroke-width=".8"/><path d="M10.6 14.8 5 20" stroke="#FFF3DC" stroke-width="2.6" stroke-linecap="round"/><path d="M8.6 13.9C7.4 10.6 8.4 6.6 11.5 4.6C12.6 3.9 13.4 4.1 14.4 3.6C15.6 3 16.6 2.9 17.7 3.6C18.7 4.2 19 5.1 19.9 5.8C20.9 6.6 21.6 7.4 21.4 8.8C21.3 9.9 20.5 10.6 20.4 11.7C20.3 12.9 20.1 13.9 19 14.8C17.6 15.9 16.3 15.6 15 16C13.6 16.4 12.6 17 11.2 16.5C10 16 9.2 15.2 8.6 13.9Z" fill="#C8701A" stroke="#8A4B1F" stroke-width=".8" stroke-linejoin="round"/><path d="M11.4 7.2c1.1-1.6 2.8-2.4 4.4-2.2" stroke="#F4BE63" stroke-width="1.1" stroke-linecap="round" fill="none"/><g fill="#F4BE63"><circle cx="16.8" cy="8.2" r=".75"/><circle cx="14" cy="10.6" r=".7"/><circle cx="18.4" cy="11.6" r=".6"/><circle cx="12.4" cy="13.4" r=".55"/></g></g></g><g class="steam" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"><path d="M560 150c-5-6 5-10 0-16"/><path d="M590 146c-5-6 5-10 0-16"/><path d="M620 150c-5-6 5-10 0-16"/></g><g fill="#FFC15E" class="lanterns"><circle cx="538" cy="166" r="4.5"/><circle cx="572" cy="162" r="4.5"/><circle cx="606" cy="166" r="4.5"/><circle cx="640" cy="162" r="4.5"/><circle cx="674" cy="166" r="4.5"/><circle cx="708" cy="162" r="4.5"/></g><path d="M520 162 Q620 176 720 162" stroke="#7a4a2a" stroke-width="1.2" fill="none" opacity=".5"/><path d="M0 214 C200 206 380 222 600 216 S980 204 1200 214 V260 H0z" fill="url(#groundG)"/><path d="M40 240 C240 222 400 252 600 236 S900 222 1160 238" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="1 11" opacity=".95"/><g stroke="#fff" stroke-width="3"><circle cx="200" cy="234" r="8" fill="#E69628"/><circle cx="600" cy="236" r="8" fill="#C2551F"/><circle cx="1000" cy="230" r="8" fill="#252D4A"/></g></svg><img class="walker weasel" src="/plan/characters/transparent/weasel-side.png" alt=""><img class="walker raccoon" src="/plan/characters/transparent/raccoon-side.png" alt=""></div><div class="t-day"><span class="t-when">낮</span><b>중구·동구 관광</b><small>근대골목·서문시장 등 운영 중인 곳 위주</small><em class="chick-note">${닭}치킨은 장소 해설·이야기로 가볍게</em></div><div class="t-eve"><span class="t-when">저녁</span><b>대구 음식 중에서 고르기</b><span class="eve-opts"><i class="opt-chicken">${닭}평화시장 닭똥집골목</i><i>동성로 닭요리</i><i>다른 대구 음식</i></span></div><div class="t-night"><span class="t-when">밤</span><b>근거리는 귀가, 원거리는 하룻밤</b><small>야경 → 숙박 → 다음 날 오전 · 가족 코스는 술 없이</small></div></section>`;}
-  const api={문장,짧게,상태,할일,보완요약,위치안내,장소패널,입장화면,닭,치킨장소};
+  function 식사비교(v){
+    const lunch=v.시간칸==='점심';
+    const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const mins=x=>Number.isFinite(x)?x+'분':'자료 없음';
+    const rows=(v.후보이동||[]).map((leg,i)=>{const old=(v.기존이동||[])[i]||{},delta=Number.isFinite(old.분)&&Number.isFinite(leg.분)?leg.분-old.분:null;
+      return `<tr><td>${safe(leg.출발)} → ${safe(leg.도착)}</td><td>${mins(old.분)}</td><td>${mins(leg.분)}${delta===null?'':` (${delta>0?'+':''}${delta}분)`}</td></tr>`;}).join('');
+    return `<h4>${safe(v.이름||v.장소명)} · 경로 비교</h4><p>영업 ${safe(v.운영시간||'미확인')} · 휴무 ${safe(v.휴무||'미확인')}</p><p class="note">지도는 후보 경유 미리보기입니다. 저장된 일정은 바뀌지 않았습니다.</p><table class="meal-comparison"><thead><tr><th>앞뒤 구간 · 도보</th><th>기존</th><th>후보</th></tr></thead><tbody>${rows||'<tr><td colspan="3">인접 방문 장소가 미정입니다.</td></tr>'}</tbody></table>${(v.후보이동||[]).map(l=>`<p class="note">${safe(l.시간근거||'이동 미확인')} · ${safe(l.출처||'')} ${safe(l.확인일||'')}</p>`).join('')}${(v.오류||[]).map(x=>`<p class="meal-error">${safe(x)}</p>`).join('')}${(v.확인필요||[]).length?`<ul class="note">${v.확인필요.map(x=>`<li>${safe(x)}</li>`).join('')}</ul>${lunch?'':`<label class="meal-ack"><input type="checkbox" id="mealAcknowledge"> 남은 확인 사항을 이해하고 초안에 반영합니다.</label>`}`:''}<p class="note">기존 식사 시간·권역과 다른 관광 일정은 유지합니다.${lunch?' 후보 체크 후 묶음을 저장하세요. 식당은 관광객이 선택합니다.':' 다른 식당 이용도 가능합니다.'}</p>${lunch?'':`<button type="button" class="btn primary" id="mealApply" ${v.반영가능&&!v.경로선택됨?'':'disabled'}>이 후보로 반영</button>`}<button type="button" class="btn" id="mealCancel">기존 경로로 돌아가기</button><p id="mealMessage" role="status"></p>`;
+  }
+  function 개인식사안내(candidate){
+    if(!candidate)return '<section class="personal-meal-result"><h4>내 점심을 골라보세요</h4><p>아래 식당 이름을 누르면 이 지도의 식당 위치와 이동시간이 바뀝니다.</p></section>';
+    const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const mins=n=>Number.isFinite(n)?n+'분':'자료 없음';
+    return `<section class="personal-meal-result"><h4>내 점심 · ${safe(candidate.이름||candidate.장소명)}</h4>${(candidate.후보이동||[]).map((leg,i)=>{
+      const before=candidate.기존이동?.[i]?.분,after=leg.분,delta=Number.isFinite(before)&&Number.isFinite(after)?after-before:null;
+      return `<p>${safe(leg.출발)} → ${safe(leg.도착)}<br><strong>이동 ${mins(before)} → ${mins(after)}</strong>${delta===null?'':` · ${delta===0?'변경 없음':Math.abs(delta)+'분 '+(delta<0?'감소':'증가')}`}</p>`;
+    }).join('')}<p>이 식당을 거치도록 개인 지도를 바꿨어요. 나머지 일정과 시간은 그대로예요.</p><small>왼쪽 목록과 지도에서 ‘내 점심’을 확인하세요. 직원이 저장한 공통 코스는 바뀌지 않습니다.</small></section>`;
+  }
+  const api={문장,짧게,상태,할일,보완요약,위치안내,장소패널,식사비교,개인식사안내,입장화면,닭,치킨장소};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   root.기획표시=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
@@ -97,7 +124,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const plain=s=>esc(기획표시.문장(s));
 const short=s=>esc(기획표시.짧게(s));
 const slotName=s=>({'낮오후':'오후','2일차오전':'둘째 날 오전'}[s]||s);
-const stopName=s=>기획표시.문장((s.표시명||s.장소명||(s.시간칸==='2일차오전'?'둘째 날 오전':slotName(s.시간칸))||'일정 미정').split(/\s*[—–]\s*/)[0]);
+const stopName=s=>s.개인선택후보?`내 ${s.시간칸||'식사'} · ${s.개인선택후보}`:기획표시.문장((s.표시명||s.장소명||(s.시간칸==='2일차오전'?'둘째 날 오전':slotName(s.시간칸))||'일정 미정').split(/\s*[—–]\s*/)[0]);
 async function get(url){const r=await fetch(url);const d=await r.json();if(!r.ok)throw new Error(d.오류||'불러오기 실패');return d;}
 let token=null,poll=null,tick=null,last=null,savedItems=null;
 async function post(url,body){
@@ -316,7 +343,10 @@ function showRecord(id,cond,rec){
   const 분=rec.분류||{};
   const 검사=`<h3>검사 원문</h3><p class="note">아래는 팀 검토용 기록이에요. 같은 확인 항목이 여러 검사에서 반복될 수 있어요.</p><div class="three">${Object.keys(분류이름).map(k=>`<div class="col c-${k}"><b>${분류이름[k][0]} <span class="cnt">${(분[k]||[]).length}</span><span class="sr-only"> · ${esc(rec.안id)}안 ${rec.버전}버전</span></b><ul>${(분[k]||[]).map(x=>`<li>${esc(x.문구)}<small> · ${esc(x.출처)}</small></li>`).join('')||'<li class="none">없음</li>'}</ul></div>`).join('')}</div>`;
   const 기=rec.부분수정기록;
-  const 부분=기?`<section class="edit-result"><h3>이번 수정 내역</h3><p>${plain(기.요청)}</p>${기.변경목록?.length?`<ul>${기.변경목록.map(t=>`<li>${plain(t)}</li>`).join('')}</ul>`:''}<p class="note">${plain(기.안내||'변경된 일정과 남은 확인 사항을 검토해 주세요.')}</p></section>`:'';
+  const 식사기록=rec.식사선택기록?.버전===rec.버전?rec.식사선택기록:null;
+  const 묶음기록=rec.식사후보묶음기록?.버전===rec.버전?rec.식사후보묶음기록:null;
+  const 묶음변경=묶음기록?`<section class="edit-result"><h3>점심 후보 묶음 저장</h3><p>${(묶음기록.후보||[]).map(plain).join(' · ')}</p><p>${plain(묶음기록.안내)}</p><p class="note">관광객 공개 전 방문일·시각·운영·이동 확인이 필요합니다. QR 화면 연결은 별도입니다.</p></section>`:'';
+  const 부분=식사기록?`<section class="edit-result"><h3>이번 식사 후보 반영</h3><p>${plain(식사기록.이전장소)} → ${plain(식사기록.장소명)}</p><p>${plain(식사기록.안내)}</p><p class="note">${(식사기록.확인필요||[]).map(plain).join(' · ')}</p></section>`:기?`<section class="edit-result"><h3>이번 수정 내역</h3><p>${plain(기.요청)}</p>${기.변경목록?.length?`<ul>${기.변경목록.map(t=>`<li>${plain(t)}</li>`).join('')}</ul>`:''}<p class="note">${plain(기.안내||'변경된 일정과 남은 확인 사항을 검토해 주세요.')}</p></section>`:'';
   const chips=[cond.계절,(cond.언어권||[]).join('·'),(cond.지역||[]).join('·'),cond.체류기간].filter(Boolean);
   main.innerHTML=`<div class="cond">${chips.map(c=>`<span class="chip">${esc(c)}</span>`).join('')}</div>
     <section class="card ai recommendation"><div class="aihead"><span class="aibadge">코스 초안</span><h2>코스 제안</h2><span class="draft-badge">확정 전 초안</span>${s.코스있음?`<button class="btn primary compare-map-button" id="openMap" title="동선 · 시간표">지도 크게 보기 ↗</button>`:''}</div>
@@ -327,7 +357,7 @@ function showRecord(id,cond,rec){
       ${이전?'<div class="review-status state-대기"><b>이전 수정본을 보고 있어요</b><p>최신 코스로 돌아가서 현재 검토 내용을 확인해 주세요.</p><button class="btn" id="latestPlan">최신 코스 보기</button></div>':''}
       <div class="review-status state-${상태.종류}" role="status"><b>${esc(상태.제목)}</b><p>${esc(상태.설명)}</p>${주요확인.length?`<ul>${주요확인.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div>
       ${s.출발가능요일?.length?`<p class="departure"><b>출발 요일 참고</b> ${esc(s.출발가능요일.join(' · '))}<span class="note">정기휴무 기준이에요. 운영 변경 여부는 출발 전 확인해 주세요.</span></p>`:''}
-      ${부분}${alt}${required}</div></div></section>
+      ${묶음변경||부분}${alt}${required}</div></div></section>
     <section class="card freedom"><h3>어디까지 자유롭게 이용하나요?</h3><p>표시된 순서와 시각은 권장 일정이에요. 관광·식사는 장소의 운영시간 안에서 선택할 수 있도록 기획합니다.</p><p class="note">예약이나 이용권에 실제로 정해진 시간이 있다면 그 조건을 따라야 해요. 미정인 사용처·유효시간·포함 혜택은 아직 확정된 상품 조건이 아니에요. 집결·해산이나 숙소 예약을 먼저 입력할 필요는 없어요.</p></section>
     ${wish}
     <details class="card"><summary>코스 수정하기 · 바꾸고 싶은 부분이 있나요?</summary>${코스편집.화면(rec,이전)}</details>
@@ -340,8 +370,9 @@ function showRecord(id,cond,rec){
   코스편집.연결(main,rec,async payload=>{const r=await post('/api/plan/revise',payload);
     showProgress(r);watch(r.기획id);window.scrollTo({top:0,behavior:'smooth'});});
 }
-let mapController=null,mapVersion=0,explorerStops=[],selectedStop=null,returnFocus=null;
+let mapController=null,mapVersion=0,explorerStops=[],selectedStop=null,returnFocus=null,mealContext={},mealRequest=0,mealPreview=null;
 function closeMap(){
+  mealRequest++;mealPreview=null;
   const view=$('mapView');if(!view||view.hidden)return;
   mapVersion++;mapController?.destroy();mapController=null;view.hidden=true;setView('course');
   document.body.classList.remove('map-open');
@@ -349,6 +380,7 @@ function closeMap(){
   (returnFocus?.isConnected?returnFocus:$('openMap'))?.focus();
 }
 function openMap(stops,context={}){
+  mealContext=context;mealRequest++;mealPreview=null;
   let view=$('mapView');
   if(!view){
     view=document.createElement('section');view.id='mapView';view.className='map-explorer';view.hidden=true;
@@ -395,27 +427,103 @@ function openMap(stops,context={}){
   $('backCompare').focus();draw(explorerStops);
 }
 function selectStop(number,fromMap=false){
+  if(mealPreview){mealRequest++;mealPreview=null;draw(explorerStops);}
   const stop=explorerStops.find(s=>s.순번===number);if(!stop)return;
   selectedStop=number;
   const view=$('mapView'),panel=$('placePanel');view.classList.add('place-open');panel.hidden=false;
   panel.innerHTML=기획표시.장소패널(stop);
   view.querySelectorAll('[data-stop]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.stop)===number)));
   panel.querySelector('[data-place-close]').onclick=()=>{
+    mealRequest++;if(mealPreview){mealPreview=null;draw(explorerStops);}
     panel.hidden=true;view.classList.remove('place-open');view.querySelector(`[data-stop="${number}"]`)?.focus();
   };
   const report=panel.querySelector('[data-place-report]');
   if(report)report.onsubmit=async e=>{e.preventDefault();const msg=report.querySelector('[data-report-msg]');
     try{const r=await post('/api/place-review/report',{장소명:stop.장소명,내용:report.내용.value});msg.textContent=r.안내;report.내용.value='';}
     catch(err){msg.textContent=err.message;}};
-  panel.querySelectorAll('[data-explore-candidate]').forEach(button=>button.onclick=()=>{const index=Number(button.dataset.exploreCandidate);showCandidate(number,index);mapController?.previewCandidate?.(number,index);});
+  panel.querySelectorAll('[data-explore-candidate]').forEach(button=>button.onclick=()=>showCandidate(number,Number(button.dataset.exploreCandidate)));
+  const save=panel.querySelector('#mealBundleSave');
+  if(save)save.onclick=()=>saveMealBundle(number);
+  const tourist=panel.querySelector('#mealTouristPreview');
+  if(tourist)tourist.onclick=()=>showTouristPreview(number);
   if(!fromMap)mapController?.selectStop?.(number,{notify:false});
 }
-function showCandidate(number,index){
+async function saveMealBundle(number){
+  const stop=explorerStops.find(s=>s.순번===number),context=mealContext,rec=context.rec;
+  const msg=$('bundleMessage'),button=$('mealBundleSave');if(!rec||!stop)return;
+  const names=Array.from($('placePanel').querySelectorAll('[data-meal-option]:checked')).map(n=>stop.식당후보[Number(n.dataset.mealOption)]?.장소명);
+  if(names.length<2){msg.textContent='관광객이 고를 후보를 2개 이상 체크해 주세요.';return;}
+  const request=++mealRequest;button.disabled=true;msg.textContent='선택한 후보들의 앞뒤 이동·운영을 확인하는 중…';
+  try{
+    await post('/api/plan/meal/bundle',{시험id:context.id,안id:rec.안id,기준버전:rec.버전,칸ID:stop.칸ID,
+      후보:names,미확인동의:!!$('bundleAcknowledge')?.checked});
+    if(context!==mealContext||request!==mealRequest||$('mapView').hidden)return;
+    const next=await get('/api/plan/record?id='+encodeURIComponent(context.id)+'&안='+encodeURIComponent(rec.안id));
+    if(context!==mealContext||request!==mealRequest||$('mapView').hidden)return;
+    showRecord(context.id,context.cond||{},next);openMap(next.요약.일정,{...context,rec:next});selectStop(number);
+    $('bundleMessage').textContent='후보 묶음을 저장했습니다. 식당 선택은 관광객이 합니다. 다른 일정은 그대로입니다.';
+  }catch(e){if(msg.isConnected){msg.textContent=e.message;button.disabled=false;}}
+}
+async function showTouristPreview(number){
+  const stop=explorerStops.find(s=>s.순번===number),context=mealContext,rec=context.rec,request=++mealRequest;
+  const panel=$('candidatePreview');if(!rec||!stop||!panel)return;
+  panel.textContent='저장된 관광객 후보 묶음을 불러오는 중…';
+  try{
+    const bundle=await get('/api/plan/meal/options?id='+encodeURIComponent(context.id)+'&안='+encodeURIComponent(rec.안id)+'&버전='+rec.버전);
+    if(context!==mealContext||request!==mealRequest||selectedStop!==number||$('mapView').hidden)return;
+    const pack=bundle.식사묶음.find(p=>p.칸ID===stop.칸ID);
+    if(!pack)throw Error('후보 묶음을 먼저 저장하세요.');
+    const session=코스지도모델.personalMeals(bundle,window.localStorage,{preview:true});
+    const render=()=>{
+      const state=session.snapshot();mealPreview={number};draw(state.일정);
+      const chosen=pack.후보.find(c=>c.장소명===state.선택[stop.칸ID]);
+      panel.innerHTML=`<h4>관광객 선택 동작 · 비공개 미리보기</h4><p class="note">이예진님 QR 페이지를 대신하는 페이지가 아닙니다. 저장한 후보와 개인 지도 연결 동작만 확인합니다. ${pack.공개준비?'운영·이동 자료의 코드 점검을 충족했습니다.':'현재는 방문일·시각·운영 등 확인이 남은 초안입니다. 관광객 공개 준비 중입니다.'}</p><p>이 기기의 미리보기 선택: <b>${esc(state.선택[stop.칸ID]||'아직 선택하지 않음')}</b></p>
+        ${기획표시.개인식사안내(chosen)}${pack.후보.map((c,i)=>`<button type="button" class="candidate-choice" data-personal-meal="${i}" aria-pressed="${state.선택[stop.칸ID]===c.장소명}" ${(c.오류||[]).length?'disabled':''}>${esc(c.이름)}${state.선택[stop.칸ID]===c.장소명?' · 선택됨':''}</button><p class="note">${esc([...(c.오류||[]),...(c.확인필요||[])].join(' · '))}</p>`).join('')}
+        <p class="note">개인 선택만 이 브라우저에 저장됩니다. 공통 코스·다른 관광객·직원의 후보 묶음은 변경되지 않습니다. 실제 관광객 선택과 미리보기 저장은 분리됩니다.</p><button type="button" class="btn" id="personalClear">개인 선택 초기화</button><button type="button" class="btn" id="personalClose">직원 후보 구성으로 돌아가기</button><p id="personalMessage" role="status"></p>`;
+      panel.querySelectorAll('[data-personal-meal]').forEach(b=>b.onclick=()=>{
+        try{session.select(stop.칸ID,pack.후보[Number(b.dataset.personalMeal)].장소명);render();}
+        catch(e){$('personalMessage').textContent=e.message;}
+      });
+      $('personalClear').onclick=()=>{try{session.clear(stop.칸ID);render();}catch(e){$('personalMessage').textContent=e.message;}};
+      $('personalClose').onclick=()=>selectStop(number,true);
+    };render();
+  }catch(e){if(request===mealRequest&&panel.isConnected)panel.textContent=e.message;}
+}
+async function showCandidate(number,index){
   const stop=explorerStops.find(s=>s.순번===number),candidate=stop?.식당후보?.[index];if(!candidate)return;
   if(selectedStop!==number)selectStop(number,true);
-  const panel=$('candidatePreview');if(panel)panel.innerHTML=`<p><b>${esc(candidate.이름)}</b></p><p class="note">후보 미리보기 · 방문 확정은 바뀌지 않습니다.${candidate.좌표?'':' 위치는 확인 중입니다.'}</p>`;
+  const panel=$('candidatePreview'),rec=mealContext.rec,request=++mealRequest;
+  if(mealPreview){mealPreview=null;draw(explorerStops);}
+  if(!rec||!candidate.장소명){if(panel)panel.textContent='기획 기록이 있는 최신 코스에서 후보를 비교해 주세요.';return;}
+  panel.textContent='앞뒤 경로와 영업 조건을 비교하는 중…';
+  const value={시험id:mealContext.id,안id:rec.안id,기준버전:rec.버전,칸ID:stop.칸ID,장소명:candidate.장소명};
+  try{
+    const report=await post('/api/plan/meal/preview',value);
+    if(request!==mealRequest||selectedStop!==number||$('mapView').hidden)return;
+    mealPreview={number,report};panel.innerHTML=기획표시.식사비교(report);
+    if(report.권역반경m)panel.insertAdjacentHTML('afterbegin',`<p class="note">기존 식사 기준점 반경 ${Number(report.권역반경m)}m 안에서 비교하는 초안 기준입니다. 권역·다른 일정은 자동 확장하지 않습니다.</p>`);
+    if(report.좌표)draw(코스지도모델.candidateStops(explorerStops,number,report));
+    $('mealCancel').onclick=()=>{mealRequest++;mealPreview=null;draw(explorerStops);selectStop(number,true);};
+    if($('mealApply'))$('mealApply').onclick=async()=>{
+      const activeContext=mealContext;
+      const button=$('mealApply'),message=$('mealMessage');
+      if($('mealAcknowledge')&&!$('mealAcknowledge').checked){message.textContent='남은 확인 사항을 읽고 체크해 주세요.';return;}
+      button.disabled=true;
+      try{
+        await post('/api/plan/meal/apply',{...value,미확인동의:!!$('mealAcknowledge')?.checked});
+        if(mealContext!==activeContext||mealRequest!==request||$('mapView').hidden)return;
+        const next=await get('/api/plan/record?id='+encodeURIComponent(mealContext.id)+'&안='+encodeURIComponent(rec.안id));
+        if(mealContext!==activeContext||mealRequest!==request||$('mapView').hidden)return;
+        const context={...mealContext,rec:next};showRecord(context.id,context.cond||{},next);openMap(next.요약.일정,context);selectStop(number);
+      }catch(e){message.textContent=e.message;button.disabled=false;}
+    };
+  }catch(e){if(request===mealRequest&&panel.isConnected)panel.textContent=e.message;}
 }
 function draw(stops){
+  for(const s of stops){
+    const name=$('mapView')?.querySelector(`[data-stop="${Number(s.순번)}"] b`);
+    if(name)name.innerHTML=(기획표시.치킨장소(stopName(s))?기획표시.닭:'')+esc(stopName(s));
+  }
   const version=++mapVersion;mapController?.destroy();mapController=null;
   const box=$('mapbox');box.innerHTML='<p class="note">큰 지도를 불러오는 중…</p>';
   import('/plan/three-map.js').then(m=>{

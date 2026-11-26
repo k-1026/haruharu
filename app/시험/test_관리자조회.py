@@ -64,6 +64,53 @@ class 조회시험(unittest.TestCase):
     def test_빈runs(self):
         self.assertEqual(결과저장소(Path(self.tmp.name) / '없는폴더').목록(), [])
 
+    def test_한글이름_기획과_검사예제도_목록과_코스로_조회한다(self):
+        from app.서버.관리자실행 import 코스시험
+        서비스 = 코스시험(self.store)
+        for 이름 in ['최신기획', '검사예제_코스', '검사예제_입력']:
+            회차 = self.root / 이름 / '01회차'
+            시험 = 회차 / '통합시험_120000_000001'
+            시험.mkdir(parents=True)
+            self.assertEqual(서비스._원본(이름 + '/01회차'), 회차)
+            self.assertEqual(서비스._시험(이름 + '/01회차/' + 시험.name), 시험)
+        (self.root / '기관업로드' / '01회차').mkdir(parents=True)
+        self.assertEqual({r['실행'] for r in self.store.목록()},
+                         {'20261122_131912', '최신기획', '검사예제_코스', '검사예제_입력'})
+
+    def test_최근기획은_폴더이름보다_실제시작시각을_따른다(self):
+        from app.공통.기획실행 import 기획실행
+        from app.서버.관리자실행 import 코스시험
+        서비스 = 기획실행(코스시험(self.store))
+        for 이름, 시각 in [('최신기획', '2026-11-26T12:07:25+09:00'),
+                            ('20261127_100000', '2026-11-27T10:00:00+09:00')]:
+            회차 = self.root / 이름 / '01회차'
+            회차.mkdir(parents=True)
+            (회차 / '기획_진행.json').write_text(json.dumps(
+                {'기획id': 이름 + '/01회차', '시작시각': 시각, '상태': '완료'}), encoding='utf-8')
+        self.assertEqual(서비스.상태('최신기획/01회차')['상태'], '완료')
+        self.assertEqual(서비스.최근()['기획id'], '20261127_100000/01회차')
+
+    def test_한글기획도_홍보목록과_문서경로를_읽는다(self):
+        from app.공통 import 기획기록
+        from app.공통.기획실행 import 기획실행
+        from app.서버.관리자실행 import 코스시험
+        from app.단계4_홍보검토.홍보실행 import 홍보실행
+        서비스 = 홍보실행(기획실행(코스시험(self.store)))
+        키 = '최신기획/01회차/홍보_20261126_130000'
+        폴더 = self.root / 키
+        폴더.mkdir(parents=True)
+        시험키 = '최신기획/01회차/통합시험_120000_000001'
+        (self.root / 시험키).mkdir()
+        기록 = 기획기록.새_기록({}, '사람:시험', 기록id=시험키.split('/')[-1])
+        기획기록.추가(기록, '코스안', {'안id': 'A', '버전': 1, '코스': {}}, '코드:시험')
+        기획기록.저장(기록, self.root)
+        (폴더 / '홍보_진행.json').write_text(json.dumps(
+            {'홍보id': 키, '상태': '홍보완료', '시험id': 시험키, '안id': 'A', '버전': 1}), encoding='utf-8')
+        self.assertEqual(서비스._홍보폴더(키), 폴더)
+        self.assertEqual(서비스.목록('최신기획/01회차')[0]['홍보id'], 키)
+        with self.assertRaises(ValueError):
+            서비스._홍보폴더('최신기획/../홍보_20261126_130000')
+
 
 if __name__ == '__main__':
     unittest.main()

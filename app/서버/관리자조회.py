@@ -7,6 +7,7 @@ import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
+from app.공통.실행경로 import 실행이름_형식
 
 기준 = Path(__file__).resolve().parents[1]
 
@@ -132,7 +133,7 @@ class 결과저장소:
             return []
         목록 = []
         for 실행 in sorted(self.루트.iterdir(), reverse=True):
-            if not 실행.is_dir() or 실행.is_symlink() or not re.fullmatch(r'\d{8}_\d{6}', 실행.name):
+            if not 실행.is_dir() or 실행.is_symlink() or not re.fullmatch(실행이름_형식, 실행.name):
                 continue
             회차들 = [p for p in sorted(실행.iterdir()) if p.is_dir() and not p.is_symlink() and re.fullmatch(r'\d+회차', p.name)]
             for 폴더 in 회차들 or [실행]:
@@ -178,11 +179,13 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서�
         def 호스트확인(self):
             return self.headers.get('Host') in [f'127.0.0.1:{self.server.server_port}', f'localhost:{self.server.server_port}']
 
-        def 응답(self, 상태, 본문, 타입='application/json; charset=utf-8', 보안=None):
+        def 응답(self, 상태, 본문, 타입='application/json; charset=utf-8', 보안=None, 다운로드=None):
             데이터 = 본문 if isinstance(본문, bytes) else json.dumps(본문, ensure_ascii=False).encode('utf-8')
             self.send_response(상태)
             self.send_header('Content-Type', 타입)
             self.send_header('Content-Length', str(len(데이터)))
+            if 다운로드:
+                self.send_header('Content-Disposition', 'attachment; filename="' + 다운로드 + '"')
             self.send_header('Cache-Control', 'no-store')
             self.send_header('X-Content-Type-Options', 'nosniff')
             self.send_header('Content-Security-Policy', 보안 or "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-ancestors 'none'")
@@ -217,6 +220,11 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서�
                     return self.응답(200, 기획서비스.상태(인자.get('id', [''])[0]))
                 if 경로.path == '/api/plan/record':
                     return self.응답(200, 기획서비스.기록보기(인자.get('id', [''])[0], 인자.get('안', [None])[0], 인자.get('버전', [None])[0]))
+                if 경로.path == '/api/plan/meal/options':
+                    version=인자.get('버전',[''])[0]
+                    if not version.isdigit():raise ValueError('코스 기준 버전이 필요합니다.')
+                    return self.응답(200, 기획서비스.관광객식사({'시험id':인자.get('id',[''])[0],
+                        '안id':인자.get('안',['A'])[0],'기준버전':int(version)}))
                 if 경로.path == '/api/plan/latest':
                     return self.응답(200, {'기획': 기획서비스.최근()})
                 if 경로.path == '/api/promo/prepare':
@@ -225,6 +233,23 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서�
                     return self.응답(200, {'목록': 홍보서비스.목록(인자.get('id', [''])[0])})
                 if 경로.path == '/api/promo/result':
                     return self.응답(200, 홍보서비스.결과(인자.get('id', [''])[0]))
+                if 경로.path in ['/plan/design', '/plan/design.zip']:
+                    hid = 인자.get('id', [''])[0]
+                    origin = f'http://127.0.0.1:{self.server.server_port}'
+                    if 경로.path.endswith('.zip'):
+                        return self.응답(200, 홍보서비스.디자인묶음(hid, origin), 'application/zip', 다운로드='haruharu-promotion.zip')
+                    return self.응답(200, 홍보서비스.디자인문서(hid, origin, 인자.get('lang', ['한국어'])[0]), 'text/html; charset=utf-8',
+                        "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'")
+                if 경로.path == '/tour':
+                    hid = 홍보서비스.랜딩기록(인자['c'][0]) if 인자.get('c') else 인자.get('id', [''])[0]
+                    return self.응답(200, 홍보서비스.랜딩문서(hid), 'text/html; charset=utf-8',
+                        "default-src 'self'; script-src 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; frame-ancestors 'self'")
+                if 경로.path.startswith('/랜딩_이미지/') or 경로.path.startswith('/%EB%9E%9C%EB%94%A9_'):
+                    from urllib.parse import unquote
+                    name = unquote(경로.path).removeprefix('/랜딩_이미지/')
+                    if name not in {p.name for p in (기준.parent / '정리본/랜딩_이미지').glob('*.webp')}:
+                        raise ValueError('이미지 이름을 확인하세요.')
+                    return self.응답(200, (기준.parent / '정리본/랜딩_이미지' / name).read_bytes(), 'image/webp')
                 if 경로.path == '/plan/doc':
                     # 산출물 HTML은 내려받아도 혼자 열리도록 스타일·그림을 파일 안에 담는다. 스크립트는 허용하지 않는다.
                     return self.응답(200, 홍보서비스.문서(인자.get('id', [''])[0], 인자.get('kind', [''])[0]), 'text/html; charset=utf-8',
@@ -320,10 +345,18 @@ def 핸들러(저장소, 실행서비스=None, 기획서비스=None, 홍보서�
                     return self.응답(201, 장소서비스.신고(값))
                 if self.path == '/api/plan/revise':
                     return self.응답(202, 기획서비스.수정시작(값))
+                if self.path == '/api/plan/meal/preview':
+                    return self.응답(200, 기획서비스.식사비교(값))
+                if self.path == '/api/plan/meal/apply':
+                    return self.응답(201, 기획서비스.식사반영(값))
+                if self.path == '/api/plan/meal/bundle':
+                    return self.응답(201, 기획서비스.식사묶음반영(값))
                 if self.path == '/api/promo/start':
                     return self.응답(202, 홍보서비스.시작(값))
+                if self.path == '/api/plan/confirm':
+                    return self.응답(201, 홍보서비스.코스확정(값))
                 if self.path == '/api/promo/deliver':
-                    return self.응답(201, 홍보서비스.산출물(값))
+                    return self.응답(201, 홍보서비스.산출물(값, f'http://127.0.0.1:{self.server.server_port}'))
                 if self.path == '/api/plan/start':
                     return self.응답(202, 기획서비스.시작(값))
                 if self.path == '/api/course/save':
