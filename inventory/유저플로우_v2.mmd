@@ -1,0 +1,63 @@
+flowchart TD
+  subgraph S1["1 · 기획 조건과 자료 업로드"]
+    START(["기획 시작"]) --> INPUT["담당자 · 계절 / 언어권 / 지역 / 기간<br/>목표 · 대상 · 희망 입력"]
+    INPUT --> HASFILE{"보유 자료 사용?"}
+    HASFILE -->|"CSV / XLSX"| UPLOAD["코드 · 파일 수신 / 시트별 미리보기"]
+    UPLOAD --> APPLY["담당자 · 시트와 내용 확인 → 이 자료 적용"]
+    APPLY --> DATA["코드 · 기존 자료 + 적용 자료<br/>근거 ID · 원본 행 · 제외 사유 보존"]
+    HASFILE -->|"업로드 없음 · 기존 자료만"| DATA
+  end
+  subgraph S2["2 · 실제 AI 기획과 검증"]
+    DATA --> DEMAND["AI · 수요 근거 요약"]
+    DEMAND --> COURSE["AI · 코스 A/B 구성 · 총괄 판단"]
+    COURSE --> COLLECT{"보완 자료 필요?"}
+    COLLECT -->|"필요 · 한도 내"| GATHER["AI · 자료수집"]
+    GATHER --> CHECK["코드 검사 + 독립 검증 AI<br/>필수 조건 · 시간 · 근거 확인"]
+    COLLECT -->|"현재 자료로 검토"| CHECK
+    CHECK --> COMPARE["담당자 · A/B 비교 · 지도 검토<br/>B 미생성은 사유 표시"]
+  end
+  subgraph S3["3 · 중간 수정 · 재검증 · 최신 버전 확정"]
+    COMPARE --> EDIT{"코스 수정?"}
+    EDIT -->|"수정"| REQUEST["담당자 · 개별 일정 / 하루 / 전체<br/>범위 · 변경 요청 지정"]
+    REQUEST --> REVISE["AI · 요청 범위 수정<br/>코드 검사 + 독립 AI 재검증"]
+    REVISE --> LATEST["담당자 · 만든 코스 보기<br/>새 버전 · 이번 수정 내역 확인"]
+    LATEST --> COMPARE
+    EDIT -->|"이 안으로 홍보 준비"| CURRENT{"선택한 최신 안·버전이<br/>이미 확정됐나?"}
+    CURRENT -->|"아니오"| CONFIRM["담당자 · 이 코스로 확정<br/>제목 자동 제안 · 수정 선택"]
+    CURRENT -->|"예 · 확정 창 생략"| DESIGN
+    CONFIRM --> DESIGN
+  end
+  subgraph S4["4 · 확정 코스 홍보 · 공개 미리보기"]
+    DESIGN["담당자 · 읽기 전용 코스 확인<br/>톤 · 홍보물 종류 선택"]
+    DESIGN --> SNAPSHOT["서버 · 확정 최신 코스 전체 사본 전달<br/>미확정 · 구버전 차단 / 원본 보존"]
+    SNAPSHOT --> PROMO["AI · 홍보 문구 · 번역 · 장면 계획"]
+    PROMO --> REVIEW["담당자 · 문구 / 번역 / 표현 검토<br/>공개 제외 내역 확인"]
+    REVIEW --> EXPRESSION{"수정 필요 표현 처리?"}
+    EXPRESSION -->|"미처리 · 수정 필요"| HOLD["최종 파일 생성 대기<br/>근거 검토 · 처리 / AI 재생성"]
+    HOLD --> REVIEW
+    REVIEW -. "문구·번역 새로 생성 · AI 호출" .-> PROMO
+    REVIEW -. "코스 변경 필요 · 최신 버전 재확정" .-> REQUEST
+    EXPRESSION -->|"처리 후 검토"| PUBLIC["코드 · 공개 사본 / 디자인 / 코스별 QR<br/>내부 경고·검토 상태 제외 · 출처 유지"]
+    PUBLIC --> PREVIEW["담당자 · 디자인 · 언어별 미리보기<br/>QR로 같은 코스 랜딩 확인"]
+  end
+  subgraph S5["5 · 최종 파일과 다운로드"]
+    PREVIEW --> SUMMARY["담당자 · 검토 사항 · 최종 요약 확인"]
+    SUMMARY --> FILES["코드 · 저장 결과 조립 · 대조<br/>결재 파일 / 제안서 / 홍보물 HTML"]
+    FILES --> DOWNLOAD(["담당자 · 문서 열기 · 인쇄/PDF 저장<br/>디자인 ZIP 다운로드"])
+    DOWNLOAD -. "변경사항으로 파일 갱신 · AI 없음" .-> FILES
+  end
+  KEEP["보존 규칙 · 잠근 조건 / 다른 일정 / 이전 버전<br/>수정한 새 버전은 다시 확인·확정"]
+  REVISE -.-> KEEP
+  LIMIT["공개·운영 범위 · 식사 개별 선택·개별 결제<br/>로컬 QR / 운영·원어민·실기기·인쇄 검증 별도"]
+  PREVIEW -.-> LIMIT
+
+  classDef person fill:#eff6ff,stroke:#2563eb,color:#16365b
+  classDef ai fill:#f3efff,stroke:#7953bc,color:#452c70
+  classDef code fill:#ecf9f5,stroke:#23866c,color:#145746
+  classDef decision fill:#fff8e6,stroke:#be8514,color:#674700
+  classDef note fill:#fff4f2,stroke:#c65f4c,color:#793c31
+  class INPUT,APPLY,COMPARE,REQUEST,LATEST,CONFIRM,DESIGN,REVIEW,PREVIEW,SUMMARY person
+  class DEMAND,COURSE,GATHER,PROMO ai
+  class UPLOAD,DATA,CHECK,REVISE,SNAPSHOT,PUBLIC,FILES code
+  class HASFILE,COLLECT,EDIT,CURRENT,EXPRESSION decision
+  class HOLD,KEEP,LIMIT note
