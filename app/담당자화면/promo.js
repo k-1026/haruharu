@@ -1,6 +1,6 @@
 // 담당자 화면 ④ 홍보물(4단계) · ⑤ 최종 산출물(5단계).
 // 코스 화면 아래에 '다음 단계' 카드를 붙이고, 확인 → 홍보 초안 → 산출물 순서로 보여 준다.
-// 원본 코스·검사 기록은 고치지 않는다. 확정값은 담당자가 이 화면에서 직접 고른 것만 보낸다.
+// 원본 코스·검사 기록은 고치지 않는다. 확정한 안·버전과 홍보 디자인 설정만 보낸다.
 (function(){
 // 지침의 캐릭터 이름(포롱이=너구리, 여울이=족제비)이 바뀌어도 같은 그림을 고른다
 const 캐릭터별칭={너구리:'너구리',포롱이:'너구리',raccoon:'너구리',족제비:'족제비',여울이:'족제비',weasel:'족제비'};
@@ -8,10 +8,14 @@ const 캐릭터=n=>캐릭터별칭[String(n??'').trim()]||null;
 const 그림=n=>캐릭터(n)==='너구리'?'raccoon':'weasel';
 function 재생성설정(p,ctx){
   const previous=ctx.이전확인||{};
-  return {기본값:{...p.기본값,...(ctx.이전버전===p.버전?previous:{})},
+  return {기본값:{...p.기본값},
     톤앤매너:previous.톤앤매너||'A+B',홍보물:previous.홍보물||p.선택지.홍보물.slice(0,2)};
 }
-if(typeof module!=='undefined')module.exports={캐릭터,그림,재생성설정};
+function 확정요약(p){
+  const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return '<div class="course-card"><b>'+e(p.코스확정?.코스이름||p.기본값.코스이름)+'</b><p>'+e(p.안id)+'안 · '+e(p.버전)+'버전 · 확정한 코스를 그대로 사용해요.</p><details><summary>사용할 일정 보기 · 변경은 코스 화면에서</summary><ol>'+(p.코스요약||[]).map(r=>'<li>'+e(r.일차)+'일차 · '+e(r.시간칸)+' · '+e(r.장소명)+'</li>').join('')+'</ol></details></div>';
+}
+if(typeof module!=='undefined')module.exports={캐릭터,그림,재생성설정,확정요약};
 if(typeof document==='undefined')return;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -37,7 +41,7 @@ async function 붙이기(main,ctx){
   const tech=main.querySelector('.technical');tech?main.insertBefore(sec,tech):main.append(sec);
   sec.innerHTML=`<div class="next-head"><div><span class="step-no">다음 단계</span><h3>코스 확정 → 홍보물 · 랜딩페이지</h3>
     <p class="note">이 코스로 정하면 홍보 검토 에이전트가 장면별 문구·번역 초안·캐릭터 시안을 만들고, 이어서 결재 파일·제안서·홍보물 묶음을 만들어요.</p></div>
-    <button class="btn primary" id="promoGo">${esc(ctx.rec.안id)}안 확인하고 코스 확정</button></div><div id="promoList"></div>`;
+    <button class="btn primary" id="promoGo">${esc(ctx.rec.안id)}안으로 홍보 준비</button></div><div id="promoList"></div>`;
   $('promoGo').onclick=()=>코스확정화면(ctx,()=>확인화면(ctx));
   try{const {목록}=await get('/api/promo/list?id='+encodeURIComponent(ctx.rec.기획id));
     if(목록.length)$('promoList').innerHTML=`<p class="note">이 기획에서 만든 홍보물</p><div class="promo-runs">${목록.map(x=>`<button class="promo-run" data-id="${esc(x.홍보id)}"><b>${esc(x.코스이름||'코스 이름 미정')}</b> <span class="st st-${esc(x.상태)}">${esc(상태말[x.상태]||x.상태)}</span><br><small>${esc(x.안id)}안 ${esc(x.버전)}버전 · ${esc((x.시작시각||'').replace('T',' ').slice(0,16))}</small></button>`).join('')}</div>`;
@@ -49,6 +53,7 @@ async function 코스확정화면(ctx,다음){
   const main=$('main');let p;
   try{p=await get(`/api/promo/prepare?id=${encodeURIComponent(ctx.id)}&안=${encodeURIComponent(ctx.rec.안id)}&버전=${ctx.rec.버전}`);}
   catch(e){main.innerHTML=`<p class="err">${esc(e.message)}</p>`;return;}
+  if(p.코스확정)return 다음();
   main.innerHTML=`<section class="card promo-form">${guide(3)}<button class="btn link" id="backConfirm">← 코스로 돌아가기</button><h2>홍보에 쓸 코스를 확정해 주세요</h2><p>${esc(p.안id)}안 · ${esc(p.버전)}버전의 일정과 확인 사항을 검토해 주세요. 제목은 자동으로 제안하며 원할 때 바꿀 수 있어요.</p><form id="courseConfirmForm" class="order"><div class="q"><label for="confirmName">코스 제목 (선택)</label><input id="confirmName" name="코스이름" maxlength="40" value="${esc(p.기본값.코스이름||'')}" placeholder="이 코스를 소개할 이름을 입력하세요"></div><p class="note">홍보에 사용할 안·버전을 저장합니다. 제목을 비우면 자동 제목을 사용해요. 운영·번역 검토는 계속 필요하며 코스를 수정하면 다시 확정해야 합니다.</p><div class="go"><span class="err" id="confirmErr" role="alert"></span><button class="btn primary big" id="confirmGo" type="submit">이 코스로 확정 · 홍보 준비</button></div></form></section>`;
   $('backConfirm').onclick=()=>ctx.돌아가기();
   $('courseConfirmForm').onsubmit=async e=>{e.preventDefault();$('confirmGo').disabled=true;$('confirmErr').textContent='';
@@ -62,28 +67,18 @@ async function 확인화면(ctx){
   const main=$('main');main.innerHTML='<p class="empty">불러오는 중…</p>';
   let p;try{p=await get(`/api/promo/prepare?id=${encodeURIComponent(ctx.id)}&안=${encodeURIComponent(ctx.rec.안id)}&버전=${ctx.rec.버전}`);}
   catch(e){main.innerHTML=`<p class="err">${esc(e.message)}</p>`;return;}
-  const setting=재생성설정(p,ctx),d=setting.기본값,박=p.체류기간==='1박2일';
-  const places=`<datalist id="placeList">${p.장소목록.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`;
+  if(!p.코스확정)return 코스확정화면(ctx,()=>확인화면(ctx));
+  const setting=재생성설정(p,ctx);
   const 톤=Object.keys(톤설명).map(k=>`<label class="tone tone-${k.replace('+','')}"><input type="radio" name="톤앤매너" value="${esc(k)}" ${k===setting.톤앤매너?'checked':''}><b>${esc(톤설명[k][0])}</b><small>${esc(톤설명[k][1])}</small></label>`).join('');
   main.innerHTML=`<section class="card promo-form">${guide(4)}
     <button class="btn link" id="backCourse">← 코스로 돌아가기</button>
-    <h2>홍보물을 만들기 전에 확인해 주세요</h2>
-    <p class="lead">홍보물의 시작·종료 안내는 담당자가 정한 값만 써요. AI가 대신 정하지 않아요. ${esc(ctx.rec.안id)}안 ${esc(ctx.rec.버전)}번째 초안으로 만들어요.</p>
+    <h2>홍보물 디자인을 골라 주세요</h2>
+    <p class="lead">확정한 코스로 문구와 번역을 만들어요. 일정은 다시 입력하지 않습니다.</p>
+    ${확정요약(p)}
     <form id="promoForm" class="order">
-      ${places}
-      <div class="sec">코스 시작과 끝</div>
-      <div class="q"><span>시작</span><div class="two"><input name="시작지점" list="placeList" required maxlength="80" value="${esc(d.시작지점)}" aria-label="시작 장소"><input name="시작시각" type="time" required value="${esc(d.시작시각)}" aria-label="시작 시각"></div></div>
-      <div class="q"><span>끝<small>${박?'둘째 날 마지막':'마지막 일정 뒤'}</small></span><div class="two"><input name="종료지점" list="placeList" required maxlength="80" value="${esc(d.종료지점)}" aria-label="종료 장소"><input name="종료시각" type="time" required value="${esc(d.종료시각)}" aria-label="종료 시각"></div></div>
-      ${p.후보설명.length?`<details class="hint"><summary>AI가 남긴 시작·종료 후보 메모</summary><ul>${p.후보설명.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>`:''}
-      ${박?`<div class="q"><span>둘째 날 오전</span><div class="pills" data-name="2일차오전구성">${p.선택지['2일차오전구성'].map(v=>`<button type="button" class="pill" aria-pressed="${v===d['2일차오전구성']}" data-v="${esc(v)}">${esc(오전설명[v]||v)}</button>`).join('')}</div></div>`:''}
-      ${p.겹침이력.length?`<div class="sec">기존 관광 상품과 겹치는 장소</div><ul class="overlap">${p.겹침이력.map(x=>`<li><b>${esc(x.장소)}</b> <span class="note">${esc(x.상품ID)}</span><br><small>${esc(x.문구)}</small></li>`).join('')}</ul>
-        <div class="q"><span>처리</span><div><div class="pills" data-name="겹침처리">${p.선택지.겹침처리.map(v=>`<button type="button" class="pill" aria-pressed="${v===d.겹침처리}" data-v="${esc(v)}">${esc(v)}</button>`).join('')}</div><input name="겹침메모" value="${esc(d.겹침메모||'')}" maxlength="200" placeholder="메모 (선택) 예: 근대골목 스탬프 투어와 연결" class="mt"></div></div>`:''}
-      <div class="sec">홍보물</div>
-      <div class="q"><span>코스 이름<small>선택 입력 · 비워 두면 자동 제목을 사용해요</small></span><input name="코스이름" maxlength="40" value="${esc(d.코스이름||'')}" placeholder="코스 이름을 입력하세요"></div>
       <div class="q"><span>톤앤매너</span><div class="tones">${톤}</div></div>
       <div class="q"><span>만들 홍보물<small>여러 개 고를 수 있어요</small></span><div class="pills" data-name="홍보물" data-multi="1">${p.선택지.홍보물.map(v=>`<button type="button" class="pill" aria-pressed="${setting.홍보물.includes(v)}" data-v="${esc(v)}">${esc(v)}</button>`).join('')}</div></div>
       <div class="q"><span>번역 언어</span><p class="langs">${p.언어.length?p.언어.map(esc).join(' · '):'조건에 언어권이 없어 번역하지 않아요'} <span class="note">(1단계 조건 그대로)</span></p></div>
-      <label class="agree check"><input type="checkbox" name="확인동의"> 시작·종료${박?', 둘째 날 오전':''}${p.겹침이력.length?', 겹침 처리':''}를 직접 확인했어요. 검토 기록은 담당자 화면에 보관하고, 확인되지 않은 안내는 공개 자료에서 제외해요.</label>
       <div class="go"><span class="err" id="promoErr"></span><button class="btn primary big" id="promoStart" type="submit">홍보물 · 번역 만들기</button></div>
     </form><p class="note">홍보 검토 에이전트(AI)가 3~6분쯤 걸려요. 창을 닫아도 이어서 볼 수 있어요.</p></section>`;
   $('backCourse').onclick=()=>ctx.돌아가기();
@@ -93,10 +88,7 @@ async function 확인화면(ctx){
     b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');}));
   const pick=n=>[...f.querySelectorAll(`[data-name="${n}"] [aria-pressed=true]`)].map(b=>b.dataset.v);
   f.onsubmit=async e=>{e.preventDefault();$('promoErr').textContent='';$('promoStart').disabled=true;
-    try{const r=await post('/api/promo/start',{시험id:ctx.id,안id:ctx.rec.안id,버전:ctx.rec.버전,코스이름:f.코스이름.value.trim(),
-        시작지점:f.시작지점.value.trim(),시작시각:f.시작시각.value,종료지점:f.종료지점.value.trim(),종료시각:f.종료시각.value,
-        '2일차오전구성':pick('2일차오전구성')[0]||'',겹침처리:pick('겹침처리')[0]||'',겹침메모:f.겹침메모?.value.trim()||'',
-        톤앤매너:f.톤앤매너.value,홍보물:pick('홍보물'),확인동의:f.확인동의.checked});
+    try{const r=await post('/api/promo/start',{시험id:ctx.id,안id:ctx.rec.안id,버전:p.버전,톤앤매너:f.톤앤매너.value,홍보물:pick('홍보물')});
       결과화면(r.홍보id,ctx);}
     catch(err){$('promoErr').textContent=err.message;$('promoStart').disabled=false;}};
 }

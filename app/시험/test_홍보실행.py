@@ -55,6 +55,48 @@ def 가짜홍보(번역='大邱近代通りを歩く', 경고='근거 없음'):
 
 
 class 홍보시험(unittest.TestCase):
+    def test_중간수정후에는_최신버전을_확정해야_그코스로_홍보를_만든다(self):
+        import copy
+        s=self.서비스(가짜홍보())
+        record=기록모듈.읽기(self.runs,시험id.split('/')[-1])
+        changed=copy.deepcopy(record['코스안'][0]['코스'])
+        changed['칸목록'][0]['머무는시간']=45
+        기록모듈.추가(record,'코스안',{'안id':'A','버전':2,'코스':changed},'에이전트:시험')
+        기록모듈.저장(record,self.runs)
+        for version in [1,2]:
+            with self.assertRaises(ValueError):s.시작(self.값(버전=version))
+        s.코스확정(self.값(버전=2))
+        before=기록모듈.읽기(self.runs,시험id.split('/')[-1])
+        hid=s.시작({'시험id':시험id,'안id':'A','버전':2,'톤앤매너':'B','홍보물':['리플릿']})['홍보id']
+        self.기다리기(s,hid)
+        self.assertEqual(json.loads((self.runs/hid/'3단계_확정.json').read_text(encoding='utf8')),changed)
+        self.assertEqual(기록모듈.읽기(self.runs,시험id.split('/')[-1]),before)
+
+    def test_확정코스를_중복입력없이_그대로_홍보에_전달한다(self):
+        import copy
+        fn=가짜홍보();s=self.서비스(fn)
+        s.코스확정({'시험id':시험id,'안id':'A','버전':1,'확인동의':True})
+        before=기록모듈.읽기(self.runs,시험id.split('/')[-1])
+        original=copy.deepcopy(before['코스안'][0]['코스'])
+        hid=s.시작({'시험id':시험id,'안id':'A','버전':1,'톤앤매너':'A','홍보물':['SNS 카드뉴스'],
+                  '시작지점':'무시할 입력','종료시각':'23:59','2일차오전구성':'후보일정추가','겹침처리':'피하기'})['홍보id']
+        self.기다리기(s,hid)
+        snapshot=json.loads((self.runs/hid/'3단계_확정.json').read_text(encoding='utf8'))
+        agent_input=json.loads((self.runs/hid/'4단계_입력.json').read_text(encoding='utf8'))
+        self.assertEqual(snapshot,original)
+        self.assertEqual(agent_input['확정코스'],original)
+        self.assertEqual(기록모듈.읽기(self.runs,시험id.split('/')[-1]),before)
+        self.assertFalse(snapshot['확정조건']['시작종료확정'])
+
+    def test_확정하지않은_코스는_홍보입력으로_자동확정하지않는다(self):
+        s=self.서비스(가짜홍보())
+        record=기록모듈.읽기(self.runs,시험id.split('/')[-1])
+        record.pop('홍보코스확정',None);record.pop('홍보코스확정이력',None)
+        기록모듈.저장(record,self.runs)
+        with self.assertRaisesRegex(ValueError,'확정'):
+            s.시작(self.값())
+        self.assertFalse(list((self.runs/시험id.split('/')[0]/'01회차').glob('홍보_*')))
+
     def test_표현_미처리는_최종파일을_막고_파일갱신은_AI를_호출하지않는다(self):
         fn=가짜홍보();s=self.서비스(fn)
         hid=s.시작(self.값())['홍보id'];self.기다리기(s,hid)
@@ -163,6 +205,7 @@ class 홍보시험(unittest.TestCase):
         import io
         import zipfile
         s = self.서비스(가짜홍보())
+        s.코스확정(self.값(코스이름='연결된 실제 코스'))
         hid = s.시작(self.값(코스이름='연결된 실제 코스'))['홍보id']
         self.기다리기(s, hid)
         result = s.결과(hid)
@@ -253,11 +296,13 @@ class 홍보시험(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def 서비스(self, fn):
-        return 홍보실행(기획실행(코스시험(결과저장소(self.runs))), fn)
+    def 서비스(self, fn, 확정=True):
+        service=홍보실행(기획실행(코스시험(결과저장소(self.runs))), fn)
+        if 확정: service.코스확정(self.값())
+        return service
 
     def 값(self, **바꿈):
-        return {'시험id': 시험id, '안id': 'A', '코스이름':'시험 코스', '시작지점': '근대골목', '시작시각': '10:00', '종료지점': '동성로', '종료시각': '20:00',
+        return {'시험id': 시험id, '안id': 'A', '버전':1, '코스이름':'시험 코스', '시작지점': '근대골목', '시작시각': '10:00', '종료지점': '동성로', '종료시각': '20:00',
                 '겹침처리': '연결하기', '톤앤매너': 'A+B', '홍보물': ['SNS 카드뉴스'], '확인동의': True, **바꿈}
 
     def 기다리기(self, s, hid):
@@ -269,14 +314,13 @@ class 홍보시험(unittest.TestCase):
         self.fail('끝나지 않음')
 
     def test_확인없이는_시작하지_않음(self):
-        s = self.서비스(가짜홍보())
-        with self.assertRaises(ValueError):
-            s.시작(self.값(확인동의=False))
-        with self.assertRaises(ValueError):
-            s.시작(self.값(겹침처리=''))
-        with self.assertRaises(ValueError):
-            s.시작(self.값(시작시각='10시'))
-        self.assertEqual(s.확인_검사(self.값(코스이름=''),s.준비(시험id))['코스이름'],'중구 가을 당일 여행')
+        s = self.서비스(가짜홍보(), 확정=False)
+        with self.assertRaisesRegex(ValueError,'확정'):
+            s.시작(self.값())
+        s.코스확정(self.값())
+        for change in [{'버전':None},{'톤앤매너':''},{'홍보물':[]}]:
+            with self.assertRaises(ValueError):
+                s.시작(self.값(**change))
 
     def test_준비값은_숙소를_끝으로_쓰지_않음(self):
         p = self.서비스(가짜홍보()).준비(시험id, 'A')
@@ -370,6 +414,8 @@ class 홍보시험(unittest.TestCase):
             확인 = self.값(시험id=sid, 겹침처리='겹침 확인 후 그대로 진행', 코스이름='자동시험 전용')
             with self.assertRaises(ValueError):
                 홍보.시작({**확인, '확인동의': False})
+            확인['버전']=max(기록모듈.버전목록(원본,'A'))
+            홍보.코스확정(확인)
             hid = 홍보.시작(확인)['홍보id']
             self.assertEqual(self.기다리기(홍보, hid)['상태'], '홍보완료')
             out = 홍보.산출물({'홍보id': hid, '홍보확인': True, '표현처리':{k:'그대로둠' for k in 홍보.결과(hid)['필터키']}})
@@ -394,8 +440,8 @@ class 홍보시험(unittest.TestCase):
         self.assertEqual(fn.호출, 1)  # 검사 통과면 다시 부르지 않는다
         폴더 = self.runs / hid
         확정 = json.loads((폴더 / '3단계_확정.json').read_text(encoding='utf-8'))
-        self.assertTrue(all(확정['확정조건'][k] for k in ['시작종료확정', '겹침처리', '2일차오전선택']))
-        self.assertEqual(확정['코스시작종료']['종료지점'], '동성로')
+        self.assertEqual(확정,코스())
+        self.assertEqual(확정['코스시작종료']['종료지점'], '미확인')
         원본 = 기록모듈.읽기(self.runs, 시험id.split('/')[-1])
         self.assertEqual(원본['코스안'][0]['코스']['코스시작종료']['시작지점'], '미확인')  # 원래 초안은 그대로
         self.assertEqual(원본['선택']['안id'], 'A')
