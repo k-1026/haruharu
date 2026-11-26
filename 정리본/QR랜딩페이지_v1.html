@@ -317,11 +317,11 @@ const T = {
 
 /* ---------- 장소 (11.25 정리본 · 시안 문구만 사용) ---------- */
 const PLACES = [
-  {id:'p1', day:1, n:1, night:false, lead:'y', mapQ:'근대골목',
+  {id:'p1', day:1, n:1, night:false, lead:'y', mapQ:{k:'청라언덕', n:'대구 청라언덕', g:'청라언덕'},
     ko:{time:'10:00', slot:'오전', name:'근대골목', desc:'대구의 근대 역사와 골목 풍경을 만나는 시간', hl:['청라언덕','계산성당','이상화 고택'], stay:'약 1시간', move:'서문시장 권역 · 도보 15분'},
     ja:{time:'10:00', slot:'午前', name:'大邱近代通り', desc:'大邱の近代の歴史と路地の風景に出会う時間', hl:['青蘿の丘','桂山聖堂','李相和古宅'], stay:'約1時間', move:'西門市場エリア・徒歩15分'},
     photo:'', credit:'계산성당'},
-  {id:'p2', day:1, n:2, night:false, lead:'p', mapQ:'서문시장',
+  {id:'p2', day:1, n:2, night:false, lead:'p', mapQ:{k:'서문시장', n:'대구 서문시장', g:'서문시장'},
     ko:{time:'11:40', slot:'점심', name:'서문시장 권역', desc:'시장 먹거리와 대구의 활기찬 풍경을 만나요.', hl:['먹거리','시장','생활문화'], stay:'약 1시간 30분',
         bub:[['포롱이','시장 냄새가 여기까지 나! 뭐부터 먹어볼까?'],['여울이','다음 장소도 챙기면서 천천히 둘러보자.']]},
     ja:{time:'11:40', slot:'お昼', name:'西門市場エリア', desc:'市場グルメと大邱のにぎやかな風景に出会おう。', hl:['グルメ','市場','暮らしの文化'], stay:'約1時間30分',
@@ -335,17 +335,17 @@ const PLACES = [
     ko:{time:'저녁', name:'평화시장 닭똥집골목', desc:'저녁은 골목의 먹거리와 함께해요.', hl:['저녁 먹거리']},
     ja:{time:'夕方', name:'大邱平和市場タクトンチプ屋通り', desc:'夕食は路地のグルメと一緒に。', hl:['夕食グルメ']},
     photo:null},
-  {id:'p5', day:1, n:5, night:true, lead:'both', mapQ:'서문시장 야시장',
+  {id:'p5', day:1, n:5, night:true, lead:'both', mapQ:{k:'서문시장', n:'대구서문야시장', g:'서문시장 야시장'},
     ko:{time:'밤', name:'서문시장 야시장', desc:'별랜턴을 켜고 밤의 대구를 탐험해요.', hl:['야경','야시장'], move:'숙박 · 중구 동성로 일대',
         bub:[['포롱이','밤에도 시장이 열려 있어!']]},
     ja:{time:'夜', name:'西門市場夜市', desc:'星のランタンを灯して、夜の大邱を探検しよう。', hl:['夜景','夜市'], move:'宿泊・中区 東城路周辺',
         bub:[['ポロンイ','夜も市場が開いてる！']]},
     photo:'', credit:'서문시장 야간'},
-  {id:'p6', day:2, n:6, night:false, lead:'p', mapQ:'동성로',
+  {id:'p6', day:2, n:6, night:false, lead:'p', mapQ:{k:'동성로관광특구', n:'동성로', g:'동성로'},
     ko:{time:'오전', name:'동성로', desc:'동성로에서 여유롭게 대구의 아침을 즐겨보세요.', hl:['자유시간'], move:'신천 · 산책'},
     ja:{time:'午前', name:'東城路', desc:'東城路でのんびり大邱の朝を楽しもう。', hl:['自由時間'], move:'新川・散歩'},
     photo:'', credit:'동성로 거리'},
-  {id:'p7', day:2, n:7, night:false, lead:'both', mapQ:'신천 대구',
+  {id:'p7', day:2, n:7, night:false, lead:'both', mapQ:{k:'신천 하천', n:'대구 신천', g:'신천 하천 대구'},  // 걷기 시작 지점 정해지면 바꿈
     ko:{time:'오후', name:'신천 산책', desc:'신천을 따라 걸은 뒤 근대골목으로 이동해 약 14:00에 코스를 마쳐요.', hl:['산책','물가']},
     ja:{time:'午後', name:'新川さんぽ', desc:'新川沿いを歩いたあと、大邱近代通りへ移動して約14:00にコース終了。', hl:['散歩','水辺']},
     photo:'', credit:'신천 물가'}
@@ -371,11 +371,12 @@ const $ = s=>document.querySelector(s);
 const t = k=>T[lang][k] ?? T.ko[k];
 
 /* ---------- 지도 앱 링크 ---------- */
+// 지도마다 검색어가 다르다 (11/26 실제로 열어 확인): 네이버는 현재 위치 기준이라 '대구'를 붙이고, 카카오는 '대구'를 붙이면 결과가 없다
 function mapLinks(q){
-  const e=encodeURIComponent(q);
-  const k={label:'카카오맵', ja:'カカオマップ', url:'https://map.kakao.com/link/search/'+e};
-  const n={label:'네이버지도', ja:'NAVER地図', url:'https://map.naver.com/p/search/'+e};
-  const g={label:'Google Maps', ja:'Google マップ', url:'https://www.google.com/maps/search/?api=1&query='+e};
+  const Q = typeof q==='string' ? {k:q, n:q, g:q} : q;
+  const k={label:'카카오맵', ja:'カカオマップ', url:'https://map.kakao.com/link/search/'+encodeURIComponent(Q.k)};
+  const n={label:'네이버지도', ja:'NAVER地図', url:'https://map.naver.com/p/search/'+encodeURIComponent(Q.n)};
+  const g={label:'Google Maps', ja:'Google マップ', url:'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(Q.g)};
   return lang==='ja' ? [g,n,k] : [k,n,g];
 }
 const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -455,8 +456,11 @@ function renderMap(){
     g.addEventListener('click',go);
     g.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
   });
-  const q = encodeURIComponent('근대골목');
-  $('#mapAll').href = lang==='ja' ? 'https://www.google.com/maps/search/?api=1&query='+q : 'https://map.kakao.com/link/search/'+q;
+  // 전체 코스: Google Maps 경로 (출발 → 경유지 → 도착). 카카오 · 네이버는 여러 경유지 링크가 없다
+  const gq = PLACES.map(p=>typeof p.mapQ==='string' ? p.mapQ : p.mapQ.g);
+  $('#mapAll').href = 'https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(gq[0])
+    +'&destination='+encodeURIComponent(gq[gq.length-1])
+    +'&waypoints='+encodeURIComponent(gq.slice(1,-1).join('|'));
 }
 
 function renderStars(){
