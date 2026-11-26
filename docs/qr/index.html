@@ -13,6 +13,9 @@
   /*
     QR 전용 랜딩페이지 v1 (시안)
     - 기준 시안: QR랜딩페이지_모바일시안_v1.svg
+    - 스탬프 북 받는 곳 · 문의처: 미정. 배부처 협의 후보는 청라언덕 관광센터 (운영 기관 [U], 3단계 11_운영주체_후보 O10).
+      협의 전에는 기관 이름을 적지 않는다 (4단계 2_입력 "협의된 것처럼 쓰지 않는다"). 문의처는 팀 공용 창구가 생기면 적는다
+    - QR 주소: https://memorismo3o-glitch.github.io/New/qr/ (GitHub Pages, memorismo3o-glitch/New 저장소 docs/qr/에 이 파일을 index.html로 올림)
     - QR 주소 끝 from= 값 (2026-11-26 확정, 지침 4단계 9_출력.md 2장):
       poster(포스터 A3 · 맨 위) | leaflet(리플릿 · 일정으로) | stampbook(스탬프 투어 북 · 스탬프로)
       | sns(SNS 프로필 링크 · 맨 위) | share(공유 버튼이 자동으로 붙임 · 맨 위)
@@ -80,6 +83,7 @@
   .tl li{display:grid;grid-template-columns:56px 1fr auto;gap:4px;align-items:center;padding:6px 0}
   .tl a{text-decoration:none}
   .tl .t{color:var(--orange);font-weight:700;font-size:13px}
+  .opt{display:inline-block;margin-left:4px;padding:1px 8px;border:1px solid var(--orange);border-radius:10px;font-size:10px;font-weight:700;color:var(--orange);background:#fff;vertical-align:middle}
   .tl .g{font-size:11px;color:var(--muted)} .tl .g.n{color:var(--orange);font-weight:700}
 
   /* 장소 카드 */
@@ -87,6 +91,7 @@
   .ph{position:relative;height:150px;background:var(--photo);display:flex;align-items:center;justify-content:center;
     color:var(--muted);font-size:13px}
   .ph img{width:100%;height:100%;object-fit:cover}
+  .ph img.contain{width:auto;max-width:100%;object-fit:contain} /* 작은 원본 사진: 늘리지 않음 */
   /* 장소 카드 2인 아이콘: 주연 크게 · 보조 작게 (지침 7_시안_캐릭터 2-2), 둘 함께는 같은 크기 */
   .ph .duo{position:absolute;right:10px;bottom:-14px;display:flex;align-items:flex-end}
   .duo .f{border-radius:50%;border:3px solid #fff;background:var(--char1) center/cover no-repeat;
@@ -134,7 +139,8 @@
 
   /* 이야기 · 확인 */
   .who{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;margin-bottom:10px}
-  .who .blob{width:48px;height:48px;font-size:10px}
+  .who .blob{width:48px;height:48px;font-size:10px;overflow:hidden}
+  .who .blob img{width:100%;height:100%;display:block;object-fit:cover}
   .who b{display:block;font-size:14px} .who small{font-size:12px;color:var(--muted)}
   .story{border-top:1px solid var(--line);padding-top:10px;margin:0;font-size:13px}
   ul.tips{margin:0;padding-left:18px;font-size:13px} ul.tips li{margin:4px 0}
@@ -225,8 +231,8 @@
   <section id="story">
     <h2 data-t="storyTitle"></h2>
     <div class="card">
-      <div class="who"><div class="blob p" data-t="porong"></div><div><b data-t="porong"></b><small data-t="porongRole"></small></div></div>
-      <div class="who"><div class="blob y" data-t="yeouri"></div><div><b data-t="yeouri"></b><small data-t="yeouriRole"></small></div></div>
+      <div class="who"><div class="blob p"><img src="랜딩_이미지/얼굴_포롱이.webp" alt="포롱이"></div><div><b data-t="porong"></b><small data-t="porongRole"></small></div></div>
+      <div class="who"><div class="blob y"><img src="랜딩_이미지/얼굴_여울이.webp" alt="여울이"></div><div><b data-t="yeouri"></b><small data-t="yeouriRole"></small></div></div>
       <p class="story" data-t="story"></p>
     </div>
   </section>
@@ -268,20 +274,20 @@ const IMG = {
    용어집에 없는 말(캐릭터 이름, 신천, 볼거리, 문장)은 AI 초안. 검토 전까지 하단에 안내문을 띄운다. */
 const T = {
   ko:{
-    brand:'포롱이와 여울이의 대구 탐험', kick:'대구 중구·동구 1박 2일 코스',
+    brand:'포롱이와 여울이의 대구 탐험', kick:'대구 중구 1박 2일 코스',
     h1a:'포롱이와 여울이의', h1b:'대구 탐험',
     tagline:'가을 대구, 골목과 시장을 따라 탐험을 시작해요.',
-    chip1:'1박 2일', chip2:'7곳', chip3:'중구·동구',
+    chip1:'1박 2일', chip2:'6곳 + 선택 1곳', chip3:'중구', optTag:'선택 · 동구',
     go:'코스 따라가기', openMap:'지도 열기', glance:'코스 한눈에 보기', detail:'장소별 탐험',
-    stay:'체류', next:'다음 장소', mapTitle:'전체 탐험 지도', mapNote:'도식 지도 · 실제 위치·축척과 다릅니다. 장소를 누르면 설명으로 이동해요.',
+    stay:'체류', next:'다음 장소', mapTitle:'전체 탐험 지도', mapNote:'도식 지도 · 실제 위치·축척과 달라요. 장소를 누르면 설명으로 이동해요.',
     mapAll:'지도 앱에서 전체 코스 열기', stampTitle:'스탬프 투어',
     st1:'장소 방문', st2:'미션 수행', st3:'스탬프 기록',
     myStars:'내 별빛 탐험 기록', myStarsNote:'방문한 곳을 누르세요 · 이 휴대폰에만 저장돼요',
-    pickup:'스탬프 북 받는 곳 · 장소 확정 후 안내 예정',
+    pickup:'지금은 이 화면의 별 스탬프로 기록할 수 있어요. 종이 스탬프 북 받는 곳은 정해지면 안내할게요.',
     storyTitle:'포롱이와 여울이 이야기', porong:'포롱이', yeouri:'여울이',
     porongRole:'먼저 발견하고 직접 체험하는 호기심 많은 탐험가',
     yeouriRole:'장소를 조사하고 이야기를 기록하는 꼼꼼한 탐험가',
-    story:'신천에서 함께 자란 포롱이와 여울이. 오랜 시간 뒤 다시 만난 대구는 기억 속 모습과 조금 달라져 있었어요. 두 친구는 대구 곳곳을 탐험하며 새로운 지도를 만들기로 했습니다.',
+    story:'신천에서 함께 자란 포롱이와 여울이. 오랜 시간 뒤 다시 만난 대구는 기억 속 모습과 조금 달라져 있었어요. 두 친구는 대구 곳곳을 탐험하며 새로운 지도를 만들기로 했어요.',
     tipsTitle:'여행 전 확인해요',
     tips:['운영시간과 휴무일은 방문 전 확인하세요.','편한 신발을 준비하세요.','시장과 골목은 천천히 둘러보세요.','밤 코스는 별랜턴과 함께 즐겨요.'],
     saveTitle:'코스 저장 · 공유', save:'★ 코스 저장', saved:'★ 저장됨', share:'공유하기', copy:'링크 복사',
@@ -292,27 +298,27 @@ const T = {
     day1:'DAY 1 · 골목과 시장', day2:'DAY 2 · 여유로운 마무리', end:'근대골목에서 코스 종료', endTime:'약 14:00'
   },
   ja:{
-    brand:'ポロンイとヨウリの大邱探検', kick:'大邱 中区・東区 1泊2日コース',
-    h1a:'ポロンイとヨウリの', h1b:'大邱探検',
-    tagline:'秋の大邱、路地と市場をたどって探検を始めよう。',
-    chip1:'1泊2日', chip2:'7か所', chip3:'中区・東区',
+    brand:'ポロンとヨウリの大邱探検', kick:'大邱 中区 1泊2日コース',
+    h1a:'ポロンとヨウリの', h1b:'大邱探検',
+    tagline:'秋の大邱、路地と市場をたどって探検を始めましょう。',
+    chip1:'1泊2日', chip2:'6か所＋オプション1か所', chip3:'中区', optTag:'オプション・東区',
     go:'コースをたどる', openMap:'地図を開く', glance:'コースを一目で', detail:'スポット別の探検',
-    stay:'滞在', next:'次のスポット', mapTitle:'探検マップ', mapNote:'イメージ図です。実際の位置・縮尺とは異なります。スポットを押すと説明に移動します。',
+    stay:'滞在', next:'次のスポット', mapTitle:'全体の探検マップ', mapNote:'イメージ図です。実際の位置・縮尺とは異なります。スポットを押すと説明に移動します。',
     mapAll:'地図アプリでコース全体を開く', stampTitle:'スタンプツアー',
-    st1:'スポットを訪問', st2:'ミッション', st3:'スタンプを記録',
+    st1:'スポットを訪問', st2:'ミッションを実行', st3:'スタンプを記録',
     myStars:'わたしの星あかり探検記録', myStarsNote:'訪れた場所を押してください・この端末にのみ保存されます',
-    pickup:'スタンプブックの配布場所・決まり次第ご案内します',
-    storyTitle:'ポロンイとヨウリの物語', porong:'ポロンイ', yeouri:'ヨウリ',
+    pickup:'今はこの画面の星スタンプで記録できます。紙のスタンプブックの配布場所は、決まり次第お知らせします。',
+    storyTitle:'ポロンとヨウリの物語', porong:'ポロン', yeouri:'ヨウリ',
     porongRole:'まず見つけて自分で体験する、好奇心いっぱいの探検家',
     yeouriRole:'スポットを調べて物語を記録する、几帳面な探検家',
-    story:'新川で一緒に育ったポロンイとヨウリ。久しぶりに再会した大邱は、記憶の中の姿と少し変わっていました。ふたりは大邱のあちこちを探検し、新しい地図を作ることにしました。',
+    story:'新川で一緒に育ったポロンとヨウリ。久しぶりに再会した大邱は、記憶の中の姿と少し変わっていました。ふたりは大邱のあちこちを探検し、新しい地図を作ることにしました。',
     tipsTitle:'旅の前に確認しましょう',
-    tips:['営業時間と休業日は訪問前にご確認ください。','歩きやすい靴をご用意ください。','市場と路地はゆっくり見て回りましょう。','夜のコースは星のランタンと一緒に楽しもう。'],
-    saveTitle:'コースの保存・共有', save:'★ 保存', saved:'★ 保存済み', share:'共有する', copy:'リンクをコピー',
+    tips:['営業時間と休業日は訪問前にご確認ください。','歩きやすい靴をご用意ください。','市場と路地はゆっくり見て回りましょう。','夜のコースは星のランタンと一緒に楽しみましょう。'],
+    saveTitle:'コースの保存・共有', save:'★ コースを保存', saved:'★ 保存済み', share:'共有する', copy:'リンクをコピー',
     homeHint:'ブラウザのメニューから「ホーム画面に追加」すると、アプリのようにすぐ開けます。',
     copied:'リンクをコピーしました', savedMsg:'この端末にコースを保存しました', unsavedMsg:'保存を取り消しました',
-    credit:'写真の出典・ライセンス', foot:'ポロンイとヨウリの大邱探検・お問い合わせ先は確定後に記載',
-    photoWait:'写真準備中', photo:'写真', charTagDay:'ポロンイ・ヨウリ', charTagNight:'ポロンイ・ヨウリ・星のランタン',
+    credit:'写真の出典・ライセンス', foot:'ポロンとヨウリの大邱探検・お問い合わせ先は確定後に記載',
+    photoWait:'写真準備中', photo:'写真', charTagDay:'ポロン・ヨウリ', charTagNight:'ポロン・ヨウリ・星のランタン',
     day1:'DAY 1・路地と市場', day2:'DAY 2・ゆったり締めくくり', end:'大邱近代通りでコース終了', endTime:'約14:00',
     aiNote:'一部の外国語表記はAI翻訳の草案です（確認中）。'
   }
@@ -321,41 +327,54 @@ const T = {
 /* ---------- 장소 (11.25 정리본 · 시안 문구만 사용) ---------- */
 const PLACES = [
   {id:'p1', day:1, n:1, night:false, lead:'y', mapQ:{k:'청라언덕', n:'대구 청라언덕', g:'청라언덕'},
-    ko:{time:'10:00', slot:'오전', name:'근대골목', desc:'대구의 근대 역사와 골목 풍경을 만나는 시간', hl:['청라언덕','계산성당','이상화 고택'], stay:'약 1시간', move:'서문시장 권역 · 도보 15분'},
-    ja:{time:'10:00', slot:'午前', name:'大邱近代通り', desc:'大邱の近代の歴史と路地の風景に出会う時間', hl:['青蘿の丘','桂山聖堂','李相和古宅'], stay:'約1時間', move:'西門市場エリア・徒歩15分'},
-    photo:'', credit:'계산성당'},
+    ko:{time:'10:00', slot:'오전', name:'근대골목', desc:'대구의 근대 역사와 골목 풍경을 만나는 시간', hl:['청라언덕','계산성당','이상화 고택'], stay:'약 1시간', move:'서문시장 권역 · 도보 15분',
+        bub:[['여울이','청라언덕이라는 이름은 선교사들이 심은 담쟁이덩굴(청라)에서 왔다고 해.']]},  // 스토리 검증 3장 조건부 · KTO-CR
+    ja:{time:'10:00', slot:'午前', name:'大邱近代通り', desc:'大邱の近代の歴史と路地の風景に出会う時間', hl:['青蘿の丘','桂山聖堂','李相和古宅'], stay:'約1時間', move:'西門市場エリア・徒歩15分',
+        bub:[['ヨウリ','青蘿の丘という名前は、宣教師たちが植えたツタ（青蘿）から来たと言われています。']]},
+    photo:'랜딩_이미지/장소_근대골목_청라언덕.webp',
+    credit:{label:'중구, 청라언덕', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63706&division=img'}},
   {id:'p2', day:1, n:2, night:false, lead:'p', mapQ:{k:'서문시장', n:'대구 서문시장', g:'서문시장'},
     ko:{time:'11:40', slot:'점심', name:'서문시장 권역', desc:'시장 먹거리와 대구의 활기찬 풍경을 만나요.', hl:['먹거리','시장','생활문화'], stay:'약 1시간 30분',
-        bub:[['포롱이','시장 냄새가 여기까지 나! 뭐부터 먹어볼까?'],['여울이','다음 장소도 챙기면서 천천히 둘러보자.']]},
-    ja:{time:'11:40', slot:'お昼', name:'西門市場エリア', desc:'市場グルメと大邱のにぎやかな風景に出会おう。', hl:['グルメ','市場','暮らしの文化'], stay:'約1時間30分',
-        bub:[['ポロンイ','市場のにおいがここまでするよ！何から食べようかな？'],['ヨウリ','次のスポットも気にしながら、ゆっくり見て回ろう。']]},
-    photo:'', credit:'서문시장 입구'},
+        bub:[['포롱이','시장 냄새가 여기까지 나! 뭐부터 먹어볼까?'],['여울이','대구 성곽의 서쪽에 있어서 서문시장이라는 이름이 붙었어.']]},  // 스토리 검증 3장 사용 · KTO-SM
+    ja:{time:'11:40', slot:'お昼', name:'西門市場エリア', desc:'市場グルメと大邱のにぎやかな風景に出会いましょう。', hl:['グルメ','市場','暮らしの文化'], stay:'約1時間30分',
+        bub:[['ポロン','市場のにおいがここまでしますね！何から食べましょうか？'],['ヨウリ','大邱の城郭の西側にあったので、西門市場という名前がつきました。']]},
+    photo:'랜딩_이미지/장소_서문시장.webp',
+    credit:{label:'중구, 서문시장', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63696&division=img'}},
   {id:'p3', day:1, n:3, night:false, lead:'y', mapQ:'김광석다시그리기길',
-    ko:{time:'오후', name:'김광석 다시그리기길', desc:'음악과 벽화가 있는 골목을 산책해요.', hl:['음악','벽화']},
-    ja:{time:'午後', name:'金光石の路', desc:'音楽と壁画のある路地を散歩しよう。', hl:['音楽','壁画']},
-    photo:null},
-  {id:'p4', day:1, n:4, night:true, lead:'p', mapQ:'평화시장 닭똥집골목',
+    ko:{time:'오후', name:'김광석 다시그리기길', desc:'음악과 벽화가 있는 골목을 산책해요.', hl:['음악','벽화'],
+        bub:[['여울이','김광석이 살았던 대봉동 방천시장 근처 골목이래.']]},  // 스토리 검증 3장 사용 · KTO-KG
+    ja:{time:'午後', name:'金光石の路', desc:'音楽と壁画のある路地を散歩しましょう。', hl:['音楽','壁画'],
+        bub:[['ヨウリ','金光石が住んでいた大鳳洞・防川市場の近くの路地だそうです。']]},
+    photo:'랜딩_이미지/장소_김광석길.webp', fit:'contain',  // 원본이 201×162이라 늘리지 않음
+    credit:{label:'김광석길', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63313&division=img'}},
+  {id:'p4', day:1, n:4, night:true, optional:true,  // 동구 · 선택 코스 (M0: MVP는 중구, 동구 평화시장 저녁 동선은 선택지)
+    lead:'p', mapQ:'평화시장 닭똥집골목',
     ko:{time:'저녁', name:'평화시장 닭똥집골목', desc:'저녁은 골목의 먹거리와 함께해요.', hl:['저녁 먹거리']},
-    ja:{time:'夕方', name:'大邱平和市場タクトンチプ屋通り', desc:'夕食は路地のグルメと一緒に。', hl:['夕食グルメ']},
-    photo:null},
+    ja:{time:'夕方', name:'大邱平和市場タクトンチプ屋通り', desc:'夕食は路地のグルメと一緒に楽しみましょう。', hl:['夕食グルメ']},
+    photo:'랜딩_이미지/장소_평화시장_닭똥집골목.webp', fit:'contain',  // 원본이 211×170이라 늘리지 않고 원래 비율로 가운데 둔다
+    credit:{label:'평화시장 닭똥집', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63734&division=img'}},
   {id:'p5', day:1, n:5, night:true, lead:'both', mapQ:{k:'서문시장', n:'대구서문야시장', g:'서문시장 야시장'},
     ko:{time:'밤', name:'서문시장 야시장', desc:'별랜턴을 켜고 밤의 대구를 탐험해요.', hl:['야경','야시장'], move:'숙박 · 중구 동성로 일대',
-        bub:[['포롱이','밤에도 시장이 열려 있어!']]},
-    ja:{time:'夜', name:'西門市場夜市', desc:'星のランタンを灯して、夜の大邱を探検しよう。', hl:['夜景','夜市'], move:'宿泊・中区 東城路周辺',
-        bub:[['ポロンイ','夜も市場が開いてる！']]},
-    photo:'', credit:'서문시장 야간'},
+        bub:[['포롱이','와, 밤 시장이다! 불빛이 반짝반짝해!']]},
+    ja:{time:'夜', name:'西門市場夜市', desc:'星のランタンを灯して、夜の大邱を探検しましょう。', hl:['夜景','夜市'], move:'宿泊・中区 東城路周辺',
+        bub:[['ポロン','わあ、夜の市場ですね！灯りがキラキラしています！']]},
+    photo:'랜딩_이미지/장소_서문시장_야시장.webp',
+    credit:{label:'중구, 서문시장 야시장 (2018)', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63697&division=img'}},
   {id:'p6', day:2, n:6, night:false, lead:'p', mapQ:{k:'동성로관광특구', n:'동성로', g:'동성로'},
     ko:{time:'오전', name:'동성로', desc:'동성로에서 여유롭게 대구의 아침을 즐겨보세요.', hl:['자유시간'], move:'신천 · 산책'},
-    ja:{time:'午前', name:'東城路', desc:'東城路でのんびり大邱の朝を楽しもう。', hl:['自由時間'], move:'新川・散歩'},
-    photo:'', credit:'동성로 거리'},
+    ja:{time:'午前', name:'東城路', desc:'東城路でのんびり大邱の朝を楽しみましょう。', hl:['自由時間'], move:'新川・散歩'},
+    photo:'랜딩_이미지/장소_동성로.webp',
+    credit:{label:'동성로 거리 (2006)', author:'Visviva', license:'퍼블릭 도메인', url:'https://commons.wikimedia.org/wiki/File:Dongseongno.jpg'}},
   {id:'p7', day:2, n:7, night:false, lead:'both', mapQ:{k:'신천 하천', n:'대구 신천', g:'신천 하천 대구'},  // 걷기 시작 지점 정해지면 바꿈
     ko:{time:'오후', name:'신천 산책', desc:'신천을 따라 걸은 뒤 근대골목으로 이동해 약 14:00에 코스를 마쳐요.', hl:['산책','물가']},
-    ja:{time:'午後', name:'新川さんぽ', desc:'新川沿いを歩いたあと、大邱近代通りへ移動して約14:00にコース終了。', hl:['散歩','水辺']},
-    photo:'', credit:'신천 물가'}
+    ja:{time:'午後', name:'新川さんぽ', desc:'新川沿いを歩いたあと、大邱近代通りへ移動して約14:00にコースを終えます。', hl:['散歩','水辺']},
+    photo:'랜딩_이미지/장소_신천.webp',
+    credit:{label:'신천 물가 (2007)', author:'Visviva', license:'퍼블릭 도메인', url:'https://commons.wikimedia.org/wiki/File:Daegu_Sincheon_ducks.jpg'}}
 ];
 
 /* 사진 출처: 작성자·라이선스·원본 링크를 확인 후 채운다 (정리본 4장) */
-const CREDITS = PLACES.filter(p=>p.credit).map(p=>({label:p.credit, author:'작성자 확인 중', license:'라이선스 확인 중', url:''}));
+// credit이 글자만 있으면 아직 확인 전, {label, author, license, url}이면 원본 페이지에서 확인한 값
+const CREDITS = PLACES.filter(p=>p.credit).map(p=>typeof p.credit==='object' ? p.credit : ({label:p.credit, author:'작성자 확인 중', license:'라이선스 확인 중', url:''}));
 
 /* ---------- 상태 ---------- */
 /* 브라우저 저장이 막힌 환경(비공개 창 등)에서는 이 화면을 연 동안만 기억한다 */
@@ -397,7 +416,8 @@ function renderTimeline(){
   const rows = PLACES.filter(p=>p.day===day).map(p=>{
     const L=p[lang];
     const gear = p.night ? `<span class="g n">★ ${lang==='ja'?'ランタン':'별랜턴'}</span>` : `<span class="g"></span>`;
-    return `<li><span class="t">${esc(L.time)}</span><a href="#${p.id}">${esc(L.name)}</a>${gear}</li>`;
+    const opt = p.optional ? ` <span class="opt">${esc(t('optTag'))}</span>` : '';
+    return `<li><span class="t">${esc(L.time)}</span><span><a href="#${p.id}">${esc(L.name)}</a>${opt}</span>${gear}</li>`;
   });
   if(day===1) rows.push(`<li><span class="t">${lang==='ja'?'宿泊':'숙박'}</span><span>${lang==='ja'?'中区 東城路周辺':'중구 동성로 일대'}</span><span></span></li>`);
   else rows.push(`<li><span class="t">${esc(t('endTime'))}</span><span>${esc(t('end'))}</span><span></span></li>`);
@@ -411,7 +431,7 @@ function renderPlaces(){
     html += `<h2 style="font-size:14px;color:var(--muted);margin:6px 0 10px">${esc(t('day'+d))}</h2>`;
     PLACES.filter(p=>p.day===d).forEach(p=>{
       const L=p[lang];
-      const photo = p.photo ? `<img src="${esc(p.photo)}" alt="${esc(L.name)}" loading="lazy">`
+      const photo = p.photo ? `<img src="${esc(p.photo)}" alt="${esc(L.name)}" loading="lazy"${p.fit==='contain'?' class="contain"':''}>`
                             : `<span>${p.photo===null?esc(t('photoWait')):esc(L.name)+' '+esc(t('photo'))}</span>`;
       // 주연: 'p' 포롱이 · 'y' 여울이 · 'both' 둘 함께 (지침 7_시안_캐릭터 2-2 배치 세트)
       const face = (c, size) => { const src = c==='y' ? IMG.faceY : IMG.faceP;
@@ -422,7 +442,7 @@ function renderPlaces(){
       html += `<article class="place${p.night?' night':''}" id="${p.id}">
         <div class="ph">${photo}<div class="duo" aria-hidden="true">${duo}</div></div>
         <div class="pb">
-          <div class="meta">${esc(meta)}${p.night?' · ★':''}</div>
+          <div class="meta">${esc(meta)}${p.night?' · ★':''}${p.optional?` <span class="opt">${esc(t('optTag'))}</span>`:''}</div>
           <h3>${esc(L.name)}${lang==='ja'?`<span class="sub">${esc(p.ko.name)}</span>`:''}</h3>
           <p class="desc">${esc(L.desc)}</p>
           ${L.hl?`<div class="hl">${L.hl.map(h=>`<span>${esc(h)}</span>`).join('')}</div>`:''}
