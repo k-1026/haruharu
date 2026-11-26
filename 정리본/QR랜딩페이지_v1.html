@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#273251">
+<title>포롱이와 여울이의 대구 탐험</title>
+<meta name="description" content="대구 중구·동구 1박 2일 코스 · 역사 · 먹거리 · 음악 · 야경">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /*
+    QR 전용 랜딩페이지 v1 (시안)
+    - 기준 시안: QR랜딩페이지_모바일시안_v1.svg
+    - 스탬프 북 받는 곳 · 문의처: 미정. 배부처 협의 후보는 청라언덕 관광센터 (운영 기관 [U], 3단계 11_운영주체_후보 O10).
+      협의 전에는 기관 이름을 적지 않는다 (4단계 2_입력 "협의된 것처럼 쓰지 않는다"). 문의처는 팀 공용 창구가 생기면 적는다
+    - QR 주소: https://memorismo3o-glitch.github.io/New/qr/ (GitHub Pages, memorismo3o-glitch/New 저장소 docs/qr/에 이 파일을 index.html로 올림)
+    - QR 주소 끝 from= 값 (2026-11-26 확정, 지침 4단계 9_출력.md 2장):
+      poster(포스터 A3 · 맨 위) | leaflet(리플릿 · 일정으로) | stampbook(스탬프 투어 북 · 스탬프로)
+      | sns(SNS 프로필 링크 · 맨 위) | share(공유 버튼이 자동으로 붙임 · 맨 위)
+      영어 소문자 한 단어. 목록에 없거나 없으면 맨 위. 일본어로 열기는 &lang=ja (예: ?from=poster&lang=ja)
+    - 사진·캐릭터 PNG는 아래 script의 IMG 값에 경로를 넣으면 바뀐다 (비어 있으면 자리 표시)
+  */
+  :root{
+    --navy:#273251; --ink:#202a49; --orange:#e98c19; --yellow:#FED665;
+    --cream:#fff1db; --paper:#f7f4ee; --card:#fff; --line:#ece6da;
+    --muted:#6e7280; --photo:#dccdb4; --char1:#c7773b; --char2:#b66a37;
+    --r:18px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:120px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif;line-height:1.5}
+  html[lang=ja] body{font-family:'Noto Sans JP','Hiragino Sans','Yu Gothic','Noto Sans KR',sans-serif}
+  .wrap{max-width:480px;margin:0 auto;background:var(--paper);min-height:100vh}
+  a{color:inherit}
+  button{font:inherit;cursor:pointer}
+  :focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+  /* 헤더 */
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+    gap:8px;height:56px;padding:0 16px;background:#fff;border-bottom:1px solid var(--line)}
+  .hd b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lang{display:flex;border:1px solid #e2dccf;border-radius:14px;overflow:hidden;flex:none}
+  .lang button{border:0;background:#fff;color:var(--muted);font-size:12px;padding:5px 10px}
+  .lang button[aria-pressed=true]{color:var(--orange);font-weight:700;background:var(--cream)}
+
+  /* 첫 화면 */
+  .hero{background:var(--navy);color:#fff;padding:16px 16px 20px}
+  .chars{position:relative;height:170px;border-radius:var(--r);background:#e9a15c;display:flex;
+    align-items:center;justify-content:center;gap:24px;overflow:hidden}
+  .chars img{max-height:160px;max-width:100%;object-fit:contain}
+  .blob{width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:#fff}
+  .blob.p{background:var(--char1)} .blob.y{background:var(--char2)}
+  .chars .tag{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;opacity:.9}
+  .lantern .blob{box-shadow:0 0 0 6px rgba(255,209,92,.35)}
+  .kick{margin:18px 0 2px;font-size:13px;opacity:.8}
+  h1{margin:0;font-size:26px;line-height:1.3}
+  h1 span{color:var(--yellow);display:block}
+  .tagline{margin:8px 0 14px;font-size:13px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-size:12px;padding:4px 12px;border-radius:13px;background:rgba(255,255,255,.14)}
+  .chip.on{background:var(--orange);font-weight:700}
+  .cta{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px}
+  .btn{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:24px;
+    font-size:15px;font-weight:700;text-decoration:none;border:1.5px solid var(--navy);background:#fff;color:var(--ink)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.dark{background:var(--navy);color:#fff}
+
+  section{padding:8px 16px 16px}
+  h2{font-size:17px;margin:12px 0 10px}
+  .card{background:var(--card);border-radius:var(--r);padding:16px}
+
+  /* DAY 탭 */
+  .tabs{position:sticky;top:56px;z-index:15;display:grid;grid-template-columns:1fr 1fr;background:#fff;
+    border-bottom:1px solid var(--line);margin:0 -16px 12px}
+  .tabs button{border:0;background:#fff;height:50px;font-size:15px;font-weight:700;color:var(--muted);
+    border-bottom:4px solid transparent}
+  .tabs button[aria-selected=true]{color:var(--orange);border-color:var(--orange)}
+  .tl{list-style:none;margin:0;padding:6px 16px}
+  .tl li{display:grid;grid-template-columns:56px 1fr auto;gap:4px;align-items:center;padding:6px 0}
+  .tl a{text-decoration:none}
+  .tl .t{color:var(--orange);font-weight:700;font-size:13px}
+  .opt{display:inline-block;margin-left:4px;padding:1px 8px;border:1px solid var(--orange);border-radius:10px;font-size:10px;font-weight:700;color:var(--orange);background:#fff;vertical-align:middle}
+  .tl .g{font-size:11px;color:var(--muted)} .tl .g.n{color:var(--orange);font-weight:700}
+
+  /* 장소 카드 */
+  .place{background:#fff;border-radius:var(--r);overflow:hidden;margin-bottom:14px;scroll-margin-top:120px}
+  .ph{position:relative;height:150px;background:var(--photo);display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:13px}
+  .ph img{width:100%;height:100%;object-fit:cover}
+  .ph img.contain{width:auto;max-width:100%;object-fit:contain} /* 작은 원본 사진: 늘리지 않음 */
+  /* 장소 카드 2인 아이콘: 주연 크게 · 보조 작게 (지침 7_시안_캐릭터 2-2), 둘 함께는 같은 크기 */
+  .ph .duo{position:absolute;right:10px;bottom:-14px;display:flex;align-items:flex-end}
+  .duo .f{border-radius:50%;border:3px solid #fff;background:var(--char1) center/cover no-repeat;
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700}
+  .duo .f.y{background-color:var(--char2)}
+  .duo .f.main{width:52px;height:52px;position:relative;z-index:1}
+  .duo .f.sub{width:34px;height:34px;margin-right:-10px}
+  .duo .f.eq{width:44px;height:44px}
+  .duo .f.eq + .f.eq{margin-left:-8px}
+  .place.night .ph{background:#3a4468;color:#cfd3e2}
+  .pb{padding:14px 16px 16px}
+  .meta{color:var(--orange);font-size:12px;font-weight:700}
+  .place h3{margin:2px 0 4px;font-size:20px}
+  .place .sub{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px}
+  .desc{font-size:13px;margin:0 0 10px}
+  .hl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .hl span{background:var(--cream);font-size:12px;padding:3px 10px;border-radius:12px}
+  .move{font-size:12px;color:var(--muted);margin:0 0 10px}
+  .bub{background:var(--cream);border-radius:16px;padding:8px 14px;font-size:12px;margin:0 0 8px}
+  .bub b{margin-right:6px}
+  .maps{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+  .maps a{flex:1 1 0;min-width:90px;text-align:center;font-size:12px;font-weight:700;padding:7px 6px;
+    border:1px solid var(--navy);border-radius:16px;text-decoration:none;background:#fff}
+
+  /* 지도 */
+  .map{background:#fff9ed;border:1px solid #f2d6a5;border-radius:var(--r);padding:6px}
+  .map svg{display:block;width:100%;height:auto}
+  .map .node{cursor:pointer}
+  .legend{display:flex;gap:14px;font-size:11px;color:var(--muted);justify-content:flex-end;margin:-4px 0 6px}
+  .legend i{display:inline-block;width:18px;height:0;border-top:3px solid var(--orange);vertical-align:middle;margin-right:4px}
+  .legend i.d{border-top:3px dashed var(--navy)}
+  .note{font-size:11px;color:var(--muted);margin:6px 4px 2px}
+
+  /* 스탬프 */
+  .steps{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;text-align:center;font-size:12px}
+  .steps .n{width:32px;height:32px;margin:0 auto 6px;border-radius:50%;background:var(--orange);color:#fff;
+    font-weight:700;display:flex;align-items:center;justify-content:center}
+  .steps .arr{color:var(--muted);font-size:18px}
+  .stars{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:10px}
+  .stars button{border:0;background:none;padding:2px 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .stars .s{font-size:26px;line-height:1;color:#c9c2b4}
+  .stars button[aria-pressed=true] .s{color:var(--orange)}
+  .stars .l{font-size:9px;color:var(--muted);white-space:nowrap}
+  .pickup{margin-top:10px;background:var(--cream);border-radius:14px;padding:10px 14px;font-size:12px;text-align:center}
+
+  /* 이야기 · 확인 */
+  .who{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;margin-bottom:10px}
+  .who .blob{width:48px;height:48px;font-size:10px;overflow:hidden}
+  .who .blob img{width:100%;height:100%;display:block;object-fit:cover}
+  .who b{display:block;font-size:14px} .who small{font-size:12px;color:var(--muted)}
+  .story{border-top:1px solid var(--line);padding-top:10px;margin:0;font-size:13px}
+  ul.tips{margin:0;padding-left:18px;font-size:13px} ul.tips li{margin:4px 0}
+
+  .share{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .share .btn{font-size:13px;min-height:44px;padding:0 6px}
+  .hint{font-size:11px;color:var(--muted);margin:8px 0 0}
+
+  #jaNote{margin:0;padding:12px 16px;background:var(--yellow);color:var(--ink);font-size:15px;font-weight:700;line-height:1.5;border-bottom:3px solid var(--orange)}
+  footer{background:var(--navy);color:rgba(255,255,255,.8);padding:20px 16px 40px;font-size:11px;margin-top:16px}
+  footer b{color:#fff;font-size:13px;display:block;margin-bottom:8px}
+  footer ul{list-style:none;margin:0 0 14px;padding:0} footer li{margin:4px 0}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;
+    font-size:13px;padding:10px 18px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+  .toast.on{opacity:1}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hd">
+    <b data-t="brand"></b>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="ko" aria-pressed="true">한국어</button>
+      <button type="button" data-lang="ja" aria-pressed="false">日本語</button>
+    </div>
+  </header>
+
+  <!-- 일본어를 고르면 보이는 AI 번역 초안 안내 (검토 전 공개 대비, 11/26 위로 옮김) -->
+  <p id="jaNote" role="note" hidden></p>
+
+  <!-- ① 첫 화면 -->
+  <div class="hero" id="top">
+    <div class="chars" id="chars"></div>
+    <p class="kick" data-t="kick"></p>
+    <h1><span style="display:inline;color:#fff" data-t="h1a"></span><span data-t="h1b"></span></h1>
+    <p class="tagline" data-t="tagline"></p>
+    <div class="chips">
+      <span class="chip on" data-t="chip1"></span>
+      <span class="chip" data-t="chip2"></span>
+      <span class="chip" data-t="chip3"></span>
+    </div>
+  </div>
+  <div class="cta">
+    <a class="btn pri" href="#schedule" data-t="go"></a>
+    <a class="btn" href="#map" data-t="openMap"></a>
+  </div>
+
+  <!-- ② 일정 · 장소 카드 -->
+  <section id="schedule">
+    <h2 data-t="glance"></h2>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" data-day="1" aria-selected="true">DAY 1</button>
+      <button type="button" role="tab" data-day="2" aria-selected="false">DAY 2</button>
+    </div>
+    <div class="card" style="padding:6px 0"><ul class="tl" id="tl"></ul></div>
+    <h2 data-t="detail" style="margin-top:22px"></h2>
+    <div id="places"></div>
+  </section>
+
+  <!-- ③ 지도 -->
+  <section id="map">
+    <h2 data-t="mapTitle"></h2>
+    <div class="legend"><span><i></i>DAY 1</span><span><i class="d"></i>DAY 2</span></div>
+    <div class="map" id="mapbox"></div>
+    <p class="note" data-t="mapNote"></p>
+    <a class="btn" style="margin-top:10px;font-size:13px" id="mapAll" target="_blank" rel="noopener" data-t="mapAll"></a>
+  </section>
+
+  <!-- ③ 스탬프 투어 -->
+  <section id="stamp">
+    <h2 data-t="stampTitle"></h2>
+    <div class="card steps">
+      <div><div class="n">1</div><span data-t="st1"></span></div><span class="arr">›</span>
+      <div><div class="n">2</div><span data-t="st2"></span></div><span class="arr">›</span>
+      <div><div class="n">3</div><span data-t="st3"></span></div>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <b style="font-size:14px" data-t="myStars"></b>
+      <div style="font-size:11px;color:var(--muted)" data-t="myStarsNote"></div>
+      <div class="stars" id="stars"></div>
+    </div>
+    <div class="pickup" data-t="pickup"></div>
+  </section>
+
+  <!-- ④ 하단부 -->
+  <section id="story">
+    <h2 data-t="storyTitle"></h2>
+    <div class="card">
+      <div class="who"><div class="blob p"><img src="랜딩_이미지/얼굴_포롱이.webp" alt="포롱이"></div><div><b data-t="porong"></b><small data-t="porongRole"></small></div></div>
+      <div class="who"><div class="blob y"><img src="랜딩_이미지/얼굴_여울이.webp" alt="여울이"></div><div><b data-t="yeouri"></b><small data-t="yeouriRole"></small></div></div>
+      <p class="story" data-t="story"></p>
+    </div>
+  </section>
+
+  <section id="tips">
+    <h2 data-t="tipsTitle"></h2>
+    <div class="card"><ul class="tips" id="tipsList"></ul></div>
+  </section>
+
+  <section id="save">
+    <h2 data-t="saveTitle"></h2>
+    <div class="share">
+      <button type="button" class="btn pri" id="btnSave"></button>
+      <button type="button" class="btn dark" id="btnShare" data-t="share"></button>
+      <button type="button" class="btn" id="btnCopy" data-t="copy"></button>
+    </div>
+    <p class="hint" data-t="homeHint"></p>
+  </section>
+
+  <footer>
+    <b data-t="credit"></b>
+    <ul id="credits"></ul>
+    <p data-t="foot"></p>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------- 이미지 경로 (확보되면 채우기) ---------- */
+const IMG = {
+  charDay: '랜딩_이미지/캐릭터_낮_크로스백.webp',            // 포롱이·여울이 크로스백
+  charNight: '랜딩_이미지/캐릭터_밤_크로스백_별랜턴.webp',   // 포롱이·여울이 크로스백 + 별랜턴
+  faceP: '랜딩_이미지/얼굴_포롱이.webp',                     // 장소 카드 아이콘
+  faceY: '랜딩_이미지/얼굴_여울이.webp'
+};
+
+/* ---------- 화면 문구 ----------
+   일본어는 번역 용어집(지침/4_홍보검토/12_번역_용어집.md) 공식 표기를 쓰고,
+   용어집에 없는 말(캐릭터 이름, 신천, 볼거리, 문장)은 AI 초안. 검토 전까지 하단에 안내문을 띄운다. */
+const T = {
+  ko:{
+    brand:'포롱이와 여울이의 대구 탐험', kick:'대구 중구 1박 2일 코스',
+    h1a:'포롱이와 여울이의', h1b:'대구 탐험',
+    tagline:'가을 대구, 골목과 시장을 따라 탐험을 시작해요.',
+    chip1:'1박 2일', chip2:'6곳 + 선택 1곳', chip3:'중구', optTag:'선택 · 동구',
+    go:'코스 따라가기', openMap:'지도 열기', glance:'코스 한눈에 보기', detail:'장소별 탐험',
+    stay:'체류', next:'다음 장소', mapTitle:'전체 탐험 지도', mapNote:'도식 지도 · 실제 위치·축척과 달라요. 장소를 누르면 설명으로 이동해요.',
+    mapAll:'지도 앱에서 전체 코스 열기', stampTitle:'스탬프 투어',
+    st1:'장소 방문', st2:'미션 수행', st3:'스탬프 기록',
+    myStars:'내 별빛 탐험 기록', myStarsNote:'방문한 곳을 누르세요 · 이 휴대폰에만 저장돼요',
+    pickup:'지금은 이 화면의 별 스탬프로 기록할 수 있어요. 종이 스탬프 북 받는 곳은 정해지면 안내할게요.',
+    storyTitle:'포롱이와 여울이 이야기', porong:'포롱이', yeouri:'여울이',
+    porongRole:'먼저 발견하고 직접 체험하는 호기심 많은 탐험가',
+    yeouriRole:'장소를 조사하고 이야기를 기록하는 꼼꼼한 탐험가',
+    story:'신천에서 함께 자란 포롱이와 여울이. 오랜 시간 뒤 다시 만난 대구는 기억 속 모습과 조금 달라져 있었어요. 두 친구는 대구 곳곳을 탐험하며 새로운 지도를 만들기로 했어요.',
+    tipsTitle:'여행 전 확인해요',
+    tips:['운영시간과 휴무일은 방문 전 확인하세요.','편한 신발을 준비하세요.','시장과 골목은 천천히 둘러보세요.','밤 코스는 별랜턴과 함께 즐겨요.'],
+    saveTitle:'코스 저장 · 공유', save:'★ 코스 저장', saved:'★ 저장됨', share:'공유하기', copy:'링크 복사',
+    homeHint:'브라우저 메뉴에서 “홈 화면에 추가”를 누르면 앱처럼 바로 열 수 있어요.',
+    copied:'링크를 복사했어요', savedMsg:'이 휴대폰에 코스를 저장했어요', unsavedMsg:'저장을 취소했어요',
+    credit:'사진 출처 · 라이선스', foot:'포롱이·여울이 대구 탐험 · 문의처 확정 후 기재',
+    photoWait:'사진 준비 중', photo:'사진', charTagDay:'포롱이·여울이 · 크로스백', charTagNight:'포롱이·여울이 · 별랜턴',
+    day1:'DAY 1 · 골목과 시장', day2:'DAY 2 · 여유로운 마무리', end:'근대골목에서 코스 종료', endTime:'약 14:00'
+  },
+  ja:{
+    brand:'ポロンとヨウリの大邱探検', kick:'大邱 中区 1泊2日コース',
+    h1a:'ポロンとヨウリの', h1b:'大邱探検',
+    tagline:'秋の大邱、路地と市場をたどって探検を始めましょう。',
+    chip1:'1泊2日', chip2:'6か所＋オプション1か所', chip3:'中区', optTag:'オプション・東区',
+    go:'コースをたどる', openMap:'地図を開く', glance:'コースを一目で', detail:'スポット別の探検',
+    stay:'滞在', next:'次のスポット', mapTitle:'全体の探検マップ', mapNote:'イメージ図です。実際の位置・縮尺とは異なります。スポットを押すと説明に移動します。',
+    mapAll:'地図アプリでコース全体を開く', stampTitle:'スタンプツアー',
+    st1:'スポットを訪問', st2:'ミッションを実行', st3:'スタンプを記録',
+    myStars:'わたしの星あかり探検記録', myStarsNote:'訪れた場所を押してください・この端末にのみ保存されます',
+    pickup:'今はこの画面の星スタンプで記録できます。紙のスタンプブックの配布場所は、決まり次第お知らせします。',
+    storyTitle:'ポロンとヨウリの物語', porong:'ポロン', yeouri:'ヨウリ',
+    porongRole:'まず見つけて自分で体験する、好奇心いっぱいの探検家',
+    yeouriRole:'スポットを調べて物語を記録する、几帳面な探検家',
+    story:'新川で一緒に育ったポロンとヨウリ。久しぶりに再会した大邱は、記憶の中の姿と少し変わっていました。ふたりは大邱のあちこちを探検し、新しい地図を作ることにしました。',
+    tipsTitle:'旅の前に確認しましょう',
+    tips:['営業時間と休業日は訪問前にご確認ください。','歩きやすい靴をご用意ください。','市場と路地はゆっくり見て回りましょう。','夜のコースは星のランタンと一緒に楽しみましょう。'],
+    saveTitle:'コースの保存・共有', save:'★ コースを保存', saved:'★ 保存済み', share:'共有する', copy:'リンクをコピー',
+    homeHint:'ブラウザのメニューから「ホーム画面に追加」すると、アプリのようにすぐ開けます。',
+    copied:'リンクをコピーしました', savedMsg:'この端末にコースを保存しました', unsavedMsg:'保存を取り消しました',
+    credit:'写真の出典・ライセンス', foot:'ポロンとヨウリの大邱探検・お問い合わせ先は確定後に記載',
+    photoWait:'写真準備中', photo:'写真', charTagDay:'ポロン・ヨウリ', charTagNight:'ポロン・ヨウリ・星のランタン',
+    day1:'DAY 1・路地と市場', day2:'DAY 2・ゆったり締めくくり', end:'大邱近代通りでコース終了', endTime:'約14:00',
+    aiNote:'一部の外国語表記はAI翻訳の草案です（確認中）。'
+  }
+};
+
+/* ---------- 장소 (11.25 정리본 · 시안 문구만 사용) ---------- */
+const PLACES = [
+  {id:'p1', day:1, n:1, night:false, lead:'y', mapQ:{k:'청라언덕', n:'대구 청라언덕', g:'청라언덕'},
+    ko:{time:'10:00', slot:'오전', name:'근대골목', desc:'대구의 근대 역사와 골목 풍경을 만나는 시간', hl:['청라언덕','계산성당','이상화 고택'], stay:'약 1시간', move:'서문시장 권역 · 도보 15분',
+        bub:[['여울이','청라언덕이라는 이름은 선교사들이 심은 담쟁이덩굴(청라)에서 왔다고 해.']]},  // 스토리 검증 3장 조건부 · KTO-CR
+    ja:{time:'10:00', slot:'午前', name:'大邱近代通り', desc:'大邱の近代の歴史と路地の風景に出会う時間', hl:['青蘿の丘','桂山聖堂','李相和古宅'], stay:'約1時間', move:'西門市場エリア・徒歩15分',
+        bub:[['ヨウリ','青蘿の丘という名前は、宣教師たちが植えたツタ（青蘿）から来たと言われています。']]},
+    photo:'랜딩_이미지/장소_근대골목_청라언덕.webp',
+    credit:{label:'중구, 청라언덕', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63706&division=img'}},
+  {id:'p2', day:1, n:2, night:false, lead:'p', mapQ:{k:'서문시장', n:'대구 서문시장', g:'서문시장'},
+    ko:{time:'11:40', slot:'점심', name:'서문시장 권역', desc:'시장 먹거리와 대구의 활기찬 풍경을 만나요.', hl:['먹거리','시장','생활문화'], stay:'약 1시간 30분',
+        bub:[['포롱이','시장 냄새가 여기까지 나! 뭐부터 먹어볼까?'],['여울이','대구 성곽의 서쪽에 있어서 서문시장이라는 이름이 붙었어.']]},  // 스토리 검증 3장 사용 · KTO-SM
+    ja:{time:'11:40', slot:'お昼', name:'西門市場エリア', desc:'市場グルメと大邱のにぎやかな風景に出会いましょう。', hl:['グルメ','市場','暮らしの文化'], stay:'約1時間30分',
+        bub:[['ポロン','市場のにおいがここまでしますね！何から食べましょうか？'],['ヨウリ','大邱の城郭の西側にあったので、西門市場という名前がつきました。']]},
+    photo:'랜딩_이미지/장소_서문시장.webp',
+    credit:{label:'중구, 서문시장', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63696&division=img'}},
+  {id:'p3', day:1, n:3, night:false, lead:'y', mapQ:'김광석다시그리기길',
+    ko:{time:'오후', name:'김광석 다시그리기길', desc:'음악과 벽화가 있는 골목을 산책해요.', hl:['음악','벽화'],
+        bub:[['여울이','김광석이 살았던 대봉동 방천시장 근처 골목이래.']]},  // 스토리 검증 3장 사용 · KTO-KG
+    ja:{time:'午後', name:'金光石の路', desc:'音楽と壁画のある路地を散歩しましょう。', hl:['音楽','壁画'],
+        bub:[['ヨウリ','金光石が住んでいた大鳳洞・防川市場の近くの路地だそうです。']]},
+    photo:'랜딩_이미지/장소_김광석길.webp', fit:'contain',  // 원본이 201×162이라 늘리지 않음
+    credit:{label:'김광석길', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63313&division=img'}},
+  {id:'p4', day:1, n:4, night:true, optional:true,  // 동구 · 선택 코스 (M0: MVP는 중구, 동구 평화시장 저녁 동선은 선택지)
+    lead:'p', mapQ:'평화시장 닭똥집골목',
+    ko:{time:'저녁', name:'평화시장 닭똥집골목', desc:'저녁은 골목의 먹거리와 함께해요.', hl:['저녁 먹거리']},
+    ja:{time:'夕方', name:'大邱平和市場タクトンチプ屋通り', desc:'夕食は路地のグルメと一緒に楽しみましょう。', hl:['夕食グルメ']},
+    photo:'랜딩_이미지/장소_평화시장_닭똥집골목.webp', fit:'contain',  // 원본이 211×170이라 늘리지 않고 원래 비율로 가운데 둔다
+    credit:{label:'평화시장 닭똥집', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63734&division=img'}},
+  {id:'p5', day:1, n:5, night:true, lead:'both', mapQ:{k:'서문시장', n:'대구서문야시장', g:'서문시장 야시장'},
+    ko:{time:'밤', name:'서문시장 야시장', desc:'별랜턴을 켜고 밤의 대구를 탐험해요.', hl:['야경','야시장'], move:'숙박 · 중구 동성로 일대',
+        bub:[['포롱이','와, 밤 시장이다! 불빛이 반짝반짝해!']]},
+    ja:{time:'夜', name:'西門市場夜市', desc:'星のランタンを灯して、夜の大邱を探検しましょう。', hl:['夜景','夜市'], move:'宿泊・中区 東城路周辺',
+        bub:[['ポロン','わあ、夜の市場ですね！灯りがキラキラしています！']]},
+    photo:'랜딩_이미지/장소_서문시장_야시장.webp',
+    credit:{label:'중구, 서문시장 야시장 (2018)', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63697&division=img'}},
+  {id:'p6', day:2, n:6, night:false, lead:'p', mapQ:{k:'동성로관광특구', n:'동성로', g:'동성로'},
+    ko:{time:'오전', name:'동성로', desc:'동성로에서 여유롭게 대구의 아침을 즐겨보세요.', hl:['자유시간'], move:'신천 · 산책'},
+    ja:{time:'午前', name:'東城路', desc:'東城路でのんびり大邱の朝を楽しみましょう。', hl:['自由時間'], move:'新川・散歩'},
+    photo:'랜딩_이미지/장소_동성로.webp',
+    credit:{label:'동성로 거리 (2006)', author:'Visviva', license:'퍼블릭 도메인', url:'https://commons.wikimedia.org/wiki/File:Dongseongno.jpg'}},
+  {id:'p7', day:2, n:7, night:false, lead:'both', mapQ:{k:'신천 하천', n:'대구 신천', g:'신천 하천 대구'},  // 걷기 시작 지점 정해지면 바꿈
+    ko:{time:'오후', name:'신천 산책', desc:'신천을 따라 걸은 뒤 근대골목으로 이동해 약 14:00에 코스를 마쳐요.', hl:['산책','물가']},
+    ja:{time:'午後', name:'新川さんぽ', desc:'新川沿いを歩いたあと、大邱近代通りへ移動して約14:00にコースを終えます。', hl:['散歩','水辺']},
+    photo:'랜딩_이미지/장소_신천.webp',
+    credit:{label:'신천 물가 (2007)', author:'Visviva', license:'퍼블릭 도메인', url:'https://commons.wikimedia.org/wiki/File:Daegu_Sincheon_ducks.jpg'}}
+];
+
+/* 사진 출처: 작성자·라이선스·원본 링크를 확인 후 채운다 (정리본 4장) */
+// credit이 글자만 있으면 아직 확인 전, {label, author, license, url}이면 원본 페이지에서 확인한 값
+const CREDITS = PLACES.filter(p=>p.credit).map(p=>typeof p.credit==='object' ? p.credit : ({label:p.credit, author:'작성자 확인 중', license:'라이선스 확인 중', url:''}));
+
+/* ---------- 상태 ---------- */
+/* 브라우저 저장이 막힌 환경(비공개 창 등)에서는 이 화면을 연 동안만 기억한다 */
+const mem = {};
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem('dgx_'+k); if(v!==null) return JSON.parse(v);}catch(e){} return k in mem ? mem[k] : d; },
+  set(k,v){ mem[k]=v; try{ localStorage.setItem('dgx_'+k, JSON.stringify(v)); }catch(e){} }
+};
+const qs = new URLSearchParams(location.search);
+const FROM = (qs.get('from')||'').toLowerCase();
+let lang = qs.get('lang') || store.get('lang', null) || ((navigator.language||'').toLowerCase().startsWith('ja') ? 'ja' : 'ko');
+if(!T[lang]) lang='ko';
+let day = 1;
+const isNight = (()=>{ const h=new Date().getHours(); return h>=18 || h<5; })();
+const $ = s=>document.querySelector(s);
+const t = k=>T[lang][k] ?? T.ko[k];
+
+/* ---------- 지도 앱 링크 ---------- */
+// 지도마다 검색어가 다르다 (11/26 실제로 열어 확인): 네이버는 현재 위치 기준이라 '대구'를 붙이고, 카카오는 '대구'를 붙이면 결과가 없다
+function mapLinks(q){
+  const Q = typeof q==='string' ? {k:q, n:q, g:q} : q;
+  const k={label:'카카오맵', ja:'カカオマップ', url:'https://map.kakao.com/link/search/'+encodeURIComponent(Q.k)};
+  const n={label:'네이버지도', ja:'NAVER地図', url:'https://map.naver.com/p/search/'+encodeURIComponent(Q.n)};
+  const g={label:'Google Maps', ja:'Google マップ', url:'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(Q.g)};
+  return lang==='ja' ? [g,n,k] : [k,n,g];
+}
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- 렌더 ---------- */
+function renderChars(){
+  const night = isNight; const src = night ? IMG.charNight : IMG.charDay;
+  const box = $('#chars'); box.classList.toggle('lantern', night);
+  box.innerHTML = src
+    ? `<img src="${esc(src)}" alt="${esc(t('porong'))} · ${esc(t('yeouri'))}">`
+    : `<div class="blob p">${esc(t('porong'))}</div><div class="blob y">${esc(t('yeouri'))}</div><div class="tag">${esc(night?t('charTagNight'):t('charTagDay'))}</div>`;
+}
+
+function renderTimeline(){
+  const rows = PLACES.filter(p=>p.day===day).map(p=>{
+    const L=p[lang];
+    const gear = p.night ? `<span class="g n">★ ${lang==='ja'?'ランタン':'별랜턴'}</span>` : `<span class="g"></span>`;
+    const opt = p.optional ? ` <span class="opt">${esc(t('optTag'))}</span>` : '';
+    return `<li><span class="t">${esc(L.time)}</span><span><a href="#${p.id}">${esc(L.name)}</a>${opt}</span>${gear}</li>`;
+  });
+  if(day===1) rows.push(`<li><span class="t">${lang==='ja'?'宿泊':'숙박'}</span><span>${lang==='ja'?'中区 東城路周辺':'중구 동성로 일대'}</span><span></span></li>`);
+  else rows.push(`<li><span class="t">${esc(t('endTime'))}</span><span>${esc(t('end'))}</span><span></span></li>`);
+  $('#tl').innerHTML = rows.join('');
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected', String(+b.dataset.day===day)));
+}
+
+function renderPlaces(){
+  let html='';
+  [1,2].forEach(d=>{
+    html += `<h2 style="font-size:14px;color:var(--muted);margin:6px 0 10px">${esc(t('day'+d))}</h2>`;
+    PLACES.filter(p=>p.day===d).forEach(p=>{
+      const L=p[lang];
+      const photo = p.photo ? `<img src="${esc(p.photo)}" alt="${esc(L.name)}" loading="lazy"${p.fit==='contain'?' class="contain"':''}>`
+                            : `<span>${p.photo===null?esc(t('photoWait')):esc(L.name)+' '+esc(t('photo'))}</span>`;
+      // 주연: 'p' 포롱이 · 'y' 여울이 · 'both' 둘 함께 (지침 7_시안_캐릭터 2-2 배치 세트)
+      const face = (c, size) => { const src = c==='y' ? IMG.faceY : IMG.faceP;
+        return `<div class="f ${c} ${size}"${src?` style="background-image:url('${esc(src)}')"`:''}>${src?'':esc(t(c==='y'?'yeouri':'porong'))}</div>`; };
+      const duo = p.lead==='both' ? face('p','eq') + face('y','eq')
+                                  : face(p.lead==='y'?'p':'y','sub') + face(p.lead,'main');
+      const meta = [String(p.n).padStart(2,'0'), (L.slot?L.slot+' ':'')+L.time, L.stay?t('stay')+' '+L.stay:''].filter(Boolean).join(' · ');
+      html += `<article class="place${p.night?' night':''}" id="${p.id}">
+        <div class="ph">${photo}<div class="duo" aria-hidden="true">${duo}</div></div>
+        <div class="pb">
+          <div class="meta">${esc(meta)}${p.night?' · ★':''}${p.optional?` <span class="opt">${esc(t('optTag'))}</span>`:''}</div>
+          <h3>${esc(L.name)}${lang==='ja'?`<span class="sub">${esc(p.ko.name)}</span>`:''}</h3>
+          <p class="desc">${esc(L.desc)}</p>
+          ${L.hl?`<div class="hl">${L.hl.map(h=>`<span>${esc(h)}</span>`).join('')}</div>`:''}
+          ${L.move?`<p class="move">→ ${esc(t('next'))} ${esc(L.move)}</p>`:''}
+          ${(L.bub||[]).map(b=>`<p class="bub"><b>${esc(b[0])}</b>“${esc(b[1])}”</p>`).join('')}
+          <div class="maps">${mapLinks(p.mapQ).map(m=>`<a href="${m.url}" target="_blank" rel="noopener">${esc(lang==='ja'?m.ja:m.label)}</a>`).join('')}</div>
+        </div></article>`;
+    });
+  });
+  $('#places').innerHTML = html;
+}
+
+function renderMap(){
+  const pts = {p1:[60,60],p2:[160,50],p3:[270,70],p4:[280,150],p5:[170,160],p6:[70,220],p7:[230,240]};
+  const lab = id=>PLACES.find(p=>p.id===id)[lang].name.replace('서문시장 권역','서문시장').replace('西門市場エリア','西門市場').replace('김광석 다시그리기길','김광석길').replace('평화시장 닭똥집골목','평화시장').replace('大邱平和市場タクトンチプ屋通り','平和市場').replace('신천 산책','신천').replace('新川さんぽ','新川');
+  const lp = {p1:[0,26],p2:[0,-18],p3:[0,28],p4:[0,28],p5:[0,28],p6:[0,28],p7:[0,28]};
+  let s = `<svg viewBox="0 0 330 280" role="img" aria-label="${esc(t('mapTitle'))}">
+    <polyline points="60,60 160,50 270,70 280,150 170,160" fill="none" stroke="#e98c19" stroke-width="3"/>
+    <line x1="170" y1="160" x2="70" y2="220" stroke="#b9b2a4" stroke-width="2" stroke-dasharray="2 4"/>
+    <line x1="70" y1="220" x2="230" y2="240" stroke="#273251" stroke-width="3" stroke-dasharray="6 4"/>`;
+  PLACES.forEach(p=>{
+    const [x,y]=pts[p.id]; const d2=p.day===2;
+    const fill = d2?'#fff':(p.night?'#273251':'#e98c19');
+    const done = store.get('stars',[]).includes(p.id);
+    s += `<g class="node" data-go="${p.id}" tabindex="0" role="link" aria-label="${esc(p[lang].name)}">
+      <circle cx="${x}" cy="${y}" r="14" fill="${fill}" stroke="${d2?'#273251':'none'}" stroke-width="2"/>
+      <text x="${x}" y="${y+4.5}" text-anchor="middle" font-size="12" font-weight="700" fill="${d2?'#273251':'#fff'}">${done?'★':p.n}</text>
+      <text x="${x+lp[p.id][0]}" y="${y+lp[p.id][1]}" text-anchor="middle" font-size="11" fill="#202a49">${esc(lab(p.id))}</text></g>`;
+  });
+  s += `<text x="96" y="205" font-size="10" fill="#6e7280">${lang==='ja'?'宿泊':'숙박'}</text></svg>`;
+  $('#mapbox').innerHTML = s;
+  $('#mapbox').querySelectorAll('.node').forEach(g=>{
+    const go=()=>document.getElementById(g.dataset.go).scrollIntoView({behavior:'smooth'});
+    g.addEventListener('click',go);
+    g.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
+  });
+  // 전체 코스: Google Maps 경로 (출발 → 경유지 → 도착). 카카오 · 네이버는 여러 경유지 링크가 없다
+  const gq = PLACES.map(p=>typeof p.mapQ==='string' ? p.mapQ : p.mapQ.g);
+  $('#mapAll').href = 'https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(gq[0])
+    +'&destination='+encodeURIComponent(gq[gq.length-1])
+    +'&waypoints='+encodeURIComponent(gq.slice(1,-1).join('|'));
+}
+
+function renderStars(){
+  const got = store.get('stars',[]);
+  $('#stars').innerHTML = PLACES.map(p=>{
+    const short = lang==='ja' ? p.ja.name.replace('大邱近代通り','近代通り').replace('西門市場エリア','西門市場').replace('大邱平和市場タクトンチプ屋通り','平和市場').replace('西門市場夜市','夜市').replace('新川さんぽ','新川').replace('金光石の路','金光石')
+                              : p.ko.name.replace(' 권역','').replace(' 다시그리기길','길').replace(' 닭똥집골목','').replace('서문시장 야시장','야시장').replace(' 산책','');
+    return `<button type="button" data-star="${p.id}" aria-pressed="${got.includes(p.id)}"><span class="s">${got.includes(p.id)?'★':'☆'}</span><span class="l">${esc(short)}</span></button>`;
+  }).join('');
+}
+
+function renderCredits(){
+  $('#credits').innerHTML = CREDITS.map(c=>`<li>${esc(c.label)} · ${esc(c.author)} · ${esc(c.license)}${c.url?` · <a href="${esc(c.url)}" target="_blank" rel="noopener">원본</a>`:''}</li>`).join('');
+}
+
+function renderSave(){ $('#btnSave').textContent = store.get('saved',false) ? t('saved') : t('save'); }
+
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.title = t('brand');
+  document.querySelectorAll('[data-t]').forEach(el=>{ el.textContent = t(el.dataset.t); });
+  document.querySelectorAll('.lang button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.lang===lang)));
+  $('#tipsList').innerHTML = T[lang].tips.map(x=>`<li>${esc(x)}</li>`).join('');
+  const n=$('#jaNote'); n.hidden = lang!=='ja'; n.textContent = T.ja.aiNote;
+  renderChars(); renderTimeline(); renderPlaces(); renderMap(); renderStars(); renderCredits(); renderSave();
+}
+
+/* ---------- 이벤트 ---------- */
+function toast(m){ const el=$('#toast'); el.textContent=m; el.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>el.classList.remove('on'),1800); }
+document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>{ lang=b.dataset.lang; store.set('lang',lang); applyLang(); }));
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{ day=+b.dataset.day; renderTimeline(); }));
+$('#stars').addEventListener('click',e=>{
+  const b=e.target.closest('[data-star]'); if(!b) return;
+  let got=store.get('stars',[]); const id=b.dataset.star;
+  got = got.includes(id) ? got.filter(x=>x!==id) : got.concat(id);
+  store.set('stars',got); renderStars(); renderMap();
+});
+$('#btnSave').addEventListener('click',()=>{ const v=!store.get('saved',false); store.set('saved',v); renderSave(); toast(v?t('savedMsg'):t('unsavedMsg')); });
+function shareUrl(){ const u=new URL(location.href); u.searchParams.delete('from'); u.searchParams.set('from','share'); return u.toString(); }
+async function copyLink(){
+  try{ await navigator.clipboard.writeText(shareUrl()); toast(t('copied')); }
+  catch(e){ prompt('URL', shareUrl()); }
+}
+$('#btnCopy').addEventListener('click',copyLink);
+$('#btnShare').addEventListener('click',async()=>{
+  if(navigator.share){ try{ await navigator.share({title:t('brand'), text:t('tagline'), url:shareUrl()}); }catch(e){} }
+  else copyLink();
+});
+
+/* ---------- 시작 ---------- */
+applyLang();
+const JUMP = {leaflet:'schedule', stampbook:'stamp'};   // poster · sns · 그 밖은 맨 위
+if(JUMP[FROM] && !location.hash){
+  requestAnimationFrame(()=>document.getElementById(JUMP[FROM]).scrollIntoView({behavior:'auto'}));
+}
+/* 유입 집계: 분석 도구가 정해지면 여기서 FROM 값을 보낸다 (지금은 보내지 않음) */
+</script>
+</body>
+</html>

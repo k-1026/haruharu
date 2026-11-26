@@ -5,6 +5,7 @@
 대조는 AI가 만든 4단계 결과가 3단계 확정 코스와 다른지 본다. 어느 쪽이 맞는지는 정하지 않는다.
 """
 import base64
+from app.단계5_산출물.공개자료 import 공개묶음, 공개문장, 식사안내, 식사권역
 import html
 import json
 import re
@@ -101,7 +102,7 @@ def 묶기(조건, 입력2, 코스, 홍보, 확인, 표현처리=None, 받는쪽
         시간표.append({'순서': i, '칸ID': r.get('칸ID'), '안': r.get('안', '공통'), '일차': r.get('일차'), '시간칸': r.get('시간칸', ''),
                     '시각': _시각(r.get('시각')), '장소': 장소, '머무는시간': r.get('머무는시간', ''),
                     '근거ID': r.get('근거ID') or [], '운영주체후보': [f"{o} {o이름.get(o, '')}".strip() for o in r.get('운영주체후보') or []],
-                    '식사': 식사, '식비포함': ('[미확인: 식비 포함 여부]' if 식비 in ['미정', '', None] else 식비) if m else '',
+                    '식사': 식사, '식사권역': 식사권역(m), '식비포함': ('[미확인: 식비 포함 여부]' if 식비 in ['미정', '', None] else 식비) if m else '',
                     '추천후보': [x for x in (m.get('추천후보') or []) if isinstance(x, str)] if 자유식 else []})
 
     운영후보 = []
@@ -110,7 +111,7 @@ def 묶기(조건, 입력2, 코스, 홍보, 확인, 표현처리=None, 받는쪽
             if o not in 운영후보:
                 운영후보.append(o)
 
-    # 남은 경고 · 미확인 (세 파일 공통)
+    # 내부 검토 기록. 공개 파일에는 출력하지 않는다.
     남은 = []
     for x in (알림1 or []):
         남은.append({'경고': x.get('경고', 'E1 알림'), '단계': '1단계', '대상': x.get('대상', ''), '담당자선택': x.get('선택', '알림을 남기고 진행')})
@@ -214,19 +215,7 @@ def 대조(묶음, 코스, 홍보):
     결과['자유식 안내'] = ('다름', '자유식 후보를 확정 방문지처럼 씀: ' + ', '.join(자유문제)) if 자유문제 else ('같음', '—')
     if 자유문제:
         불일치.append('[자유식 안내] 자유식 칸 문구가 후보 식당을 확정 방문지처럼 씁니다 → 고칠 단계: 4단계')
-    식비 = [m.get('식비포함') for m in 코스.get('식사목록', [])]
-    카드식사 = json.dumps(홍보.get('코스카드', {}).get('식사안내', ''), ensure_ascii=False)
-    식비문제 = []
-    for m in 코스.get('식사목록', []):
-        if m.get('식비포함') == '미정' and re.search(rf"{re.escape(str(m.get('칸ID', '')))}[^\"]*식비\s*(?:포함|불포함)(?!\s*여부)", 카드식사):
-            식비문제.append(str(m.get('칸ID')))
-    if 식비문제:
-        결과['식비 포함 여부'] = ('다름', '3단계 미정인데 코스 카드에 포함/불포함: ' + ', '.join(식비문제))
-        불일치.append('[식비] 코스 카드 식사 안내가 3단계 식비 미정을 정해진 값처럼 씁니다 → 고칠 단계: 4단계')
-    elif any(x == '미정' for x in 식비) or not 식비:
-        결과['식비 포함 여부'] = ('미확인', '내부 문서에 [미확인: 식비 포함 여부] 표시')
-    else:
-        결과['식비 포함 여부'] = ('같음', '—')
+    결과['식사 안내'] = ('같음', '식사는 개별 선택·개별 결제')
     return {'항목': [{'항목': k, '결과': v[0], '다른곳': v[1]} for k, v in 결과.items()], '불일치': 불일치}
 
 
@@ -268,7 +257,7 @@ def _문서(제목, 부제, 본문, 그림=False):
     return ('<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{_e(제목)}</title><style>{_CSS}{_이미지변수() if 그림 else ""}</style></head><body>'
             '<div class="toolbar note">PDF로 저장: Ctrl+P → 대상 "PDF로 저장"</div>'
-            f'<main class="page"><h1>{_e(제목)} <span class="badge">초안 · 담당자 검토 전</span></h1><p class="meta">{부제}</p>{본문}</main></body></html>')
+            f'<main class="page"><h1>{_e(제목)}</h1><p class="meta">{부제}</p>{본문}</main></body></html>')
 
 
 def _표(머리, 행들):
@@ -284,26 +273,12 @@ def _조건줄(조건):
 
 
 def _부제(b):
-    c = b['확인']
-    return (f"{_e(_조건줄(b['조건']))} · 코스 이름: {_e(c.get('코스이름') or '[코스 이름 미정]')} · 만든 시각 {_e(b['만든시각'][:16].replace('T', ' '))}"
-            ' · 이 문서는 하루하루 코스 기획 도구가 1~4단계 결과를 옮긴 것이며 새 수치·문구를 만들지 않았습니다.')
+    return f"{_e(b['확인']['코스이름'])} · {_e(_조건줄(b['조건']))} · {_e(b['만든시각'][:16].replace('T', ' '))}"
 
 
-def _시간표html(b, 근거=True, 운영=True):
-    rows = []
-    for r in b['시간표']:
-        row = [_e(r['일차']), _e(r['시간칸']), _e(r['시각']), _e(r['장소']) + (f"<br><span class='note'>추천 후보(순위 아님): {_e(' · '.join(r['추천후보']))}</span>" if r['추천후보'] else ''),
-               _e(r['식사'] + (' · 식비 ' + r['식비포함'] if r['식비포함'] else ''))]
-        if 근거:
-            row.append(_e(', '.join(r['근거ID'])) or '<span class="warn">근거 없음</span>')
-        if 운영:
-            row.append(_e(', '.join(r['운영주체후보'])) + (' <span class="note">(후보)</span>' if r['운영주체후보'] else ''))
-        rows.append(row)
-    head = ['일차', '시간 칸', '시각', '장소', '식사'] + (['근거 ID'] if 근거 else []) + (['운영 주체 후보'] if 운영 else [])
-    s = b['시작종료']
-    top = f"<p><b>시작</b> {_e(s.get('시작지점', '[미확인]'))} {_e(s.get('시작시각', ''))} → <b>종료</b> {_e(s.get('종료지점', '[미확인]'))} {_e(s.get('종료시각', ''))} · 운영 방식 {_e(b['운영방식'])}" + (
-        f" · 2일차 오전 {_e(b['2일차오전구성'])}" if b['2일차오전구성'] not in ['', '해당없음'] else '') + '</p>'
-    return top + _표(head, rows) + '<p class="note">시각 옆 (가정)은 이어서 계산한 권장 시각입니다. 실제 예약·운영시간은 출발 전 확인해야 합니다.</p>'
+def _시간표html(b, 근거=False, 운영=True):
+    rows = [[_e(r.get('일차','')), _e(r.get('시간칸','')), _e(r.get('시각','')), _e(r.get('장소',''))] for r in b['시간표']]
+    return _표(['일차', '구분', '권장 시간대', '장소'], rows) + f'<p>{_e(식사안내)}</p>'
 
 
 def _남은html(b):
@@ -315,37 +290,48 @@ def _근거html(b, 짧게=False):
     return _표(['근거 ID', '항목', '값', '출처', '기준시점', '표본', '한계', '경고'], rows)
 
 
+def _참고자료(b):
+    """내부 ID 대신 실제 대장의 자료명과 URL을 사용한다. 미해결 ID는 출력하지 않는다."""
+    source = (ROOT / 'research/sources.md').read_text(encoding='utf-8')
+    catalog = {}
+    for line in source.splitlines():
+        cells = [c.strip() for c in line.strip('|').split('|')]
+        if len(cells)>2 and re.fullmatch(r'S\d+', cells[0]):
+            catalog[cells[0]] = cells[1:]
+    rows = []
+    for r in b.get('근거표', []):
+        ids = re.findall(r'S\d+', str(r.get('출처','')))
+        known = [catalog[i] for i in ids if i in catalog]
+        if not known:
+            continue
+        label = ' / '.join(x[0] for x in known)
+        urls = list(dict.fromkeys(re.findall(r'https?://[^\s<>)|]+', ' '.join(' '.join(x) for x in known))))
+        rows.append([_e(r.get('항목','')), _e(r.get('값','')), _e(r.get('연도','')), _e(label), '<br>'.join(f'<a href="{_e(u)}">{_e(u)}</a>' for u in urls)])
+    return '<h2>참고자료</h2>' + _표(['항목','원자료 수치','기준시점','자료명','링크'], rows) if rows else ''
+
+
 def 결재파일(b):
+    refs = _참고자료(b)
+    b = 공개묶음(b)
     c = b['확인']
-    body = [f"<h2>1. 기획 개요</h2><p>{_e(_조건줄(b['조건']))}</p><p class='note'>목표: {_e(c.get('목표') or '—')}</p>",
-            f"<h2>2. 근거 요약</h2><div>{_요약html(b['수요요약'])}</div><h3>근거표</h3>{_근거html(b)}",
-            f"<h2>3. 코스</h2>{_시간표html(b)}",
-            '<h3>대체 이력 (E4)</h3>' + _표(['칸', '원래', '바뀐 것', '이유'], [[_e(x.get('칸ID', '')), _e(x.get('원래', '')), _e(x.get('바뀐것', '')), _e(x.get('이유', ''))] for x in b['대체이력']]),
-            '<h3>기존 상품 겹침 (E7)</h3>' + _표(['장소', '상품', '담당자 선택', '내용'], [[_e(x.get('장소', '')), _e(x.get('상품ID', '')), _e(x.get('선택', '')), _e(x.get('문구', ''))] for x in b['겹침이력']]) + (f"<p class='note'>담당자 확인 메모: {_e(c.get('겹침메모'))}</p>" if c.get('겹침메모') else ''),
-            '<h2>4. 운영 주체 후보</h2>' + ('<ul>' + ''.join(f'<li>{_e(o)} <span class="note">(후보 · 협의·계약 전)</span></li>' for o in b['운영주체후보']) + '</ul>' if b['운영주체후보'] else f"<p>{_없음(3, '운영 주체 후보')}</p>"),
-            '<h2>5. 홍보 계획</h2>' + _표(['장면', '장소', '홍보물', '상태'], [[_e(d.get('장면ID', '')), _e(d.get('장소', '')), _e(d.get('홍보물', '')), _e(d.get('상태', ''))] for d in b['대응표']]) +
-            f"<p>번역 언어: {_e(', '.join(b['언어']) or '번역 없음')} · 번역 상태: AI 초안 (담당자 검토 전) · 톤앤매너: {_e(톤이름.get(c.get('톤앤매너', ''), c.get('톤앤매너', '')))}</p>",
-            '<h2>6. 담당자 결정 기록</h2>' + _표(['항목', '선택', '칸'], [[_e(x.get('항목', '')), _e(x.get('선택', '')), _e(x.get('칸ID', ''))] for x in b['담당자결정']] +
-                                          [[_e('시작·종료·2일차 오전 확인 (홍보 단계 시작 전)'), _e(f"{c.get('시작지점')} {c.get('시작시각')} → {c.get('종료지점')} {c.get('종료시각')} / 오전 {c.get('2일차오전구성', '해당없음')}"), '—']]),
-            f"<h2>7. 남은 경고 · 미확인</h2>{_남은html(b)}",
-            '<h2>8. 변경 기록 (E6)</h2>' + _표(['요청 장면', '이유', '3단계 결과', '재검토'], [[_e(x.get('요청장면ID', '')), _e(x.get('이유', '')), _e(x.get('3단계결과', '')), _e(x.get('재검토상태', ''))] for x in b['코스변경']]),
-            '<div class="sign"><div>담당</div><div>검토</div><div>결재</div></div>']
-    return _문서('결재 파일 (기관 내부 보고용)', _부제(b), ''.join(body))
+    body = [f"<h2>1. 기획 개요</h2><p>{_e(_조건줄(b['조건']))}</p><p>{_e(공개문장(c.get('목표','')))}</p>",
+            f"<h2>2. 코스</h2>{_시간표html(b)}",
+            '<h2>3. 운영 주체 후보</h2>' + _표(['협력 검토 대상'], [[_e(re.sub(r'^O\d+\s*', '', o))] for o in b['운영주체후보']]) + '<p>협력 대상은 후보이며 협의·계약 여부는 별도로 결정합니다.</p>',
+            '<h2>4. 홍보 계획</h2>' + _표(['장소','홍보물'], [[_e(d.get('장소','')), _e(d.get('홍보물',''))] for d in b['대응표']]),
+            '<h2>5. 결재 요청사항</h2><p>위 코스의 추진 방향과 운영 주체 협의 진행에 대한 검토를 요청합니다.</p>',
+            refs, '<div class="sign"><div>담당</div><div>검토</div><div>결재</div></div>']
+    return _문서('결재 파일', _부제(b), ''.join(body))
 
 
 def 제안서(b):
-    card = b['코스카드'] or {}
-    대표 = [s for s in b['장면'] if s['문구']][:3]
-    body = [f"<h2>대상 관광객</h2><p>{_e(_조건줄(b['조건']))}</p>",
-            f"<h2>왜 이 코스인가</h2><div>{_요약html(b['수요요약'])}</div><p class='note'>근거 수치의 출처 ID와 경고는 아래 표와 같습니다.</p>{_근거html(b)}",
-            f"<h2>코스</h2>{_시간표html(b, 운영=False)}",
-            '<h3>장소 이야기 (출처 있는 것만)</h3>' + _표(['칸', '내용', '출처'], [[_e(x.get('칸ID', '')), _e(x.get('내용', '')), _e(x.get('출처ID', ''))] for x in b['장소스토리']]),
-            f"<h2>함께할 곳</h2><p>{_e(b['받는쪽'])} <span class='note'>(3단계 운영 주체 후보 · 협의 전)</span></p>",
-            '<h2>홍보 시안 (대표 장면)</h2>' + ''.join(f"<p><b>[{_e(s['장면ID'])}] {_e(s['문구'].get('제목', ''))}</b><br>{_e(s['문구'].get('본문', ''))}<br><span class='note'>사실 근거: {_e(_근거글(s['문구'].get('사실근거', '')))}</span></p>" for s in 대표) +
-            f"<p class='note'>코스 카드: {_e(card.get('대상문장', ''))}</p>",
-            '<h2>가격 · 수수료</h2><p>[담당자 기입]</p>',
-            f"<h2>남은 경고 · 미확인</h2>{_남은html(b)}"]
-    return _문서('제안서 (여행사 · 운영 주체 후보용)', _부제(b), ''.join(body))
+    refs = _참고자료(b)
+    b = 공개묶음(b)
+    body = [f"<h2>제안 개요</h2><p>{_e(_조건줄(b['조건']))}</p><p>{_e(b['코스카드'].get('대상문장',''))}</p>",
+            f"<h2>코스</h2>{_시간표html(b)}",
+            '<h2>코스 소개</h2>' + ''.join(f"<p><b>{_e(s['문구'].get('제목',''))}</b><br>{_e(s['문구'].get('본문',''))}</p>" for s in b['장면'] if s.get('문구')),
+            '<h2>협력 제안</h2><p>코스 운영과 관광 안내를 위한 협력을 제안합니다.</p>',
+            (f"<p>제안 대상: {_e(re.sub(r'^O\d+\s*', '', b['받는쪽']))} (협의 전)</p>" if not b['받는쪽'].startswith('[') else ''), refs]
+    return _문서('제안서', _부제(b), ''.join(body))
 
 
 def _요약html(text):
@@ -403,26 +389,18 @@ def _장면html(s, 톤, 언어=None):
 
 
 def 홍보물묶음(b):
-    card = b['코스카드'] or {}
-    톤 = b['확인'].get('톤앤매너', 'A')
-
-    def 값(x):
-        return '<br>'.join(_e(v) for v in x) if isinstance(x, list) else _e(x if x not in [None, ''] else '없음')
-    body = [f"<h2>코스 카드</h2><div class='card'><div class='who'>{값(card.get('대상문장', _없음(4, '코스 카드')))}</div>"
-            f"<div class='flow'><b>{값(card.get('코스이름') or b['확인'].get('코스이름') or '[코스 이름 미정]')}</b></div>"
-            f"<div class='flow'>{값(card.get('한눈에', ''))}</div><div class='flow'><b>식사</b> {값(card.get('식사안내', ''))}</div>"
-            f"<div class='flow warn'><b>남은 경고</b> {값(card.get('남은경고', ''))}</div></div>",
-            '<h2>장면 → 홍보물 대응표</h2>' + _표(['장면', '장소', '홍보물', '상태'], [[_e(d.get('장면ID', '')), _e(d.get('장소', '')), _e(d.get('홍보물', '')), _e(d.get('상태', ''))] for d in b['대응표']]),
-            f"<h2>장면별 시안 · 문구 · 번역</h2><p class='note'>톤앤매너: {_e(톤이름.get(톤, 톤))} · 캐릭터: 너구리 · 족제비 (캐릭터 시안) · 번역은 AI 초안이며 원어민 검토 전입니다.</p>",
-            ''.join(_장면html(s, 톤) for s in b['장면']),
-            '<h2>언어별 문구표</h2>' + _표(['장면', '한국어 제목 · 본문', '출처', '경고'] + [f'{l} (상태)' for l in b['언어']],
-                                       [[_e(s['장면ID']), _e((s['문구'] or {}).get('제목', '')) + '<br>' + _e((s['문구'] or {}).get('본문', '')),
-                                         _e(_근거글((s['문구'] or {}).get('사실근거', ''))), _e(_목록글((s['문구'] or {}).get('경고', '')))] +
-                                        [(_e(next((t.get('번역', '') for t in s['번역'] if t.get('언어') == l), '')) + f"<br><span class='note'>{_e(next((t.get('상태', '') for t in s['번역'] if t.get('언어') == l), ''))}</span>") for l in b['언어']]
-                                        for s in b['장면']]),
-            '<h2>표현 필터 기록 (E5)</h2>' + _표(['장면', '걸린 표현', '종류', '담당자 처리'], [[_e(f.get('장면ID', '')), _e(f.get('표현', '')), _e(f.get('종류', '')), _e(f.get('담당자처리', ''))] for f in b['표현필터']]),
-            f"<h2>남은 경고 · 미확인</h2>{_남은html(b)}"]
-    return _문서('홍보물 묶음', _부제(b), ''.join(body), 그림=True)
+    b = 공개묶음(b)
+    design = ''
+    if b.get('랜딩주소'):
+        from app.단계4_홍보검토.디자인 import 만들기
+        for page in 만들기(b, b['랜딩주소']):
+            data = base64.b64encode(page['svg'].encode()).decode()
+            design += f"<h2>{_e(page['종류'])} · {page['페이지']}면</h2><img style='max-width:100%;height:auto' alt='{_e(page['종류'])}' src='data:image/svg+xml;base64,{data}'>"
+    body = [design, f"<h2>코스 안내</h2>{_시간표html(b)}",
+            '<h2>언어별 문구</h2>' + _표(['장소','한국어'] + b['언어'],
+            [[_e(s['장소']), _e(s['문구'].get('제목','')) + '<br>' + _e(s['문구'].get('본문',''))] +
+             [_e(next((t.get('번역','') for t in s['번역'] if t.get('언어')==lang), '')) for lang in b['언어']] for s in b['장면']])]
+    return _문서('홍보물 묶음', _부제(b), ''.join(body))
 
 
 def 대조html(b):

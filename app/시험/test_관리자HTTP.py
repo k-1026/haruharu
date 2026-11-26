@@ -11,6 +11,36 @@ import test_관리자실행 as fixtures
 
 
 class HTTP시험(unittest.TestCase):
+    def test_직원_묶음저장은_토큰필요하고_QR조회는_읽기전용이다(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        service=SimpleNamespace(식사묶음반영=Mock(return_value={'버전':2}),관광객식사=Mock(return_value={'형식버전':1,'식사묶음':[]}))
+        server=ThreadingHTTPServer(('127.0.0.1',0),핸들러(self.store,self.service,기획서비스=service))
+        threading.Thread(target=server.serve_forever,kwargs={'poll_interval':.01},daemon=True).start()
+        self.addCleanup(server.server_close);self.addCleanup(server.shutdown)
+        self.port=server.server_port;self.origin=f'http://127.0.0.1:{self.port}'
+        self.assertEqual(self.request('POST','/api/plan/meal/bundle',{})[0],403)
+        token=self.request('GET','/api/session')[1]['token']
+        self.assertEqual(self.request('POST','/api/plan/meal/bundle',{}, {'X-Admin-Token':token})[0],201)
+        self.assertEqual(self.request('GET','/api/plan/meal/options?id=x&'+quote('안')+'=A&'+quote('버전')+'=2')[0],200)
+        service.관광객식사.assert_called_once_with({'시험id':'x','안id':'A','기준버전':2})
+        self.assertEqual(self.request('GET','/api/plan/meal/options?id=x')[0],400)
+        self.assertEqual(service.식사묶음반영.call_count,1)
+
+    def test_식사_비교와_반영도_같은_토큰과_명시API를_사용한다(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        service=SimpleNamespace(식사비교=Mock(return_value={'반영가능':True}),식사반영=Mock(return_value={'버전':2}))
+        server=ThreadingHTTPServer(('127.0.0.1',0),핸들러(self.store,self.service,기획서비스=service))
+        threading.Thread(target=server.serve_forever,kwargs={'poll_interval':.01},daemon=True).start()
+        self.addCleanup(server.server_close);self.addCleanup(server.shutdown)
+        self.port=server.server_port;self.origin=f'http://127.0.0.1:{self.port}'
+        self.assertEqual(self.request('POST','/api/plan/meal/apply',{})[0],403)
+        token=self.request('GET','/api/session')[1]['token'];headers={'X-Admin-Token':token}
+        self.assertEqual(self.request('POST','/api/plan/meal/preview',{},headers)[0],200)
+        service.식사반영.assert_not_called()
+        self.assertEqual(self.request('POST','/api/plan/meal/apply',{},headers),(201,{'버전':2}))
+
     def test_HTTP_CSV_엑셀_업로드는_미리보기만하고_토큰검사(self):
         import base64
         from pathlib import Path

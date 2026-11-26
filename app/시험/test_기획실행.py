@@ -10,7 +10,7 @@ from app.서버.관리자실행 import 코스시험
 from app.공통 import 기획기록 as 기록모듈
 from app.공통 import 기획실행 as 모듈
 
-견본 = Path(__file__).resolve().parents[1] / 'runs' / '20261122_223324' / '01회차'
+견본 = Path(__file__).resolve().parents[1] / 'runs' / '검사예제_코스' / '01회차'
 견본있음 = (견본 / '2단계_결과.md').is_file() and (견본 / '통합시험_235320_982315' / '3단계_결과.md').is_file()
 
 좋은입력 = {'계절': '봄', '언어권': ['일본어'], '지역': ['중구'], '체류기간': '1박2일',

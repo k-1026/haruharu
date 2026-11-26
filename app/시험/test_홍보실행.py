@@ -55,6 +55,189 @@ def 가짜홍보(번역='大邱近代通りを歩く', 경고='근거 없음'):
 
 
 class 홍보시험(unittest.TestCase):
+    def test_표현_미처리는_최종파일을_막고_파일갱신은_AI를_호출하지않는다(self):
+        fn=가짜홍보();s=self.서비스(fn)
+        hid=s.시작(self.값())['홍보id'];self.기다리기(s,hid)
+        raw=(self.runs/hid/'4단계_구조화.json').read_bytes()
+        key=s.결과(hid)['필터키'][0]
+        for decision in [{},{key:'미처리'},{key:'고침필요'}]:
+            with self.assertRaisesRegex(ValueError,'홍보 표현'):
+                s.산출물({'홍보id':hid,'홍보확인':True,'표현처리':decision})
+        self.assertFalse((self.runs/hid/'산출물').exists())
+        args={'홍보id':hid,'홍보확인':True,'표현처리':{key:'그대로둠'}}
+        s.산출물(args);s.산출물(args)
+        self.assertEqual(fn.호출,1)
+        self.assertEqual(s.결과(hid)['산출물선택']['표현처리'],{key:'그대로둠'})
+        self.assertEqual((self.runs/hid/'4단계_구조화.json').read_bytes(),raw)
+
+    def test_랜딩_실제장소는_유지하며_짧은표기와_단위와_빈칩을_정리한다(self):
+        from app.단계4_홍보검토.디자인 import 랜딩
+        c=코스();c['칸목록'][0].update({'장소명':'대구광역시 중구 김광석길','머무는시간':60,'시각':{'값':'13:01','종류':'가정'}})
+        b=산출물.묶기(입력2()['조건'],입력2(),c,{'문구목록':[],'번역목록':[]},self.값())
+        page=랜딩(b,'layout-test')
+        data=json.loads(page.split('const COURSE = ',1)[1].split(';\nconst PLACES',1)[0])
+        first=data['places'][0]
+        self.assertEqual(first['ko']['name'],'김광석 다시그리기길')
+        self.assertEqual(first['ja']['name'],'金光石の路')
+        self.assertEqual(first['ko']['stay'],'약 60분')
+        self.assertEqual(first['ko']['hl'],[])
+        self.assertEqual(first['short']['ko'],'김광석길')
+        self.assertEqual(first['ko']['time'],'오후')
+        self.assertEqual(first['원본시각'],'오후')
+        self.assertNotIn("p[lang].name;\n  const lp",page)
+
+    def test_확정은_동시식사수정의_잠금을_기다리고_새버전을_덮어쓰지않는다(self):
+        import threading
+        s=self.서비스(가짜홍보());started=threading.Event();done=threading.Event();errors=[]
+        def confirm():
+            started.set()
+            try:s.코스확정({'시험id':시험id,'안id':'A','버전':1,'코스이름':'확정 이름','확인동의':True})
+            except ValueError as e:errors.append(str(e))
+            finally:done.set()
+        with s.기획.잠금:
+            t=threading.Thread(target=confirm);t.start();started.wait(1)
+            self.assertFalse(done.wait(.1),'식사 수정 잠금 중 확정이 먼저 저장됨')
+            record=기록모듈.읽기(self.runs,시험id.split('/')[-1])
+            기록모듈.추가(record,'코스안',{'안id':'A','버전':2,'코스':코스()},'코드:시험')
+            기록모듈.저장(record,self.runs)
+        t.join(2)
+        self.assertTrue(errors)
+        self.assertEqual(기록모듈.버전목록(기록모듈.읽기(self.runs,시험id.split('/')[-1]),'A'),[1,2])
+
+    def test_이름미정인_기존홍보는_확정전_새산출물을_만들지않는다(self):
+        s=self.서비스(가짜홍보());hid=s.시작(self.값())['홍보id'];self.기다리기(s,hid)
+        record=기록모듈.읽기(self.runs,시험id.split('/')[-1])
+        record.pop('홍보코스확정',None);record.pop('홍보코스확정이력',None);기록모듈.저장(record,self.runs)
+        with self.assertRaisesRegex(ValueError,'확정'):
+            s.산출물({'홍보id':hid,'홍보확인':True,'표현처리':{k:'그대로둠' for k in s.결과(hid)['필터키']}})
+
+    def test_코스확정은_이름과_안버전을_저장하고_AI없이_다음단계에_전달한다(self):
+        fn=가짜홍보(); s=self.서비스(fn)
+        auto=s.코스확정({'시험id':시험id,'안id':'A','버전':1,'코스이름':'','확인동의':True})
+        self.assertEqual(auto['코스이름'],'중구 가을 당일 여행')
+        before=기록모듈.읽기(self.runs,시험id.split('/')[-1])
+        saved=s.코스확정({'시험id':시험id,'안id':'A','버전':1,'코스이름':'내가 정한 코스','확인동의':True})
+        self.assertEqual(saved['코스이름'],'내가 정한 코스')
+        self.assertEqual(fn.호출,0)
+        after=기록모듈.읽기(self.runs,시험id.split('/')[-1])
+        self.assertEqual(before['코스안'],after['코스안'])
+        self.assertEqual(s.준비(시험id,'A')['기본값']['코스이름'],'내가 정한 코스')
+        기록모듈.추가(after,'코스안',{'안id':'A','버전':2,'코스':코스()},'코드:시험')
+        기록모듈.저장(after,self.runs)
+        self.assertIsNone(s.준비(시험id,'A')['코스확정'])
+        with self.assertRaises(ValueError):
+            s.코스확정({'시험id':시험id,'안id':'A','버전':1,'코스이름':'옛 버전','확인동의':True})
+
+    def test_기존미정홍보도_명시적인코스이름확정후_원문보존하며_표시한다(self):
+        s=self.서비스(가짜홍보())
+        hid=s.시작(self.값())['홍보id'];self.기다리기(s,hid)
+        before=(self.runs/hid/'4단계_구조화.json').read_bytes()
+        s.코스확정({'시험id':시험id,'안id':'A','버전':1,'코스이름':'담당자가 정한 이름','확인동의':True})
+        self.assertEqual(s.결과(hid)['확인']['코스이름'],'담당자가 정한 이름')
+        b,_=s._디자인자료(hid)
+        self.assertEqual(b['코스카드']['코스이름'],'담당자가 정한 이름')
+        self.assertEqual((self.runs/hid/'4단계_구조화.json').read_bytes(),before)
+        s.산출물({'홍보id':hid,'홍보확인':True,'표현처리':{k:'그대로둠' for k in s.결과(hid)['필터키']}})
+        bundle=json.loads((self.runs/hid/'산출물/5단계_묶음.json').read_text(encoding='utf8'))
+        self.assertEqual(bundle['코스카드']['코스이름'],'담당자가 정한 이름')
+
+    def test_최신디자인에_현재코스와_문구를_넣고_종류별QR을_만든다(self):
+        from app.단계4_홍보검토.디자인 import 만들기
+        홍보 = json.loads(가짜홍보()('', '입력 JSON:\n' + json.dumps({'확정코스': 코스(), '담당자선택': {'코스이름': '실제 코스'}})).split('```json\n')[1].split('```')[0])
+        확인 = self.값(코스이름='실제 코스', 홍보물=['SNS 카드뉴스', '리플릿', '포스터', '스탬프 투어 북'])
+        b = 산출물.묶기(입력2()['조건'], 입력2(), 코스(), 홍보, 확인)
+        원본 = json.dumps(b, ensure_ascii=False)
+        결과 = 만들기(b, 'http://127.0.0.1:8790/tour?id=course-A-v1')
+        self.assertEqual({x['종류'] for x in 결과}, set(확인['홍보물']))
+        for x in 결과:
+            self.assertIn('course-A-v1', x['랜딩주소'])
+            self.assertIn('from=', x['랜딩주소'])
+            self.assertIn('<svg', x['svg'])
+            self.assertNotIn('평화시장', x['svg'])
+            self.assertNotIn('memorismo3o-glitch', x['svg'])
+        self.assertIn('실제 코스', ''.join(x['svg'] for x in 결과))
+        self.assertIn('근대골목 산책', ''.join(x['svg'] for x in 결과))
+        self.assertEqual(json.dumps(b, ensure_ascii=False), 원본)
+
+    def test_화면과_내려받기는_같은코스의_디자인과_랜딩으로_연결된다(self):
+        import io
+        import zipfile
+        s = self.서비스(가짜홍보())
+        hid = s.시작(self.값(코스이름='연결된 실제 코스'))['홍보id']
+        self.기다리기(s, hid)
+        result = s.결과(hid)
+        self.assertIn('디자인', result)
+        from urllib.parse import parse_qs, urlsplit
+        key = parse_qs(urlsplit(result['디자인']['랜딩']).query)['c'][0]
+        self.assertEqual(s.랜딩기록(key), hid)
+        before = (self.runs / hid / '4단계_구조화.json').read_bytes()
+        preview = s.디자인문서(hid, 'http://127.0.0.1:8790').decode()
+        self.assertIn('data:image/svg+xml;base64,', preview)
+        with zipfile.ZipFile(io.BytesIO(s.디자인묶음(hid, 'http://127.0.0.1:8790'))) as z:
+            self.assertIn('홍보물.html', z.namelist())
+            self.assertIn('랜딩페이지.html', z.namelist())
+            self.assertTrue(any(n.endswith('.svg') for n in z.namelist()))
+            self.assertIn('연결된 실제 코스', z.read('랜딩페이지.html').decode())
+        self.assertEqual((self.runs / hid / '4단계_구조화.json').read_bytes(), before)
+        unsafe=json.loads(before)
+        unsafe['번역목록'].append({**unsafe['번역목록'][0],'언어':'../외부'})
+        (self.runs/hid/'4단계_구조화.json').write_text(json.dumps(unsafe,ensure_ascii=False),encoding='utf8')
+        with zipfile.ZipFile(io.BytesIO(s.디자인묶음(hid,'http://127.0.0.1:8790'))) as z:
+            self.assertTrue(all('..' not in Path(n).parts and not n.startswith('/') for n in z.namelist()))
+
+    def test_랜딩은_실제일정과_번역을_사용하고_예시코스를_남기지않는다(self):
+        from app.단계4_홍보검토.디자인 import 랜딩
+        b = 산출물.묶기(입력2()['조건'], 입력2(), 코스(), {'문구목록': [], '번역목록': []}, self.값(코스이름='현재 코스 </script><script>bad()</script>'))
+        page = 랜딩(b, 'course-A-v1')
+        self.assertIn('자유식 · 동성로', page)
+        self.assertNotIn('bad()</script>', page)
+        self.assertNotIn("id:'p7'", page)
+        self.assertNotIn('평화시장 닭똥집골목', page)
+        self.assertIn('course-A-v1', page)
+        self.assertIn('랜딩_이미지', page)
+        self.assertNotIn('if(day===1) rows.push', page)
+
+    def test_포스터에도_에이전트문구와_선택언어와_톤을_반영한다(self):
+        from app.단계4_홍보검토.디자인 import 만들기
+        h = {'코스카드': {'코스이름':'문구 연결'}, '문구목록':[{'장면ID':'낮-1','제목':'실제 장면 제목','본문':'에이전트가 만든 실제 본문'}],
+             '번역목록':[{'장면ID':'낮-1','언어':'일본어','번역':'【タイトル】日本語見出し【本文】本当の本文'}]}
+        b = 산출물.묶기(입력2()['조건'], 입력2(), 코스(), h, self.값(홍보물=['포스터'], 톤앤매너='C'))
+        korean = 만들기(b, 'http://localhost/tour?c=abc')[0]['svg']
+        japanese = 만들기(b, 'http://localhost/tour?c=abc', '일본어')[0]['svg']
+        self.assertIn('실제 장면 제목', korean)
+        self.assertIn('에이전트가 만든 실제 본문', korean)
+        self.assertIn('日本語見出し', japanese)
+        self.assertIn('本当の本文', japanese)
+        b['확인']['톤앤매너'] = 'B'
+        self.assertNotEqual(korean, 만들기(b, 'http://localhost/tour?c=abc')[0]['svg'])
+
+    def test_디자인다운로드와_짧은QR의_실제HTTP응답(self):
+        import http.client
+        import threading
+        from http.server import ThreadingHTTPServer
+        from urllib.parse import urlencode, quote
+        from app.서버.관리자조회 import 핸들러
+        s = self.서비스(가짜홍보())
+        hid = s.시작(self.값())['홍보id']; self.기다리기(s, hid)
+        server = ThreadingHTTPServer(('127.0.0.1', 0), 핸들러(결과저장소(self.runs), 홍보서비스=s))
+        threading.Thread(target=server.serve_forever, kwargs={'poll_interval':.01}, daemon=True).start()
+        self.addCleanup(server.server_close); self.addCleanup(server.shutdown)
+        def read(path):
+            c = http.client.HTTPConnection('127.0.0.1', server.server_port)
+            c.request('GET', path); r=c.getresponse(); data=r.read(); c.close()
+            return r.status, dict(r.getheaders()), data
+        query=urlencode({'id':hid})
+        code, headers, body=read('/plan/design?'+query)
+        self.assertEqual(code, 200); self.assertIn(b'data:image/svg+xml;base64,',body)
+        code, headers, body=read('/plan/design.zip?'+query)
+        self.assertEqual(code,200);self.assertEqual(headers['Content-Type'],'application/zip')
+        self.assertIn('attachment',headers['Content-Disposition'])
+        code, _, page=read(s.랜딩주소(hid))
+        self.assertEqual(code,200);self.assertIn(hid.encode(),page)
+        self.assertEqual(read('/tour?c=bad')[0],400)
+        self.assertEqual(read('/'+quote('랜딩_이미지/얼굴_포롱이.webp'))[0],200)
+        self.assertEqual(read('/'+quote('랜딩_이미지/../../.env'))[0],400)
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         runs = Path(self.tmp.name) / 'runs'
@@ -74,7 +257,7 @@ class 홍보시험(unittest.TestCase):
         return 홍보실행(기획실행(코스시험(결과저장소(self.runs))), fn)
 
     def 값(self, **바꿈):
-        return {'시험id': 시험id, '안id': 'A', '시작지점': '근대골목', '시작시각': '10:00', '종료지점': '동성로', '종료시각': '20:00',
+        return {'시험id': 시험id, '안id': 'A', '코스이름':'시험 코스', '시작지점': '근대골목', '시작시각': '10:00', '종료지점': '동성로', '종료시각': '20:00',
                 '겹침처리': '연결하기', '톤앤매너': 'A+B', '홍보물': ['SNS 카드뉴스'], '확인동의': True, **바꿈}
 
     def 기다리기(self, s, hid):
@@ -93,6 +276,7 @@ class 홍보시험(unittest.TestCase):
             s.시작(self.값(겹침처리=''))
         with self.assertRaises(ValueError):
             s.시작(self.값(시작시각='10시'))
+        self.assertEqual(s.확인_검사(self.값(코스이름=''),s.준비(시험id))['코스이름'],'중구 가을 당일 여행')
 
     def test_준비값은_숙소를_끝으로_쓰지_않음(self):
         p = self.서비스(가짜홍보()).준비(시험id, 'A')
@@ -114,7 +298,7 @@ class 홍보시험(unittest.TestCase):
         s = self.서비스(가짜홍보())
         hid = s.시작(self.값())['홍보id']
         self.기다리기(s, hid)
-        s.산출물({'홍보id': hid, '홍보확인': True})
+        s.산출물({'홍보id': hid, '홍보확인': True, '표현처리':{k:'그대로둠' for k in s.결과(hid)['필터키']}})
         옛문서 = s.문서(hid, '결재')
         기록 = 기록모듈.읽기(self.runs, 시험id.split('/')[-1])
         기록모듈.추가(기록, '코스안', {'안id': 'A', '버전': 2, '코스': 코스()}, '코드:시험')
@@ -123,7 +307,7 @@ class 홍보시험(unittest.TestCase):
         self.assertEqual(s.결과(hid)['현재코스버전'], 2)
         self.assertEqual(s.문서(hid, '결재'), 옛문서)
         with self.assertRaisesRegex(ValueError, '코스.*버전'):
-            s.산출물({'홍보id': hid, '홍보확인': True})
+            s.산출물({'홍보id': hid, '홍보확인': True, '표현처리':{k:'그대로둠' for k in s.결과(hid)['필터키']}})
 
     def test_다른안의_새버전은_현재홍보를_무효화하지않는다(self):
         s = self.서비스(가짜홍보())
@@ -188,7 +372,7 @@ class 홍보시험(unittest.TestCase):
                 홍보.시작({**확인, '확인동의': False})
             hid = 홍보.시작(확인)['홍보id']
             self.assertEqual(self.기다리기(홍보, hid)['상태'], '홍보완료')
-            out = 홍보.산출물({'홍보id': hid, '홍보확인': True})
+            out = 홍보.산출물({'홍보id': hid, '홍보확인': True, '표현처리':{k:'그대로둠' for k in 홍보.결과(hid)['필터키']}})
         이후 = 기록모듈.읽기(self.runs, p['기록id'])
         self.assertEqual(원본['코스안'], 이후['코스안'])
         self.assertEqual(원본['근거'], 이후['근거'])
@@ -198,7 +382,7 @@ class 홍보시험(unittest.TestCase):
         self.assertIn('.claude/agents/검증.md', 호출)
         for 이름 in ['결재파일.html', '제안서.html', '홍보물묶음.html']:
             글 = (self.runs / hid / '산출물' / 이름).read_text(encoding='utf-8')
-            self.assertIn('근거 없음', 글)
+            self.assertNotIn('근거 없음', 글)
             self.assertNotIn('<script', 글)
 
     def test_4단계부터_5단계까지(self):
@@ -226,10 +410,10 @@ class 홍보시험(unittest.TestCase):
         self.assertEqual({x['항목']: x['결과'] for x in out['산출물']['대조']['항목']}['코스'], '같음')
         for name in ['결재파일.html', '제안서.html', '홍보물묶음.html']:
             text = (폴더 / '산출물' / name).read_text(encoding='utf-8')
-            self.assertIn('W1', text)  # 경고는 세 파일 모두에 따라간다
-            self.assertIn('[미확인: 식비 포함 여부]', text) if name != '홍보물묶음.html' else None
+            self.assertNotIn('W1', __import__('re').sub(r'data:image/[^"\s]+','',text))  # 경고는 내부 묶음에만 보관한다
+            self.assertNotIn('[미확인: 식비 포함 여부]', text)
             self.assertNotIn('<script', text)
-        self.assertIn('인기', (폴더 / '산출물/홍보물묶음.html').read_text(encoding='utf-8'))  # E5 그대로 둠 기록
+        self.assertIn('인기', (폴더 / '산출물/5단계_묶음.json').read_text(encoding='utf-8'))  # 내부 기록은 보존
 
     def test_검사에_걸리면_한번만_다시_부름(self):
         fn = 가짜홍보(번역='近代の路地')  # 용어집 표기 大邱近代通り 없음

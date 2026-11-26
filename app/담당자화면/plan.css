@@ -689,3 +689,12 @@ body>header .app-actions #historyBtn{display:inline-flex;align-items:center;gap:
 .edit-examples{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 16px}.course-editor .edit-repeat{display:flex;gap:8px;align-items:center;font-weight:400;margin:10px 0}
 .edit-result{margin-top:14px;padding:14px;border-radius:12px;background:#fff5e5}.edit-result h3{margin-top:0}.edit-result li{margin:7px 0;overflow-wrap:anywhere}
 .course-editor [hidden]{display:none!important}.course-editor textarea{resize:vertical}
+.meal-comparison{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;margin:12px 0}.meal-comparison th,.meal-comparison td{padding:9px 5px;border-bottom:1px solid #e5ddd0;overflow-wrap:anywhere;text-align:left}.meal-comparison th:first-child{width:50%}.meal-error{color:#8c2929;background:#fff0ed;border-radius:8px;padding:9px}.meal-ack{display:flex;align-items:flex-start;gap:8px;font-size:13px;margin:12px 0}.meal-ack input{width:18px;height:18px;flex-shrink:0}.candidate-choice small{display:block}.place-panel #candidatePreview{overflow-wrap:anywhere}
+.meal-option{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:12px 0;align-items:center}
+.meal-option label{display:flex;gap:8px;align-items:center;overflow-wrap:anywhere}
+.meal-option small{grid-column:1/-1;color:var(--muted,#666)}
+.meal-bundle>.btn{margin:6px 4px 6px 0;white-space:normal}
+.personal-meal-result{margin:16px 0;padding:14px;border:2px solid #28796e;border-radius:12px;background:#eef8f3;color:#24433b}
+.personal-meal-result h4{margin:0 0 10px}
+.personal-meal-result strong{font-size:1.08em}
+.candidate-choice[aria-pressed="true"]{border:2px solid #28796e;background:#eef8f3}
