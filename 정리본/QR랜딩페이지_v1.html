@@ -323,7 +323,8 @@ const PLACES = [
   {id:'p1', day:1, n:1, night:false, lead:'y', mapQ:{k:'청라언덕', n:'대구 청라언덕', g:'청라언덕'},
     ko:{time:'10:00', slot:'오전', name:'근대골목', desc:'대구의 근대 역사와 골목 풍경을 만나는 시간', hl:['청라언덕','계산성당','이상화 고택'], stay:'약 1시간', move:'서문시장 권역 · 도보 15분'},
     ja:{time:'10:00', slot:'午前', name:'大邱近代通り', desc:'大邱の近代の歴史と路地の風景に出会う時間', hl:['青蘿の丘','桂山聖堂','李相和古宅'], stay:'約1時間', move:'西門市場エリア・徒歩15分'},
-    photo:'', credit:'계산성당'},
+    photo:'랜딩_이미지/장소_근대골목_청라언덕.webp',
+    credit:{label:'중구, 청라언덕', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63706&division=img'}},
   {id:'p2', day:1, n:2, night:false, lead:'p', mapQ:{k:'서문시장', n:'대구 서문시장', g:'서문시장'},
     ko:{time:'11:40', slot:'점심', name:'서문시장 권역', desc:'시장 먹거리와 대구의 활기찬 풍경을 만나요.', hl:['먹거리','시장','생활문화'], stay:'약 1시간 30분',
         bub:[['포롱이','시장 냄새가 여기까지 나! 뭐부터 먹어볼까?'],['여울이','다음 장소도 챙기면서 천천히 둘러보자.']]},
@@ -347,15 +348,18 @@ const PLACES = [
   {id:'p6', day:2, n:6, night:false, lead:'p', mapQ:{k:'동성로관광특구', n:'동성로', g:'동성로'},
     ko:{time:'오전', name:'동성로', desc:'동성로에서 여유롭게 대구의 아침을 즐겨보세요.', hl:['자유시간'], move:'신천 · 산책'},
     ja:{time:'午前', name:'東城路', desc:'東城路でのんびり大邱の朝を楽しもう。', hl:['自由時間'], move:'新川・散歩'},
-    photo:'', credit:'동성로 거리'},
+    photo:'랜딩_이미지/장소_동성로.webp',
+    credit:{label:'동성로 거리 (2006)', author:'Visviva', license:'퍼블릭 도메인', url:'https://commons.wikimedia.org/wiki/File:Dongseongno.jpg'}},
   {id:'p7', day:2, n:7, night:false, lead:'both', mapQ:{k:'신천 하천', n:'대구 신천', g:'신천 하천 대구'},  // 걷기 시작 지점 정해지면 바꿈
     ko:{time:'오후', name:'신천 산책', desc:'신천을 따라 걸은 뒤 근대골목으로 이동해 약 14:00에 코스를 마쳐요.', hl:['산책','물가']},
     ja:{time:'午後', name:'新川さんぽ', desc:'新川沿いを歩いたあと、大邱近代通りへ移動して約14:00にコース終了。', hl:['散歩','水辺']},
-    photo:'', credit:'신천 물가'}
+    photo:'랜딩_이미지/장소_신천.webp',
+    credit:{label:'신천 물가 (2007)', author:'Visviva', license:'퍼블릭 도메인', url:'https://commons.wikimedia.org/wiki/File:Daegu_Sincheon_ducks.jpg'}}
 ];
 
 /* 사진 출처: 작성자·라이선스·원본 링크를 확인 후 채운다 (정리본 4장) */
-const CREDITS = PLACES.filter(p=>p.credit).map(p=>({label:p.credit, author:'작성자 확인 중', license:'라이선스 확인 중', url:''}));
+// credit이 글자만 있으면 아직 확인 전, {label, author, license, url}이면 원본 페이지에서 확인한 값
+const CREDITS = PLACES.filter(p=>p.credit).map(p=>typeof p.credit==='object' ? p.credit : ({label:p.credit, author:'작성자 확인 중', license:'라이선스 확인 중', url:''}));
 
 /* ---------- 상태 ---------- */
 /* 브라우저 저장이 막힌 환경(비공개 창 등)에서는 이 화면을 연 동안만 기억한다 */
