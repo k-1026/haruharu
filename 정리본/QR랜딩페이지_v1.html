@@ -87,6 +87,7 @@
   .ph{position:relative;height:150px;background:var(--photo);display:flex;align-items:center;justify-content:center;
     color:var(--muted);font-size:13px}
   .ph img{width:100%;height:100%;object-fit:cover}
+  .ph img.contain{width:auto;max-width:100%;object-fit:contain} /* 작은 원본 사진: 늘리지 않음 */
   /* 장소 카드 2인 아이콘: 주연 크게 · 보조 작게 (지침 7_시안_캐릭터 2-2), 둘 함께는 같은 크기 */
   .ph .duo{position:absolute;right:10px;bottom:-14px;display:flex;align-items:flex-end}
   .duo .f{border-radius:50%;border:3px solid #fff;background:var(--char1) center/cover no-repeat;
@@ -134,7 +135,8 @@
 
   /* 이야기 · 확인 */
   .who{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;margin-bottom:10px}
-  .who .blob{width:48px;height:48px;font-size:10px}
+  .who .blob{width:48px;height:48px;font-size:10px;overflow:hidden}
+  .who .blob img{width:100%;height:100%;display:block;object-fit:cover}
   .who b{display:block;font-size:14px} .who small{font-size:12px;color:var(--muted)}
   .story{border-top:1px solid var(--line);padding-top:10px;margin:0;font-size:13px}
   ul.tips{margin:0;padding-left:18px;font-size:13px} ul.tips li{margin:4px 0}
@@ -225,8 +227,8 @@
   <section id="story">
     <h2 data-t="storyTitle"></h2>
     <div class="card">
-      <div class="who"><div class="blob p" data-t="porong"></div><div><b data-t="porong"></b><small data-t="porongRole"></small></div></div>
-      <div class="who"><div class="blob y" data-t="yeouri"></div><div><b data-t="yeouri"></b><small data-t="yeouriRole"></small></div></div>
+      <div class="who"><div class="blob p"><img src="랜딩_이미지/얼굴_포롱이.webp" alt="포롱이"></div><div><b data-t="porong"></b><small data-t="porongRole"></small></div></div>
+      <div class="who"><div class="blob y"><img src="랜딩_이미지/얼굴_여울이.webp" alt="여울이"></div><div><b data-t="yeouri"></b><small data-t="yeouriRole"></small></div></div>
       <p class="story" data-t="story"></p>
     </div>
   </section>
@@ -330,21 +332,25 @@ const PLACES = [
         bub:[['포롱이','시장 냄새가 여기까지 나! 뭐부터 먹어볼까?'],['여울이','다음 장소도 챙기면서 천천히 둘러보자.']]},
     ja:{time:'11:40', slot:'お昼', name:'西門市場エリア', desc:'市場グルメと大邱のにぎやかな風景に出会おう。', hl:['グルメ','市場','暮らしの文化'], stay:'約1時間30分',
         bub:[['ポロンイ','市場のにおいがここまでするよ！何から食べようかな？'],['ヨウリ','次のスポットも気にしながら、ゆっくり見て回ろう。']]},
-    photo:'', credit:'서문시장 입구'},
+    photo:'랜딩_이미지/장소_서문시장.webp',
+    credit:{label:'중구, 서문시장', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63696&division=img'}},
   {id:'p3', day:1, n:3, night:false, lead:'y', mapQ:'김광석다시그리기길',
     ko:{time:'오후', name:'김광석 다시그리기길', desc:'음악과 벽화가 있는 골목을 산책해요.', hl:['음악','벽화']},
     ja:{time:'午後', name:'金光石の路', desc:'音楽と壁画のある路地を散歩しよう。', hl:['音楽','壁画']},
-    photo:null},
+    photo:'랜딩_이미지/장소_김광석길.webp', fit:'contain',  // 원본이 201×162이라 늘리지 않음
+    credit:{label:'김광석길', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63313&division=img'}},
   {id:'p4', day:1, n:4, night:true, lead:'p', mapQ:'평화시장 닭똥집골목',
     ko:{time:'저녁', name:'평화시장 닭똥집골목', desc:'저녁은 골목의 먹거리와 함께해요.', hl:['저녁 먹거리']},
     ja:{time:'夕方', name:'大邱平和市場タクトンチプ屋通り', desc:'夕食は路地のグルメと一緒に。', hl:['夕食グルメ']},
-    photo:null},
+    photo:'랜딩_이미지/장소_평화시장_닭똥집골목.webp', fit:'contain',  // 원본이 211×170이라 늘리지 않고 원래 비율로 가운데 둔다
+    credit:{label:'평화시장 닭똥집', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63734&division=img'}},
   {id:'p5', day:1, n:5, night:true, lead:'both', mapQ:{k:'서문시장', n:'대구서문야시장', g:'서문시장 야시장'},
     ko:{time:'밤', name:'서문시장 야시장', desc:'별랜턴을 켜고 밤의 대구를 탐험해요.', hl:['야경','야시장'], move:'숙박 · 중구 동성로 일대',
         bub:[['포롱이','밤에도 시장이 열려 있어!']]},
     ja:{time:'夜', name:'西門市場夜市', desc:'星のランタンを灯して、夜の大邱を探検しよう。', hl:['夜景','夜市'], move:'宿泊・中区 東城路周辺',
         bub:[['ポロンイ','夜も市場が開いてる！']]},
-    photo:'', credit:'서문시장 야간'},
+    photo:'랜딩_이미지/장소_서문시장_야시장.webp',
+    credit:{label:'중구, 서문시장 야시장 (2018)', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63697&division=img'}},
   {id:'p6', day:2, n:6, night:false, lead:'p', mapQ:{k:'동성로관광특구', n:'동성로', g:'동성로'},
     ko:{time:'오전', name:'동성로', desc:'동성로에서 여유롭게 대구의 아침을 즐겨보세요.', hl:['자유시간'], move:'신천 · 산책'},
     ja:{time:'午前', name:'東城路', desc:'東城路でのんびり大邱の朝を楽しもう。', hl:['自由時間'], move:'新川・散歩'},
@@ -415,7 +421,7 @@ function renderPlaces(){
     html += `<h2 style="font-size:14px;color:var(--muted);margin:6px 0 10px">${esc(t('day'+d))}</h2>`;
     PLACES.filter(p=>p.day===d).forEach(p=>{
       const L=p[lang];
-      const photo = p.photo ? `<img src="${esc(p.photo)}" alt="${esc(L.name)}" loading="lazy">`
+      const photo = p.photo ? `<img src="${esc(p.photo)}" alt="${esc(L.name)}" loading="lazy"${p.fit==='contain'?' class="contain"':''}>`
                             : `<span>${p.photo===null?esc(t('photoWait')):esc(L.name)+' '+esc(t('photo'))}</span>`;
       // 주연: 'p' 포롱이 · 'y' 여울이 · 'both' 둘 함께 (지침 7_시안_캐릭터 2-2 배치 세트)
       const face = (c, size) => { const src = c==='y' ? IMG.faceY : IMG.faceP;
