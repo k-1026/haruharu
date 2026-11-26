@@ -83,6 +83,7 @@
   .tl li{display:grid;grid-template-columns:56px 1fr auto;gap:4px;align-items:center;padding:6px 0}
   .tl a{text-decoration:none}
   .tl .t{color:var(--orange);font-weight:700;font-size:13px}
+  .opt{display:inline-block;margin-left:4px;padding:1px 8px;border:1px solid var(--orange);border-radius:10px;font-size:10px;font-weight:700;color:var(--orange);background:#fff;vertical-align:middle}
   .tl .g{font-size:11px;color:var(--muted)} .tl .g.n{color:var(--orange);font-weight:700}
 
   /* 장소 카드 */
@@ -273,10 +274,10 @@ const IMG = {
    용어집에 없는 말(캐릭터 이름, 신천, 볼거리, 문장)은 AI 초안. 검토 전까지 하단에 안내문을 띄운다. */
 const T = {
   ko:{
-    brand:'포롱이와 여울이의 대구 탐험', kick:'대구 중구·동구 1박 2일 코스',
+    brand:'포롱이와 여울이의 대구 탐험', kick:'대구 중구 1박 2일 코스',
     h1a:'포롱이와 여울이의', h1b:'대구 탐험',
     tagline:'가을 대구, 골목과 시장을 따라 탐험을 시작해요.',
-    chip1:'1박 2일', chip2:'7곳', chip3:'중구·동구',
+    chip1:'1박 2일', chip2:'6곳 + 선택 1곳', chip3:'중구', optTag:'선택 · 동구',
     go:'코스 따라가기', openMap:'지도 열기', glance:'코스 한눈에 보기', detail:'장소별 탐험',
     stay:'체류', next:'다음 장소', mapTitle:'전체 탐험 지도', mapNote:'도식 지도 · 실제 위치·축척과 달라요. 장소를 누르면 설명으로 이동해요.',
     mapAll:'지도 앱에서 전체 코스 열기', stampTitle:'스탬프 투어',
@@ -297,10 +298,10 @@ const T = {
     day1:'DAY 1 · 골목과 시장', day2:'DAY 2 · 여유로운 마무리', end:'근대골목에서 코스 종료', endTime:'약 14:00'
   },
   ja:{
-    brand:'ポロンとヨウリの大邱探検', kick:'大邱 中区・東区 1泊2日コース',
+    brand:'ポロンとヨウリの大邱探検', kick:'大邱 中区 1泊2日コース',
     h1a:'ポロンとヨウリの', h1b:'大邱探検',
     tagline:'秋の大邱、路地と市場をたどって探検を始めましょう。',
-    chip1:'1泊2日', chip2:'7か所', chip3:'中区・東区',
+    chip1:'1泊2日', chip2:'6か所＋オプション1か所', chip3:'中区', optTag:'オプション・東区',
     go:'コースをたどる', openMap:'地図を開く', glance:'コースを一目で', detail:'スポット別の探検',
     stay:'滞在', next:'次のスポット', mapTitle:'全体の探検マップ', mapNote:'イメージ図です。実際の位置・縮尺とは異なります。スポットを押すと説明に移動します。',
     mapAll:'地図アプリでコース全体を開く', stampTitle:'スタンプツアー',
@@ -342,7 +343,8 @@ const PLACES = [
     ja:{time:'午後', name:'金光石の路', desc:'音楽と壁画のある路地を散歩しましょう。', hl:['音楽','壁画']},
     photo:'랜딩_이미지/장소_김광석길.webp', fit:'contain',  // 원본이 201×162이라 늘리지 않음
     credit:{label:'김광석길', author:'대구광역시', license:'공공누리 제1유형(출처표시)', url:'https://www.kogl.or.kr/recommend/recommendDivView.do?recommendIdx=63313&division=img'}},
-  {id:'p4', day:1, n:4, night:true, lead:'p', mapQ:'평화시장 닭똥집골목',
+  {id:'p4', day:1, n:4, night:true, optional:true,  // 동구 · 선택 코스 (M0: MVP는 중구, 동구 평화시장 저녁 동선은 선택지)
+    lead:'p', mapQ:'평화시장 닭똥집골목',
     ko:{time:'저녁', name:'평화시장 닭똥집골목', desc:'저녁은 골목의 먹거리와 함께해요.', hl:['저녁 먹거리']},
     ja:{time:'夕方', name:'大邱平和市場タクトンチプ屋通り', desc:'夕食は路地のグルメと一緒に楽しみましょう。', hl:['夕食グルメ']},
     photo:'랜딩_이미지/장소_평화시장_닭똥집골목.webp', fit:'contain',  // 원본이 211×170이라 늘리지 않고 원래 비율로 가운데 둔다
@@ -410,7 +412,8 @@ function renderTimeline(){
   const rows = PLACES.filter(p=>p.day===day).map(p=>{
     const L=p[lang];
     const gear = p.night ? `<span class="g n">★ ${lang==='ja'?'ランタン':'별랜턴'}</span>` : `<span class="g"></span>`;
-    return `<li><span class="t">${esc(L.time)}</span><a href="#${p.id}">${esc(L.name)}</a>${gear}</li>`;
+    const opt = p.optional ? ` <span class="opt">${esc(t('optTag'))}</span>` : '';
+    return `<li><span class="t">${esc(L.time)}</span><span><a href="#${p.id}">${esc(L.name)}</a>${opt}</span>${gear}</li>`;
   });
   if(day===1) rows.push(`<li><span class="t">${lang==='ja'?'宿泊':'숙박'}</span><span>${lang==='ja'?'中区 東城路周辺':'중구 동성로 일대'}</span><span></span></li>`);
   else rows.push(`<li><span class="t">${esc(t('endTime'))}</span><span>${esc(t('end'))}</span><span></span></li>`);
@@ -435,7 +438,7 @@ function renderPlaces(){
       html += `<article class="place${p.night?' night':''}" id="${p.id}">
         <div class="ph">${photo}<div class="duo" aria-hidden="true">${duo}</div></div>
         <div class="pb">
-          <div class="meta">${esc(meta)}${p.night?' · ★':''}</div>
+          <div class="meta">${esc(meta)}${p.night?' · ★':''}${p.optional?` <span class="opt">${esc(t('optTag'))}</span>`:''}</div>
           <h3>${esc(L.name)}${lang==='ja'?`<span class="sub">${esc(p.ko.name)}</span>`:''}</h3>
           <p class="desc">${esc(L.desc)}</p>
           ${L.hl?`<div class="hl">${L.hl.map(h=>`<span>${esc(h)}</span>`).join('')}</div>`:''}
