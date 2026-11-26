@@ -22,7 +22,7 @@
   <text x="660" y="225" class="w sm">겉면 2 · 코스 요약</text><text x="660" y="285" class="w lg">대구 중구·동구</text><text x="660" y="330" class="w lg">1박 2일 탐험 코스</text><text x="660" y="380" class="w md">포롱이와 여울이를 따라</text><text x="660" y="414" class="w md">대구의 새로운 모습을 만나보세요.</text>
   <rect x="660" y="455" width="475" height="2" fill="#65708e"/>
   <text x="660" y="500" class="w md">DAY 1 · 골목과 시장</text><text x="660" y="540" class="w sm">근대골목 → 서문시장 → 김광석길</text><text x="660" y="570" class="w sm">→ 평화시장 → 서문시장 야시장</text>
-  <text x="660" y="630" class="w md">DAY 2 · 여유로운 마무리</text><text x="660" y="670" class="w sm">동성로 자유시간 → 신천</text><text x="660" y="700" class="w sm">14:11 근대골목에서 코스 종료</text>
+  <text x="660" y="630" class="w md">DAY 2 · 여유로운 마무리</text><text x="660" y="670" class="w sm">동성로 자유시간 → 신천</text><text x="660" y="700" class="w sm">약 14:00 근대골목에서 코스 종료</text>
   <rect x="660" y="755" width="130" height="38" rx="19" class="orange"/><text x="690" y="780" class="w sm">역사</text><rect x="805" y="755" width="130" height="38" rx="19" class="orange"/><text x="835" y="780" class="w sm">먹거리</text><rect x="950" y="755" width="130" height="38" rx="19" class="orange"/><text x="980" y="780" class="w sm">야경</text>
 
   <!-- cover -->

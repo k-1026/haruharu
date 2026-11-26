@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+  <defs>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="22" dy="28" stdDeviation="22" flood-color="#182038" flood-opacity=".42"/></filter>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffdf7"/><stop offset="1" stop-color="#e9e4da"/></linearGradient>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#334066"/><stop offset="1" stop-color="#202a49"/></linearGradient>
+  </defs>
+  <rect width="1800" height="1200" fill="#eee8dc"/>
+  <style>
+    .t{font-family:'Malgun Gothic','Noto Sans KR',Arial,sans-serif;fill:#202a49}.w{font-family:'Malgun Gothic','Noto Sans KR',Arial,sans-serif;fill:#fff}.m{font-family:'Malgun Gothic','Noto Sans KR',Arial,sans-serif;fill:#707586}.sm{font-size:17px}.md{font-size:23px}.lg{font-size:31px;font-weight:700}.xl{font-size:48px;font-weight:700}.line{stroke:#d4cfc5;stroke-width:2}
+  </style>
+  <text x="80" y="82" class="t xl">대구 탐험 리플렛 · 3단 접지 3D 목업</text>
+  <text x="82" y="125" class="m md">표지·코스 소개·장소 정보·야간 탐험을 실제 인쇄물처럼 확인하는 시안</text>
+
+  <!-- open inside spread, left angled panel -->
+  <g transform="translate(145,245) skewY(-5) rotate(-6 260 400)" filter="url(#shadow)">
+    <rect width="520" height="760" rx="8" fill="url(#paper)"/>
+    <rect width="520" height="122" rx="8" fill="#273251"/>
+    <text x="35" y="48" class="w sm">DAY 1 · 코스 한눈에 보기</text>
+    <text x="35" y="92" class="w lg">대구의 골목과 시장</text>
+    <text x="35" y="170" class="t md">10:00  근대골목</text><text x="35" y="212" class="t md">11:40  서문시장</text><text x="35" y="254" class="t md">오후   김광석길</text><text x="35" y="296" class="t md">저녁   평화시장</text><text x="35" y="338" class="t md">밤     서문시장 야시장</text>
+    <line x1="35" y1="375" x2="480" y2="375" class="line"/>
+    <text x="35" y="425" class="t lg">탐험 지도</text>
+    <path d="M75 650 C150 520,200 560,270 470 S380 470,450 420" fill="none" stroke="#e98c19" stroke-width="8"/><g fill="#e98c19"><circle cx="75" cy="650" r="13"/><circle cx="200" cy="560" r="13"/><circle cx="270" cy="470" r="13"/><circle cx="450" cy="420" r="13"/></g>
+    <text x="35" y="715" class="m sm">중구·동구 1박 2일</text><text x="35" y="742" class="m sm">역사 · 먹거리 · 음악 · 야경</text>
+  </g>
+
+  <!-- center inside panel -->
+  <g transform="translate(610,210) skewY(1)" filter="url(#shadow)">
+    <rect width="520" height="760" rx="8" fill="url(#paper)"/>
+    <rect width="520" height="122" rx="8" fill="#e98c19"/>
+    <text x="35" y="48" class="w sm">장소별 탐험</text><text x="35" y="94" class="w lg">포롱이와 여울이를 따라</text>
+    <rect x="35" y="155" width="450" height="180" rx="10" fill="#e8a15c"/><text x="160" y="250" class="w md">계산성당 사진 후보</text>
+    <text x="35" y="385" class="t lg">근대골목</text><text x="35" y="425" class="t md">대구의 근대 역사와 골목 풍경을 만나요.</text><text x="35" y="470" class="m sm">청라언덕 · 계산성당 · 이상화 고택</text>
+    <rect x="35" y="510" width="450" height="96" rx="10" fill="#fff1db"/><text x="55" y="550" class="t sm">포롱이: “우와, 여기서부터 시작이구나!”</text><text x="55" y="582" class="t sm">여울이: “대구의 근대 역사를 만날 수 있어.”</text>
+    <text x="35" y="660" class="t lg">서문시장</text><text x="35" y="700" class="m sm">점심 · 시장 먹거리 · 서문시장 입구 사진 후보</text><text x="35" y="740" class="m sm">낮 시간대는 크로스백 이미지를 사용</text>
+  </g>
+
+  <!-- right cover / folded panel -->
+  <g transform="translate(1125,265) skewY(6) rotate(6 250 370)" filter="url(#shadow)">
+    <rect width="500" height="720" rx="8" fill="url(#navy)"/>
+    <text x="35" y="55" class="w sm">표지</text><text x="35" y="145" class="w xl">너구리와</text><text x="35" y="205" class="w xl">족제비의</text><text x="35" y="265" class="w xl">대구 탐험</text>
+    <text x="35" y="330" class="w md">가을 대구, 골목과 시장을 따라</text><text x="35" y="366" class="w md">1박 2일 탐험을 시작해요.</text>
+    <circle cx="170" cy="510" r="92" fill="#e8a15c"/><circle cx="340" cy="510" r="92" fill="#c77a48"/>
+    <text x="35" y="650" class="w md">역사 · 먹거리 · 음악 · 야경</text><rect x="35" y="670" width="170" height="38" rx="19" fill="#e98c19"/><text x="63" y="696" class="w sm">A4 3단 접지</text>
+  </g>
+
+  <!-- night panel peek -->
+  <g transform="translate(300,1015)"><rect width="1180" height="78" rx="20" fill="#fff" opacity=".9"/><text x="350" y="1065" class="t md">안쪽 하단에는 저녁·밤 코스와 별빛 기록을 연결하고, 별랜턴 캐릭터는 야시장 패널에만 배치</text></g>
+</svg>

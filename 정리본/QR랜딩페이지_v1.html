@@ -133,6 +133,7 @@
   .share .btn{font-size:13px;min-height:44px;padding:0 6px}
   .hint{font-size:11px;color:var(--muted);margin:8px 0 0}
 
+  #jaNote{margin:0;padding:12px 16px;background:var(--yellow);color:var(--ink);font-size:15px;font-weight:700;line-height:1.5;border-bottom:3px solid var(--orange)}
   footer{background:var(--navy);color:rgba(255,255,255,.8);padding:20px 16px 40px;font-size:11px;margin-top:16px}
   footer b{color:#fff;font-size:13px;display:block;margin-bottom:8px}
   footer ul{list-style:none;margin:0 0 14px;padding:0} footer li{margin:4px 0}
@@ -152,6 +153,9 @@
       <button type="button" data-lang="ja" aria-pressed="false">日本語</button>
     </div>
   </header>
+
+  <!-- 일본어를 고르면 보이는 AI 번역 초안 안내 (검토 전 공개 대비, 11/26 위로 옮김) -->
+  <p id="jaNote" role="note" hidden></p>
 
   <!-- ① 첫 화면 -->
   <div class="hero" id="top">
@@ -235,7 +239,6 @@
   <footer>
     <b data-t="credit"></b>
     <ul id="credits"></ul>
-    <p id="jaNote" hidden></p>
     <p data-t="foot"></p>
   </footer>
 </div>
@@ -274,7 +277,7 @@ const T = {
     copied:'링크를 복사했어요', savedMsg:'이 휴대폰에 코스를 저장했어요', unsavedMsg:'저장을 취소했어요',
     credit:'사진 출처 · 라이선스', foot:'포롱이·여울이 대구 탐험 · 문의처 확정 후 기재',
     photoWait:'사진 준비 중', photo:'사진', charTagDay:'포롱이·여울이 · 크로스백', charTagNight:'포롱이·여울이 · 별랜턴',
-    day1:'DAY 1 · 골목과 시장', day2:'DAY 2 · 여유로운 마무리', end:'근대골목에서 코스 종료'
+    day1:'DAY 1 · 골목과 시장', day2:'DAY 2 · 여유로운 마무리', end:'근대골목에서 코스 종료', endTime:'약 14:00'
   },
   ja:{
     brand:'ポロンイとヨウリの大邱探検', kick:'大邱 中区・東区 1泊2日コース',
@@ -298,7 +301,7 @@ const T = {
     copied:'リンクをコピーしました', savedMsg:'この端末にコースを保存しました', unsavedMsg:'保存を取り消しました',
     credit:'写真の出典・ライセンス', foot:'ポロンイとヨウリの大邱探検・お問い合わせ先は確定後に記載',
     photoWait:'写真準備中', photo:'写真', charTagDay:'ポロンイ・ヨウリ', charTagNight:'ポロンイ・ヨウリ・星のランタン',
-    day1:'DAY 1・路地と市場', day2:'DAY 2・ゆったり締めくくり', end:'大邱近代通りでコース終了',
+    day1:'DAY 1・路地と市場', day2:'DAY 2・ゆったり締めくくり', end:'大邱近代通りでコース終了', endTime:'約14:00',
     aiNote:'一部の外国語表記はAI翻訳の草案です（確認中）。'
   }
 };
@@ -334,8 +337,8 @@ const PLACES = [
     ja:{time:'午前', name:'東城路', desc:'東城路でのんびり大邱の朝を楽しもう。', hl:['自由時間'], move:'新川・散歩'},
     photo:'', credit:'동성로 거리'},
   {id:'p7', day:2, n:7, night:false, mapQ:'신천 대구',
-    ko:{time:'오후', name:'신천 산책', desc:'신천을 따라 걸은 뒤 근대골목으로 이동해 14:11 코스를 마쳐요.', hl:['산책','물가']},
-    ja:{time:'午後', name:'新川さんぽ', desc:'新川沿いを歩いたあと、大邱近代通りへ移動して14:11にコース終了。', hl:['散歩','水辺']},
+    ko:{time:'오후', name:'신천 산책', desc:'신천을 따라 걸은 뒤 근대골목으로 이동해 약 14:00에 코스를 마쳐요.', hl:['산책','물가']},
+    ja:{time:'午後', name:'新川さんぽ', desc:'新川沿いを歩いたあと、大邱近代通りへ移動して約14:00にコース終了。', hl:['散歩','水辺']},
     photo:'', credit:'신천 물가'}
 ];
 
@@ -384,7 +387,7 @@ function renderTimeline(){
     return `<li><span class="t">${esc(L.time)}</span><a href="#${p.id}">${esc(L.name)}</a>${gear}</li>`;
   });
   if(day===1) rows.push(`<li><span class="t">${lang==='ja'?'宿泊':'숙박'}</span><span>${lang==='ja'?'中区 東城路周辺':'중구 동성로 일대'}</span><span></span></li>`);
-  else rows.push(`<li><span class="t">14:11</span><span>${esc(t('end'))}</span><span></span></li>`);
+  else rows.push(`<li><span class="t">${esc(t('endTime'))}</span><span>${esc(t('end'))}</span><span></span></li>`);
   $('#tl').innerHTML = rows.join('');
   document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected', String(+b.dataset.day===day)));
 }
