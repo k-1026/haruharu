@@ -70,7 +70,7 @@
 
   <text x="60" y="1490" class="kr h2">별빛 탐험 기록</text>
   <rect x="60" y="1530" width="1320" height="150" rx="24" fill="#273251"/>
-  <g fill="#ffd15c" font-size="42"><text x="110" y="1615">★</text><text x="300" y="1615">★</text><text x="490" y="1615">★</text><text x="680" y="1615">★</text><text x="870" y="1615">☆</text><text x="1060" y="1615">☆</text></g>
+  <g fill="#FED665" font-size="42"><text x="110" y="1615">★</text><text x="300" y="1615">★</text><text x="490" y="1615">★</text><text x="680" y="1615">★</text><text x="870" y="1615">☆</text><text x="1060" y="1615">☆</text></g>
   <g class="white small" text-anchor="middle"><text x="140" y="1655">근대골목</text><text x="330" y="1655">서문시장</text><text x="520" y="1655">김광석길</text><text x="710" y="1655">평화시장</text><text x="900" y="1655">동성로</text><text x="1100" y="1655">다음 탐험</text></g>
   <rect x="60" y="1740" width="1320" height="90" rx="24" fill="#fff"/>
   <text x="95" y="1796" class="kr body">너구리와 족제비와 함께 대구 탐험을 시작해보세요.</text>

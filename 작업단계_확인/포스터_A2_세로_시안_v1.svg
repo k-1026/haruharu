@@ -21,7 +21,7 @@
   <text x="125" y="760" class="w sm">포롱이·여울이 대표 이미지 삽입 영역</text>
   <text x="610" y="475" class="w md">낮에는 크로스백</text><text x="610" y="515" class="w sm">근대골목 · 서문시장 · 동성로</text>
   <text x="610" y="690" class="w md">밤에는 별랜턴</text><text x="610" y="730" class="w sm">평화시장 · 서문시장 야시장</text>
-  <circle cx="875" cy="700" r="34" fill="#ffd15c"/><text x="862" y="710" class="t md">★</text>
+  <circle cx="875" cy="700" r="34" fill="#FED665"/><text x="862" y="710" class="t md">★</text>
 
   <!-- route -->
   <text x="55" y="870" class="t lg">1박 2일 탐험 코스</text>

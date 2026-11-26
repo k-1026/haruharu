@@ -67,6 +67,6 @@
 
   <text x="55" y="2265" class="kr h2">별빛 탐험 기록</text>
   <rect x="55" y="2300" width="1330" height="125" rx="25" fill="#273251"/>
-  <g fill="#ffd15c" font-size="42"><text x="105" y="2375">★</text><text x="275" y="2375">★</text><text x="445" y="2375">★</text><text x="615" y="2375">★</text><text x="785" y="2375">★</text><text x="955" y="2375">☆</text></g>
+  <g fill="#FED665" font-size="42"><text x="105" y="2375">★</text><text x="275" y="2375">★</text><text x="445" y="2375">★</text><text x="615" y="2375">★</text><text x="785" y="2375">★</text><text x="955" y="2375">☆</text></g>
   <g class="white small" text-anchor="middle"><text x="135" y="2408">근대골목</text><text x="305" y="2408">서문시장</text><text x="475" y="2408">김광석길</text><text x="645" y="2408">평화시장</text><text x="815" y="2408">야시장</text><text x="985" y="2408">다음 탐험</text></g>
 </svg>
