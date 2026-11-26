@@ -280,7 +280,10 @@ function 시간표(일정){
   if(!일정.length)return '<div class="day-schedule"><p class="empty">아직 일정이 없어요.</p></div>';
   let day=null;const days=new Set(일정.map(x=>x.일차)).size;
   const rows=일정.map(x=>{const n=stopName(x),c=칸색(x);const head=days>1&&x.일차!==day?`<li class="ds-day">${esc(x.일차)}일차</li>`:'';day=x.일차;
-    return head+`<li class="ds-row slot-${c}"><span class="ds-time">${esc(x.시각||'미정')}</span><span class="ds-dot" aria-hidden="true"></span><span class="ds-name">${기획표시.치킨장소(n)?`<em class="chick-stop" title="치킨·닭요리 요소">${기획표시.닭}${esc(n)}</em>`:esc(n)}<small>${esc(칸이름[x.시간칸]||x.시간칸||'')}</small></span></li>`;}).join('');
+    const 끝일차=Number.isInteger(x.종료일차)&&x.종료일차!==x.일차?`${x.종료일차}일차 `:'';
+    const 범위=!x.시각&&!x.종료시각?'시각 미정':`${x.시각||'시작 미정'}~${x.종료시각?끝일차+x.종료시각:'종료 미정'}`;
+    const 체류=Number.isFinite(x.머무는시간)&&x.머무는시간>0?`${x.머무는시간}분`:'체류시간 미정';
+    return head+`<li class="ds-row slot-${c}"><span class="ds-time">${esc(범위+' · '+체류)}</span><span class="ds-dot" aria-hidden="true"></span><span class="ds-name">${기획표시.치킨장소(n)?`<em class="chick-stop" title="치킨·닭요리 요소">${기획표시.닭}${esc(n)}</em>`:esc(n)}<small>${esc(칸이름[x.시간칸]||x.시간칸||'')}</small></span></li>`;}).join('');
   return `<div class="day-schedule"><h3>하루 시간표 <span class="note">권장 순서·시각</span></h3><ol>${rows}</ol></div>`;
 }
 function showRecord(id,cond,rec){
@@ -313,7 +316,7 @@ function showRecord(id,cond,rec){
   const 분=rec.분류||{};
   const 검사=`<h3>검사 원문</h3><p class="note">아래는 팀 검토용 기록이에요. 같은 확인 항목이 여러 검사에서 반복될 수 있어요.</p><div class="three">${Object.keys(분류이름).map(k=>`<div class="col c-${k}"><b>${분류이름[k][0]} <span class="cnt">${(분[k]||[]).length}</span><span class="sr-only"> · ${esc(rec.안id)}안 ${rec.버전}버전</span></b><ul>${(분[k]||[]).map(x=>`<li>${esc(x.문구)}<small> · ${esc(x.출처)}</small></li>`).join('')||'<li class="none">없음</li>'}</ul></div>`).join('')}</div>`;
   const 기=rec.부분수정기록;
-  const 부분=기?`<p class="note">최근 수정 요청: ${plain(기.요청)}</p>`:'';
+  const 부분=기?`<section class="edit-result"><h3>이번 수정 내역</h3><p>${plain(기.요청)}</p>${기.변경목록?.length?`<ul>${기.변경목록.map(t=>`<li>${plain(t)}</li>`).join('')}</ul>`:''}<p class="note">${plain(기.안내||'변경된 일정과 남은 확인 사항을 검토해 주세요.')}</p></section>`:'';
   const chips=[cond.계절,(cond.언어권||[]).join('·'),(cond.지역||[]).join('·'),cond.체류기간].filter(Boolean);
   main.innerHTML=`<div class="cond">${chips.map(c=>`<span class="chip">${esc(c)}</span>`).join('')}</div>
     <section class="card ai recommendation"><div class="aihead"><span class="aibadge">코스 초안</span><h2>코스 제안</h2><span class="draft-badge">확정 전 초안</span>${s.코스있음?`<button class="btn primary compare-map-button" id="openMap" title="동선 · 시간표">지도 크게 보기 ↗</button>`:''}</div>
@@ -327,24 +330,15 @@ function showRecord(id,cond,rec){
       ${부분}${alt}${required}</div></div></section>
     <section class="card freedom"><h3>어디까지 자유롭게 이용하나요?</h3><p>표시된 순서와 시각은 권장 일정이에요. 관광·식사는 장소의 운영시간 안에서 선택할 수 있도록 기획합니다.</p><p class="note">예약이나 이용권에 실제로 정해진 시간이 있다면 그 조건을 따라야 해요. 미정인 사용처·유효시간·포함 혜택은 아직 확정된 상품 조건이 아니에요. 집결·해산이나 숙소 예약을 먼저 입력할 필요는 없어요.</p></section>
     ${wish}
-    <details class="card"><summary>코스 수정하기 · 바꾸고 싶은 부분이 있나요?</summary><p class="note">고른 일정만 다시 제안해요. 나머지 일정과 이전 초안은 보존해요.</p>
-      <div class="pills" id="redo">${rec.시간칸.map(k=>`<button type="button" class="pill" aria-pressed="false" data-v="${esc(k)}">${esc(slotName(k))}</button>`).join('')}</div>
-      <div class="redo-row"><input id="redoText" maxlength="300" placeholder="예: 낮은 유지하고 저녁만 설문 음식 후보로 바꿔 주세요"><button class="btn primary" id="redoGo" disabled>다시 만들기</button></div>
-      <p class="note" id="keep"></p><p class="err" id="redoErr"></p></details>
+    <details class="card"><summary>코스 수정하기 · 바꾸고 싶은 부분이 있나요?</summary>${코스편집.화면(rec,이전)}</details>
     <details class="card technical"><summary>팀 검토용 상세 · 수정 이력과 검사 기록</summary><p class="note">${esc(rec.안id)}안은 ${rec.안id==='A'?'원래 요청으로 만든 코스':'구성을 조정한 대안'}이고, ${rec.버전}버전은 같은 코스를 ${rec.버전}번째로 작성한 기록이에요. 서로 다른 여행 상품 ${rec.버전}개를 뜻하지 않아요.</p>${vers}${검사}<p><a href="/admin/">서비스 제공자용 로그 보기 ↗</a></p></details>`;
   if(s.코스있음)$('openMap').onclick=()=>openMap(s.일정,{id,cond,rec});
   if(!이전&&globalThis.홍보화면)globalThis.홍보화면.붙이기(main,{id,cond,rec,돌아가기:()=>show(id,cond,rec.안id,rec.버전)});  // ④ 홍보물 · ⑤ 산출물
   if($('latestPlan'))$('latestPlan').onclick=()=>show(id,cond,rec.안id);
   main.querySelectorAll('.tab[data-plan]').forEach(b=>b.onclick=()=>show(id,cond,b.dataset.plan));
   main.querySelectorAll('.vers .pill').forEach(b=>b.onclick=()=>show(id,cond,rec.안id,b.dataset.v));
-  const redo=$('redo');const pick=()=>[...redo.querySelectorAll('[aria-pressed=true]')].map(b=>b.dataset.v);
-    const upd=()=>{const p=pick();$('keep').textContent=p.length?`그대로 둘 일정: ${rec.시간칸.filter(k=>!p.includes(k)).map(slotName).join(', ')||'없음'}`:'';$('redoGo').disabled=!p.length||!$('redoText').value.trim();};
-  redo.onclick=e=>{const b=e.target.closest('.pill');if(!b)return;b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');upd();};
-  $('redoText').oninput=upd;
-  $('redoGo').onclick=async()=>{const p=pick();$('redoGo').disabled=true;$('redoErr').textContent='';
-    try{const r=await post('/api/plan/revise',{기획id:rec.기획id,안id:rec.안id,바꿀:p,유지:rec.시간칸.filter(k=>!p.includes(k)),요청:$('redoText').value.trim()});
-      showProgress(r);watch(r.기획id);window.scrollTo({top:0,behavior:'smooth'});}
-    catch(err){$('redoErr').textContent=err.message;upd();}};
+  코스편집.연결(main,rec,async payload=>{const r=await post('/api/plan/revise',payload);
+    showProgress(r);watch(r.기획id);window.scrollTo({top:0,behavior:'smooth'});});
 }
 let mapController=null,mapVersion=0,explorerStops=[],selectedStop=null,returnFocus=null;
 function closeMap(){
