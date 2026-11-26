@@ -13,7 +13,10 @@
   /*
     QR 전용 랜딩페이지 v1 (시안)
     - 기준 시안: QR랜딩페이지_모바일시안_v1.svg
-    - QR 링크 예: <짧은 주소>?from=poster | leaflet | stampbook | sns, 언어 고정은 &lang=ja
+    - QR 주소 끝 from= 값 (2026-11-26 확정, 지침 4단계 9_출력.md 2장):
+      poster(포스터 A3 · 맨 위) | leaflet(리플릿 · 일정으로) | stampbook(스탬프 투어 북 · 스탬프로)
+      | sns(SNS 프로필 링크 · 맨 위) | share(공유 버튼이 자동으로 붙임 · 맨 위)
+      영어 소문자 한 단어. 목록에 없거나 없으면 맨 위. 일본어로 열기는 &lang=ja (예: ?from=poster&lang=ja)
     - 사진·캐릭터 PNG는 아래 script의 IMG 값에 경로를 넣으면 바뀐다 (비어 있으면 자리 표시)
   */
   :root{
