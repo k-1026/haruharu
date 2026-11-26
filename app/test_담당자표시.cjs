@@ -192,3 +192,10 @@ test('저장된 실제 B안은 미생성 안내 대신 비교 카드로 표시�
   assert.match(html,/B안 · 구성을 조정한 안/);
   assert.doesNotMatch(html,/missing-plan/);
 });
+
+test('장소 설명에 위치 신고 양식이 있다', () => {
+  const html = ui.장소패널({순번: 2, 장소명: '대구광역시 중구 김광석길', 표시명: '중구 김광석길', 장소안내: {}, 식당후보: []});
+  assert.match(html, /위치가 이상해요/);
+  assert.match(html, /data-place-report/);
+  assert.match(html, /maxlength="300"/);
+});

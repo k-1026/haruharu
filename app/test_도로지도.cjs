@@ -47,13 +47,15 @@ test('정면 걷기는 두 캐릭터의 원본 정면 모션 시선을 같은 �
   assert.equal(UI.characterMotion('raccoon',0,-1,0,'follow').view,'back');
 });
 
-test('대중교통에는 도보 geometry를 붙이지 않고 시간·노선만 전달한다',()=>{
+test('대중교통 구간은 걷기 재생용 path는 비우고, 지도 표시용 도로 선(roadPath)만 붙인다',()=>{
   const data=UI.model([{일차:1,좌표:[35.86,128.6],다음이동:{도보분:60,대중교통분:39,노선:'401',확인일:'2026-11-19'}},{일차:1,좌표:[35.88,128.62]}]);
   const cache={routes:{[UI.routeKey(data.entries[0].point,data.entries[1].point)]:{profile:'foot',points:[[35.86,128.6],[35.88,128.62]],durationSeconds:3600}}};
   const before=JSON.stringify(data),result=UI.routesFor(data,cache);
   assert.equal(result.legs[0].mode,'transit');assert.equal(result.legs[0].durationSeconds,2340);
   assert.equal(result.legs[0].path,null);assert.equal(result.legs[0].canWalk,false);
+  assert.deepEqual(result.legs[0].roadPath,[[35.86,128.6],[35.88,128.62]]);   // 사용자 결정(11/26): 버스 구간도 도로 선으로 보여 준다
   assert.equal(UI.routesFor(data,{}).legs[0].mode,'transit');
+  assert.equal(UI.routesFor(data,{}).legs[0].roadPath,null);
   assert.match(UI.legTimeLabel(result.legs[0]),/대중교통.*39분/);
   assert.equal(JSON.stringify(data),before);
 });
@@ -211,4 +213,41 @@ test('홍보 화면도 포롱이·여울이를 너구리·족제비 그림으로
   assert.equal(promo.캐릭터('너구리'), '너구리');
   assert.equal(promo.캐릭터('동등'), null);
   assert.equal(promo.그림('여울이'), 'weasel');
+});
+
+test('다음 일정이 위치 없는 숙소면 경로 미확인 대신 숙소를 정하면 안내한다고 쓴다', () => {
+  const m = require('./담당자화면/map-model.js');
+  assert.equal(m.legFallbackLabel({다음이동: null}, {시간칸: '숙박', 좌표: null}), '숙소를 정하면 이동 안내');
+  assert.equal(m.legFallbackLabel({다음이동: {도보분: 14, 대중교통분: 9}}, {시간칸: '낮', 좌표: [35.8, 128.5]}), '도보 약 14분 · 지도 경로 준비 중');
+  assert.equal(m.legFallbackLabel({다음이동: null}, {시간칸: '낮', 좌표: null}), '경로 미확인');
+});
+
+test('대중교통 구간은 두 장소 사이를 점선 조각으로 잇는다', () => {
+  const m = require('./담당자화면/map-model.js');
+  const rows = m.dashRows([0, 0], [100, 0], 10, 6);
+  assert.ok(rows.length >= 6 && rows.length <= 7);
+  assert.deepEqual(rows[0], [[0, 0], [10, 0]]);
+  assert.ok(rows.every(r => r.length === 2 && r[1][0] <= 100));
+  assert.deepEqual(m.dashRows([0, 0], [0, 0], 10, 6), []);
+});
+
+test('도로 선이 있는 대중교통 구간은 기다리지 않고 버스로 타고 가는 구간으로 재생한다', () => {
+  const m = require('./담당자화면/map-model.js');
+  const s = [1, 2, 3, 4].map(순번 => ({순번, 일차: 1}));
+  const road = [[35.86, 128.6], [35.87, 128.61]];
+  const legs = m.playableLegs([
+    {from: s[0], to: s[1], mode: 'foot', canWalk: true, path: road},
+    {from: s[1], to: s[2], mode: 'transit', canWalk: false, path: null, roadPath: road, durationSeconds: 1020},
+    {from: s[2], to: s[3], mode: 'transit', canWalk: false, path: null, roadPath: null, durationSeconds: 600}]);
+  assert.equal(legs[1].ride, true); assert.equal(legs[1].canWalk, true); assert.deepEqual(legs[1].path, road);
+  assert.equal(legs[2].ride, undefined); assert.equal(legs[2].mode, 'transit');   // 도로 선이 없으면 예전처럼 안내만
+  assert.match(m.legTimeLabel(legs[1]), /대중교통 약 17분/);
+  const p = m.playback(legs); p.startAll(); p.advance(1);
+  assert.equal(p.state.index, 1); assert.equal(p.state.waiting, false);   // 버스 구간에서 멈춰 기다리지 않는다
+  p.advance(1); assert.equal(p.state.waiting, true);                     // 도로 선 없는 구간만 기다린다
+});
+
+test('목록에 넘기는 구간 정보(mode만 있음)도 버스 구간이면 대중교통 시간으로 쓴다', () => {
+  const m = require('./담당자화면/map-model.js');
+  assert.match(m.legTimeLabel({mode: 'ride', durationSeconds: 1200}), /대중교통 약 20분/);
 });

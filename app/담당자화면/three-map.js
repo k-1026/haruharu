@@ -15,6 +15,9 @@ function journey(leg,progress,index,total){
     const t=leg.transport||{},basis=[t.출처,t.기준요일,t.기준출발시각,t.확인일].filter(Boolean).join(' · ');
     return `<small>대중교통 이동 안내 ${index+1} / ${total}</small><strong>${esc(globalThis.코스지도모델.label(leg.from))} → ${esc(globalThis.코스지도모델.label(leg.to))}</strong><span>대중교통 약 ${Math.round(leg.durationSeconds/60)}분 · ${esc(t.노선||'노선 확인 필요')}</span><p class="transit-basis">${esc(basis)} 기준 자료</p><p class="transit-basis">실제 노선 경로는 미연결입니다. 걷기 없이 ‘도착지로 넘어가기’를 누르세요.</p>`;
   }
+  if(leg.ride){
+    return `<small>버스·지하철 이동 ${index+1} / ${total}</small><strong>${esc(globalThis.코스지도모델.label(leg.from))}<span aria-hidden="true"> → </span>${esc(globalThis.코스지도모델.label(leg.to))}</strong><span>${progress>=1?'도착했어요':`대중교통 약 ${Math.round(leg.durationSeconds/60)}분 · ${esc((leg.transport||{}).노선||'노선 확인 필요')} · ${Math.floor(progress*100)}%`}<em>표시 선은 도로 경로예요</em></span><progress max="1" value="${progress}" aria-label="현재 구간 진행"></progress>`;
+  }
   const metres=Number.isFinite(leg.distance)?leg.distance:(leg.track?.total||0)/U;
   const remaining=Math.max(0,metres*(1-progress)),distance=remaining>=1000?(remaining/1000).toFixed(1)+'km':Math.round(remaining/10)*10+'m';
   return `<small>지금 걷는 구간 ${index+1} / ${total}</small><strong>${esc(globalThis.코스지도모델.label(leg.from))}<span aria-hidden="true"> → </span>${esc(globalThis.코스지도모델.label(leg.to))}</strong><span>${progress>=1?'도착했어요':`다음 장소까지 약 ${distance} · ${Math.floor(progress*100)}%`}<em>${esc(globalThis.코스지도모델.timeLabel(leg.durationSeconds))} 구간</em></span><progress max="1" value="${progress}" aria-label="현재 구간 진행"></progress>`;
@@ -37,16 +40,18 @@ async function roadFallback(host,model,routed,options={}){
   const width=xs.length?Math.max(1000,Math.max(...xs)-left+400):4000,height=ys.length?Math.max(800,Math.max(...ys)-top+400):3000;
   const roads=(rows,color,width)=>`<g fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round">${(rows||[]).map(row=>`<polyline vector-effect="non-scaling-stroke" points="${row.map(p=>p[0]+','+(-p[1])).join(' ')}"/>`).join('')}</g>`;
   const routePaths=routed.legs.map(leg=>leg.canWalk?leg.path.map(p=>project(p).join(' ')).join(' L '):null);
+  const transitLegs=routed.legs.filter(leg=>!leg.canWalk);
+  const transitStroke=`<g fill="none" stroke="${ROUTE.transit}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">${transitLegs.filter(leg=>leg.roadPath).map(leg=>`<path vector-effect="non-scaling-stroke" d="M ${leg.roadPath.map(p=>project(p).join(' ')).join(' L ')}"/>`).join('')}</g><g fill="none" stroke="${ROUTE.transit}" stroke-width="3" stroke-dasharray="10 8" stroke-linecap="round">${transitLegs.filter(leg=>!leg.roadPath).map(leg=>`<path vector-effect="non-scaling-stroke" d="M ${project(leg.from.point).join(' ')} L ${project(leg.to.point).join(' ')}"/>`).join('')}</g>`;
   const routeStroke=(color,width,progress=false)=>`<g fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round">${routePaths.map((path,i)=>path?`<path ${progress?`data-flat-progress="${i}" pathLength="100" stroke-dasharray="100 100"`:''} vector-effect="non-scaling-stroke" d="M ${path}"/>`:'').join('')}</g>`;
-  host.innerHTML=`<div class="map3d-tools"><button type="button" data-flat-play>전체 동선 재생</button><button type="button" data-flat-pause disabled>잠시 멈춤</button><button type="button" data-flat-transit-next hidden>도착지로 넘어가기</button><button type="button" data-flat-speed title="지도 미리보기 속도">속도 1×</button><button type="button" data-flat-home>전체 지도</button><button type="button" data-flat-follow>따라보기</button><span data-flat-clock title="코스 일정 시각 기준 분위기 · 실제 일몰 예측 아님"></span></div><p class="note" data-flat-status>청록 실선은 도보 · 대중교통은 시간/노선 안내. 이 환경에서는 평면 지도로 표시합니다.</p>
+  host.innerHTML=`<div class="map3d-tools"><button type="button" data-flat-play>전체 동선 재생</button><button type="button" data-flat-pause disabled>잠시 멈춤</button><button type="button" data-flat-transit-next hidden>도착지로 넘어가기</button><button type="button" data-flat-speed title="지도 미리보기 속도">속도 1×</button><button type="button" data-flat-home>전체 지도</button><button type="button" data-flat-follow>따라보기</button><span data-flat-clock title="코스 일정 시각 기준 분위기 · 실제 일몰 예측 아님"></span></div><p class="note" data-flat-status>청록은 걷기 · 보라는 버스·지하철(선은 도로 경로, 실제 노선과 다를 수 있음). 이 환경에서는 평면 지도로 표시합니다.</p>
     <svg class="map-road-fallback" viewBox="${left} ${top} ${width} ${height}" role="img" aria-label="코스 도로 지도">
     <rect data-flat-ground x="${left}" y="${top}" width="${width}" height="${height}" fill="#F1E8D9"/>
     ${roads(geo.minor,'#CBBEAB',2.5)}${roads(geo.minor,'#FFFCF5',1.3)}${roads(geo.walk,'#E8BB7A',1.5)}
     ${roads(geo.mid,'#AFA796',3.6)}${roads(geo.mid,'#FFF8ED',2.1)}${roads(geo.major,'#AD9D86',4.6)}${roads(geo.major,'#E5D9C5',3.1)}
     ${roads(walkingRoads,'#CBBEAB',16)}${roads(walkingRoads,'#FFFCF5',14)}
-    ${routeStroke(ROUTE.edge,11)}${routeStroke(ROUTE.ahead,6.5)}${routeStroke(ROUTE.ink,6.5,true)}
+    ${transitStroke}${routeStroke(ROUTE.edge,11)}${routeStroke(ROUTE.ahead,6.5)}${routeStroke(ROUTE.ink,6.5,true)}
     ${points.map(s=>`<g data-map-stop="${s.순번}" role="button" tabindex="0" aria-label="${esc(globalThis.코스지도모델.label(s))} 설명 보기"><circle cx="${s.xy[0]}" cy="${s.xy[1]}" r="18" fill="${ROUTE.ink}" stroke="${ROUTE.edge}" stroke-width="4"/><text x="${s.xy[0]+27}" y="${s.xy[1]}" font-size="25" fill="#735335">${esc(s.순번+'. '+(s.kind==='area'?'[식사] ':'')+globalThis.코스지도모델.label(s))}</text></g>`).join('')}
-    ${routed.legs.length?['raccoon','weasel'].map(type=>`<image data-flat-character="${type}" pointer-events="none" width="${width/13}" height="${width/10}" href="/plan/characters/transparent/${type}-front.png"/>`).join(''):''}</svg>
+    ${routed.legs.length?['raccoon','weasel'].map(type=>`<image data-flat-character="${type}" pointer-events="none" width="${width/13}" height="${width/10}" href="/plan/characters/transparent/${type}-front.png"/>`).join('')+`<text data-flat-ride text-anchor="middle" font-weight="700" fill="#fff" stroke="${ROUTE.transit}" stroke-width="6" paint-order="stroke" pointer-events="none">버스 이동</text>`:''}</svg>
     <div class="map3d-hud" data-flat-journey></div><div data-fallback-areas>${model.areas.map(s=>`<button type="button" data-area="${s.순번}">${esc(globalThis.코스지도모델.label(s))} · 식당 후보</button>`).join('')}</div>
     <div class="map3d-detail" data-map-detail></div><p class="note">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> · <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener">FOSSGIS OSRM</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener">지도 수정 제보</a></p>`;
   const detail=host.querySelector('[data-map-detail]');
@@ -86,10 +91,11 @@ async function roadFallback(host,model,routed,options={}){
     const c=globalThis.코스지도모델.preview(model,number,index);if(!c)return;
     if(c.좌표)focus(c.좌표);options.onCandidate?.(number,index);
   }
-  const tracks=routed.legs.map(leg=>leg.canWalk?globalThis.코스지도모델.track(leg.path.map(project)):null);
-  const player=globalThis.코스지도모델.playback(routed.legs);
-  const play=host.querySelector('[data-flat-play]'),pause=host.querySelector('[data-flat-pause]'),status=host.querySelector('[data-flat-status]'),next=host.querySelector('[data-flat-transit-next]'),hud=host.querySelector('[data-flat-journey]');play.disabled=!routed.legs.length;
-  const sprites=[...host.querySelectorAll('[data-flat-character]')];
+  const plegs=globalThis.코스지도모델.playableLegs(routed.legs);
+  const tracks=plegs.map(leg=>leg.canWalk?globalThis.코스지도모델.track(leg.path.map(project)):null);
+  const player=globalThis.코스지도모델.playback(plegs);
+  const play=host.querySelector('[data-flat-play]'),pause=host.querySelector('[data-flat-pause]'),status=host.querySelector('[data-flat-status]'),next=host.querySelector('[data-flat-transit-next]'),hud=host.querySelector('[data-flat-journey]');play.disabled=!plegs.length;
+  const sprites=[...host.querySelectorAll('[data-flat-character]')],rideTag=host.querySelector('[data-flat-ride]');if(rideTag)rideTag.style.visibility='hidden';
   let last=0,frame=0,dead=false,follow=false,playbackSpeed=1,shown=-1;
   function sync(){pause.disabled=player.state.finished||player.state.waiting||shown<0;pause.textContent=player.state.finished?'재생 완료':player.state.playing?'잠시 멈춤':'계속 재생';next.hidden=!player.state.waiting||shown!==player.state.index;}
   function place(sample){
@@ -98,24 +104,25 @@ async function roadFallback(host,model,routed,options={}){
       const motion=globalThis.코스지도모델.characterMotion(sprite.dataset.flatCharacter,sample.direction[0],sample.direction[1],0,follow?'front':'overview');
       sprite.style.transformBox='fill-box';sprite.style.transformOrigin='center';sprite.style.transform=`scaleX(${motion.flip?-1:1})`;
       if(sprite.dataset.view!==motion.view){sprite.dataset.view=motion.view;sprite.setAttribute('href',`/plan/characters/transparent/${sprite.dataset.flatCharacter}-${motion.view}.png`);}});
+    if(rideTag){rideTag.setAttribute('x',sample.point[0]);rideTag.setAttribute('y',sample.point[1]-size*1.45);rideTag.setAttribute('font-size',size*.32);}
     if(follow)svg.setAttribute('viewBox',`${sample.point[0]-600} ${sample.point[1]-450} 1200 900`);
   }
   sprites.forEach(sprite=>sprite.style.visibility='hidden');
-  function enter(){const leg=routed.legs[player.state.index];shown=player.state.index;follow=leg.canWalk;
+  function enter(){const leg=plegs[player.state.index];shown=player.state.index;follow=leg.canWalk;
     status.textContent=globalThis.코스지도모델.label(leg.from)+' → '+globalThis.코스지도모델.label(leg.to)+' · '+globalThis.코스지도모델.legTimeLabel(leg);
-    sprites.forEach(sprite=>sprite.style.visibility=leg.canWalk?'visible':'hidden');
+    sprites.forEach(sprite=>sprite.style.visibility=leg.canWalk?'visible':'hidden');if(rideTag)rideTag.style.visibility=leg.ride?'visible':'hidden';
     if(leg.canWalk)place(globalThis.코스지도모델.sample(tracks[shown],0));else home();
-    sceneMinutes=globalThis.코스지도모델.courseMinutes(leg.from,leg.to,0);showTime();hud.innerHTML=journey(leg,0,shown,routed.legs.length);sync();options.onSelect?.(leg.from.순번,{playback:true});}
+    sceneMinutes=globalThis.코스지도모델.courseMinutes(leg.from,leg.to,0);showTime();hud.innerHTML=journey(leg,0,shown,plegs.length);sync();options.onSelect?.(leg.from.순번,{playback:true});}
   function start(number=null){const ok=number===null?player.startAll():player.playLeg(number);if(!ok)return false;progressPaths.forEach(p=>p.style.visibility='hidden');enter();return true;}
   play.onclick=()=>start();pause.onclick=()=>{player.toggle();sync();};
-  next.onclick=()=>{const leg=routed.legs[player.state.index],event=player.confirmTransit();if(!event)return;sceneMinutes=globalThis.코스지도모델.clockMinutes(leg.to.시각);showTime();focus(leg.to.point);hud.innerHTML=`<strong>${esc(globalThis.코스지도모델.label(leg.to))} 도착지 보기</strong>`;sync();options.onSelect?.(event.arrived.순번,{playback:!event.done});};
+  next.onclick=()=>{const leg=plegs[player.state.index],event=player.confirmTransit();if(!event)return;sceneMinutes=globalThis.코스지도모델.clockMinutes(leg.to.시각);showTime();focus(leg.to.point);hud.innerHTML=`<strong>${esc(globalThis.코스지도모델.label(leg.to))} 도착지 보기</strong>`;sync();options.onSelect?.(event.arrived.순번,{playback:!event.done});};
   host.querySelector('[data-flat-speed]').onclick=event=>{playbackSpeed=playbackSpeed===4?1:playbackSpeed*2;event.currentTarget.textContent=`속도 ${playbackSpeed}×`;};
   host.querySelector('[data-flat-home]').onclick=()=>{follow=false;home();};host.querySelector('[data-flat-follow]').onclick=()=>follow=true;
   function tick(now){if(dead)return;const dt=Math.min(.05,(now-last)/1000||0);last=now;
     if(player.state.playing&&shown!==player.state.index)enter();
-    if(player.state.playing&&!player.state.waiting){const index=player.state.index,event=player.advance(dt/globalThis.코스지도모델.previewSeconds(tracks[index].total,playbackSpeed)),progress=event?1:player.state.progress;place(globalThis.코스지도모델.sample(tracks[index],progress));
-      progressPaths.get(index).style.visibility='visible';progressPaths.get(index).style.strokeDashoffset=String((1-progress)*100);
-      const leg=routed.legs[index];sceneMinutes=globalThis.코스지도모델.courseMinutes(leg.from,leg.to,progress);showTime();status.textContent=globalThis.코스지도모델.label(leg.from)+' → '+globalThis.코스지도모델.label(leg.to)+' · '+globalThis.코스지도모델.legTimeLabel(leg);hud.innerHTML=journey(leg,progress,index,routed.legs.length);
+    if(player.state.playing&&!player.state.waiting){const index=player.state.index,event=player.advance(dt/globalThis.코스지도모델.previewSeconds(tracks[index].total,playbackSpeed*(plegs[index].ride?3:1))),progress=event?1:player.state.progress;place(globalThis.코스지도모델.sample(tracks[index],progress));
+      const pp=progressPaths.get(index);if(pp){pp.style.visibility='visible';pp.style.strokeDashoffset=String((1-progress)*100);}
+      const leg=plegs[index];sceneMinutes=globalThis.코스지도모델.courseMinutes(leg.from,leg.to,progress);showTime();status.textContent=globalThis.코스지도모델.label(leg.from)+' → '+globalThis.코스지도모델.label(leg.to)+' · '+globalThis.코스지도모델.legTimeLabel(leg);hud.innerHTML=journey(leg,progress,index,plegs.length);
       if(player.state.waiting)sprites.forEach(sprite=>sprite.style.visibility='hidden');
       if(event){sync();options.onSelect?.(event.arrived.순번,{playback:!event.done});}}
     frame=requestAnimationFrame(tick);
@@ -155,7 +162,7 @@ export async function mount(host,stops,options={}){
   try{const r=await fetch('/plan/map-data.json');if(!r.ok)throw Error();geo=await r.json();}
   catch{renderer.dispose();status.textContent='도로 자료를 불러오지 못했습니다. 일정과 식당 후보 목록은 계속 볼 수 있어요.';return {destroy(){},select(){}};}
   const project=p=>new THREE.Vector3((p[1]-geo.origin.lon)*geo.origin.kx*U,0,-(p[0]-geo.origin.lat)*geo.origin.ky*U);
-  const legs=routed.legs.map(leg=>({...leg,track:leg.canWalk?globalThis.코스지도모델.track(leg.path.map(p=>{const v=project(p);return [v.x,v.z];})):null}));
+  const legs=globalThis.코스지도모델.playableLegs(routed.legs).map(leg=>({...leg,track:leg.canWalk?globalThis.코스지도모델.track(leg.path.map(p=>{const v=project(p);return [v.x,v.z];})):null}));
   const player=globalThis.코스지도모델.playback(legs);
   let cameraMode='overview';const leadPos=new THREE.Vector3(),leadDir=new THREE.Vector3(0,0,1),cameraDir=new THREE.Vector3(0,0,1);
   let playbackSpeed=1,journeyKey='',arrivalHold=0,shownLeg=-1;
@@ -253,7 +260,13 @@ export async function mount(host,stops,options={}){
   function highlight(number){for(const row of allPins)row.el.classList.toggle('is-focused',row.number===number);}
   function previewCandidate(number,index){const area=model.areas.find(s=>s.순번===number);if(area){select(number);candidatePreview(area,index);}}
   for(const [index,leg] of legs.entries()){
-    if(!leg.canWalk){
+    if(!leg.canWalk||leg.ride){
+      // 대중교통 구간: 노선 모양을 모르니 두 장소를 보라색 점선 직선으로만 잇는다.
+      // 대중교통 구간: 같은 도로 위에 보라색 선으로. 도로 선이 없을 때만 두 장소를 점선 직선으로 잇는다.
+      if(leg.roadPath){const rows=[leg.roadPath.map(p=>{const v=project(p);return [v.x,v.z];})];
+        stroke(rows,ROUTE.edge,1.17,9,0,{round:true});stroke(rows,ROUTE.transit,1.18,5,0,{round:true});}
+      else{const a=project(leg.from.point),b=project(leg.to.point);
+        stroke(globalThis.코스지도모델.dashRows([a.x,a.z],[b.x,b.z],9,7),ROUTE.transit,1.18,3.2,0,{round:true});}
       const middle=project(leg.from.point).lerp(project(leg.to.point),.5).setY(3);
       const pin=label(globalThis.코스지도모델.legTimeLabel(leg),middle,()=>startPlayback(leg.from.순번),'travel-time transit');pin.routeFrom=leg.from.순번;continue;
     }
@@ -288,6 +301,7 @@ export async function mount(host,stops,options={}){
     labels.append(image);image.src=`/plan/characters/transparent/${type}-front.png`;
     return row;
   });
+  const rideBadge=document.createElement('span');rideBadge.className='map-ride-badge';rideBadge.textContent='버스 이동';rideBadge.hidden=true;labels.append(rideBadge);
   const first=legs.find(leg=>leg.canWalk);for(const c of characters){c.group.visible=false;if(first)c.group.position.copy(project(first.path[0]));}
   let movement=new THREE.Vector3(0,0,1);
   const play=host.querySelector('[data-play]'),pause=host.querySelector('[data-pause]'),hud=host.querySelector('[data-walk-hud]'),transitNext=host.querySelector('[data-transit-next]');
@@ -343,13 +357,13 @@ export async function mount(host,stops,options={}){
   canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);canvas.addEventListener('wheel',wheel,{passive:false});
   function resize(){const w=Math.max(1,stage.clientWidth),h=Math.max(1,stage.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
   const observer=new ResizeObserver(resize);observer.observe(stage);resize();
-  status.textContent=`청록 실선: 도보 ${legs.filter(leg=>leg.canWalk).length}구간 · 대중교통 안내 ${legs.filter(leg=>!leg.canWalk).length}구간${routed.missing.length?` · 경로 미확인 ${routed.missing.length}구간`:''}`;
+  status.textContent=`청록: 걷기 ${legs.filter(leg=>leg.canWalk).length}구간 · 보라: 버스·지하철 ${legs.filter(leg=>!leg.canWalk).length}구간(선은 도로 경로, 실제 노선과 다를 수 있음)${routed.missing.length?` · 경로 미확인 ${routed.missing.length}구간`:''}`;
   function tick(now){
     if(dead)return;const dt=Math.min(.05,(now-last)/1000||0);last=now;
     if(player.state.playing&&arrivalHold>0)arrivalHold=Math.max(0,arrivalHold-dt);
     if(player.state.playing&&arrivalHold===0&&shownLeg!==player.state.index)enterLeg();
     if(player.state.playing&&!player.state.waiting&&arrivalHold===0&&legs[player.state.index]){
-      const index=player.state.index,leg=legs[index],event=player.advance(dt/globalThis.코스지도모델.previewSeconds(leg.track.total/U,playbackSpeed));
+      const index=player.state.index,leg=legs[index],event=player.advance(dt/globalThis.코스지도모델.previewSeconds(leg.track.total/U,playbackSpeed*(leg.ride?3:1)));
       const progress=event?1:player.state.progress;completed.set(index,progress);
       sceneMinutes=globalThis.코스지도모델.courseMinutes(leg.from,leg.to,progress);
       const sample=globalThis.코스지도모델.sample(leg.track,event?1:player.state.progress);
@@ -388,6 +402,9 @@ export async function mount(host,stops,options={}){
       row.image.style.transform=`translate(-50%,-98%) scaleX(${motion.flip?-1:1})`;
       row.shadow.hidden=row.image.hidden;row.shadow.style.left=row.image.style.left;row.shadow.style.top=row.image.style.top;
     }
+    {const p=leadPos.clone().project(camera),riding=hasPlayed&&!!legs[player.state.index]?.ride&&shownLeg===player.state.index;
+      rideBadge.hidden=!riding||Math.abs(p.x)>1||Math.abs(p.y)>1;
+      rideBadge.style.left=((p.x+1)/2*stage.clientWidth)+'px';rideBadge.style.top=((-p.y+1)/2*stage.clientHeight-(cameraMode==='overview'?70:150))+'px';}
     for(const row of routeStrokes)row.done.material.uniforms.cutoff.value=hasPlayed?(completed.has(row.index)?row.leg.track.total*completed.get(row.index):-1):1e9;
     const mood=atmosphere(sceneMinutes),fade=1-Math.exp(-dt*2.5);
     scene.background.lerp(mood.sky,fade);scene.fog.color.copy(scene.background);for(const row of terrainMaterials)row.material.color.lerp(mood[row.kind],fade);

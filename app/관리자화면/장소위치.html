@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>하루하루 · 장소 위치 확인</title><link rel="stylesheet" href="/admin/logs.css"><script defer src="/admin/place-review.js"></script></head>
+<body><header><div><strong>장소 위치 확인</strong><p>서비스 제공자용 관리자 · 지도 좌표 확인과 길 자동 수집</p></div><nav aria-label="서비스 화면"><a href="/plan/">코스 기획 ↗</a><a href="/admin/">서비스 운영 로그</a><a href="/admin/places-review" aria-current="page">장소 위치 확인</a></nav></header>
+<main><section class="intro"><h1>장소 위치 확인</h1>
+<p>코드가 찾아 둔 위치를 지도에서 보고 맞으면 <b>맞다</b>를 누르세요. 확인한 장소끼리의 지도 길은 서버가 뒤에서 자동으로 모읍니다. 기획자 화면은 확인 전까지 '지도 경로 준비 중'으로 보여 줍니다.</p>
+<p id="job" role="status">자동 작업 상태를 불러오는 중…</p></section>
+<section class="viewer" aria-label="확인 대기 장소"><div class="listhead"><h2>확인 대기</h2><button id="refresh" type="button">새로고침</button></div>
+<p id="notice" role="status"></p><div id="list"><p>불러오는 중…</p></div></section></main></body></html>

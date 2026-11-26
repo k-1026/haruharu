@@ -79,7 +79,8 @@
       ${info.주소?`<p class="note">${safe(info.주소)}</p>`:''}
       ${s.식사권역?`<section><h3>식당 후보</h3><p class="note">후보를 눌러도 방문이 확정되지 않습니다.</p>${candidates.length?candidates.map((c,i)=>`<button type="button" class="candidate-choice" data-explore-candidate="${i}">${safe(c.이름)} <small>미리보기${c.좌표?'':' · 위치 확인 중'}</small></button>`).join(''):'<p class="note">아직 등록된 식당 후보가 없습니다. 권역만 표시합니다.</p>'}<div id="candidatePreview" role="status"></div></section>`:''}
       ${!s.좌표&&!s.권역표시?.중심?'<p class="note">이 일정은 아직 지도 위치가 정해지지 않았습니다. 목록에는 계속 남겨 둡니다.</p>':''}
-      ${위치안내(s)}${info.출처URL?`<p><a target="_blank" rel="noopener" href="${safe(info.출처URL)}">장소 안내 출처 ↗</a></p>`:''}`;
+      ${위치안내(s)}${info.출처URL?`<p><a target="_blank" rel="noopener" href="${safe(info.출처URL)}">장소 안내 출처 ↗</a></p>`:''}
+      ${s.장소명?`<details class="place-report"><summary>위치가 이상해요</summary><form data-place-report><label for="placeReport">무엇이 이상한지 적어 주세요</label><textarea id="placeReport" name="내용" maxlength="300" required></textarea><button type="submit" class="btn">관리자에게 알리기</button><p class="note" data-report-msg role="status"></p></form></details>`:''}`;
   }
   const 닭=`<svg class="drum" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 14.8 5 20" stroke="#8A4B1F" stroke-width="4.4" stroke-linecap="round"/><circle cx="4.1" cy="19.1" r="1.9" fill="#FFF3DC" stroke="#8A4B1F" stroke-width=".8"/><circle cx="5.9" cy="20.9" r="1.9" fill="#FFF3DC" stroke="#8A4B1F" stroke-width=".8"/><path d="M10.6 14.8 5 20" stroke="#FFF3DC" stroke-width="2.6" stroke-linecap="round"/><path d="M8.6 13.9C7.4 10.6 8.4 6.6 11.5 4.6C12.6 3.9 13.4 4.1 14.4 3.6C15.6 3 16.6 2.9 17.7 3.6C18.7 4.2 19 5.1 19.9 5.8C20.9 6.6 21.6 7.4 21.4 8.8C21.3 9.9 20.5 10.6 20.4 11.7C20.3 12.9 20.1 13.9 19 14.8C17.6 15.9 16.3 15.6 15 16C13.6 16.4 12.6 17 11.2 16.5C10 16 9.2 15.2 8.6 13.9Z" fill="#C8701A" stroke="#8A4B1F" stroke-width=".8" stroke-linejoin="round"/><path d="M11.4 7.2c1.1-1.6 2.8-2.4 4.4-2.2" stroke="#F4BE63" stroke-width="1.1" stroke-linecap="round" fill="none"/><g fill="#F4BE63"><circle cx="16.8" cy="8.2" r=".75"/><circle cx="14" cy="10.6" r=".7"/><circle cx="18.4" cy="11.6" r=".6"/><circle cx="12.4" cy="13.4" r=".55"/></g></svg>`;
   const 치킨장소=name=>/닭|치킨|치맥/.test(String(name||''));
@@ -408,6 +409,10 @@ function selectStop(number,fromMap=false){
   panel.querySelector('[data-place-close]').onclick=()=>{
     panel.hidden=true;view.classList.remove('place-open');view.querySelector(`[data-stop="${number}"]`)?.focus();
   };
+  const report=panel.querySelector('[data-place-report]');
+  if(report)report.onsubmit=async e=>{e.preventDefault();const msg=report.querySelector('[data-report-msg]');
+    try{const r=await post('/api/place-review/report',{장소명:stop.장소명,내용:report.내용.value});msg.textContent=r.안내;report.내용.value='';}
+    catch(err){msg.textContent=err.message;}};
   panel.querySelectorAll('[data-explore-candidate]').forEach(button=>button.onclick=()=>{const index=Number(button.dataset.exploreCandidate);showCandidate(number,index);mapController?.previewCandidate?.(number,index);});
   if(!fromMap)mapController?.selectStop?.(number,{notify:false});
 }
@@ -430,9 +435,10 @@ function draw(stops){
     mapController=controller;if(selectedStop!==null)controller.selectStop?.(selectedStop,{notify:false});
     for(const node of $('mapView').querySelectorAll('[data-route-time]')){
       const leg=controller.routes?.find(leg=>leg.from===Number(node.dataset.routeTime));
-      if(!leg){const s=stops.find(x=>x.순번===Number(node.dataset.routeTime));node.textContent=코스지도모델.tableLabel(s?.다음이동)||'경로 미확인';continue;}
-      const alt=leg.mode==='transit'?코스지도모델.timeLabel(leg.walkSeconds):leg.transitSeconds?'대중교통 약 '+Math.round(leg.transitSeconds/60)+'분':'대중교통 자료 없음';
-      node.innerHTML=`<b class="mode-primary ${leg.mode==='transit'?'transit':'foot'}">${esc(코스지도모델.legTimeLabel(leg))}</b><small class="mode-alt">${esc(alt)}</small>`;
+      if(!leg){const i=stops.findIndex(x=>x.순번===Number(node.dataset.routeTime));node.textContent=코스지도모델.legFallbackLabel(stops[i],stops[i+1]);continue;}
+      const bus=leg.mode==='transit'||leg.mode==='ride';
+      const alt=bus?코스지도모델.timeLabel(leg.walkSeconds):leg.transitSeconds?'대중교통 약 '+Math.round(leg.transitSeconds/60)+'분':'대중교통 자료 없음';
+      node.innerHTML=`<b class="mode-primary ${bus?'transit':'foot'}">${esc(코스지도모델.legTimeLabel(leg))}</b><small class="mode-alt">${esc(alt)}</small>`;
       const t=leg.transport||{};node.title=[t.노선,t.출처,t.기준요일,t.기준출발시각,t.확인일,t.비고].filter(Boolean).join(' · ');
     }
     for(const button of $('mapView').querySelectorAll('[data-play-segment]')){
