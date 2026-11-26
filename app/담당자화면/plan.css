@@ -369,10 +369,10 @@ main{padding-top:28px}
 .day-schedule h3{font-size:15px;margin:0 0 10px;display:flex;align-items:baseline;gap:8px}
 .day-schedule ol{list-style:none;margin:0;padding:0}
 .ds-day{font-size:12px;font-weight:800;color:var(--crust);margin:6px 0 4px}
-.ds-row{display:grid;grid-template-columns:86px 14px minmax(0,1fr);gap:10px;align-items:start;position:relative;padding:5px 0 9px}
+.ds-row{display:grid;grid-template-columns:180px 14px minmax(0,1fr);gap:10px;align-items:start;position:relative;padding:5px 0 9px}
 .ds-time{font-size:12.5px;color:var(--sub);font-variant-numeric:tabular-nums;padding-top:2px;text-align:right}
 .ds-dot{width:12px;height:12px;border-radius:50%;margin-top:5px;background:#E69628;box-shadow:0 0 0 3px #FFFCF7;position:relative;z-index:1}
-.ds-row:not(:last-child)::before{content:"";position:absolute;left:101px;top:17px;bottom:-6px;width:2px;background:#eadcc6}
+.ds-row:not(:last-child)::before{content:"";position:absolute;left:195px;top:17px;bottom:-6px;width:2px;background:#eadcc6}
 .slot-eve .ds-dot{background:var(--sauce)}.slot-night .ds-dot{background:var(--night)}
 .ds-name{font-size:15px;font-weight:650;color:var(--ink);overflow-wrap:anywhere}
 .ds-name small{display:block;font-weight:400;font-size:12px;color:var(--sub)}
@@ -451,6 +451,7 @@ body>header .service-nav a,body>header nav[aria-label] a{font-size:14.5px}
 .working{font-size:15px}
 .log li{font-size:14.5px}.log .when{font-size:13px}
 .day-schedule h3{font-size:17px}.ds-time{font-size:14px}.ds-name{font-size:16px}.ds-name small{font-size:13px}.ds-day{font-size:13.5px}
+@media(max-width:640px){.ds-row{grid-template-columns:14px minmax(0,1fr);column-gap:10px;row-gap:0}.ds-time{grid-column:2;text-align:left}.ds-dot{grid-column:1;grid-row:1 / span 2}.ds-name{grid-column:2}.ds-row:not(:last-child)::before{left:5px}}
 .plan-choice small{font-size:14px}.choice-top b{font-size:17px}.choice-badge{font-size:12.5px}.draft-badge{font-size:13px}
 .review-status b{font-size:16px}.review-status p,.review-status ul{font-size:14.5px}
 .departure{font-size:15px}
@@ -677,3 +678,14 @@ body>header .app-actions #historyBtn{display:inline-flex;align-items:center;gap:
 .upload-data{padding:16px 0;border-top:1px solid #dfd8cc}.upload-data h3{margin:0 0 8px}.upload-data select{max-width:100%;padding:8px}.upload-table{overflow-x:auto;max-width:100%;margin:12px 0}.upload-table table{border-collapse:collapse;min-width:560px;font-size:12px}.upload-table th,.upload-table td{padding:8px;text-align:left;border-bottom:1px solid #dfd8cc}.upload-table th{background:#edf8f5}.upload-result{padding:12px 0}.missing-plan small{white-space:normal;overflow:visible;display:block}
 .place-report{margin-top:14px;border-top:1px solid #ece4d6;padding-top:10px}.place-report summary{cursor:pointer;color:#7a5a3a;font-size:13px}.place-report form{display:grid;gap:8px;margin-top:8px}.place-report label{font-size:12px;color:#6b625a}.place-report textarea{font:inherit;min-height:64px;border:1px solid #dcd2c2;border-radius:8px;padding:8px}
 .map-ride-badge{position:absolute;transform:translate(-50%,-100%);background:#80619D;color:#fff;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;box-shadow:0 2px 6px rgba(37,45,74,.25);pointer-events:none;white-space:nowrap;z-index:3}
+/* 담당자 방문별 코스 수정 */
+.course-editor fieldset{border:0;padding:0;margin:18px 0 0;min-width:0}
+.course-editor label{display:block;font-size:14px;font-weight:600}
+.course-editor select,.course-editor textarea,.course-editor input[type=number]{display:block;width:100%;box-sizing:border-box;margin:7px 0 14px;padding:11px 12px;border:1px solid #d9d2c6;border-radius:10px;background:#fffdf8;color:#252d4a;font:inherit}
+.edit-controls{display:flex;gap:16px;flex-wrap:wrap}.edit-controls>label{flex:1;min-width:140px}
+.edit-targets{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:10px 0 14px}
+.edit-targets h4{margin:0 0 8px}.course-editor .edit-target{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #e5ddd0;border-radius:10px;margin-bottom:7px;font-weight:500;cursor:pointer}
+.edit-target:has(input:checked){background:#fff0d9;border-color:#c77b25}.edit-target input{width:18px;height:18px;accent-color:#b76d21;flex-shrink:0}.edit-target small{display:block;font-size:12px;color:#71695f}.edit-locked{opacity:.6;cursor:default!important}
+.edit-examples{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 16px}.course-editor .edit-repeat{display:flex;gap:8px;align-items:center;font-weight:400;margin:10px 0}
+.edit-result{margin-top:14px;padding:14px;border-radius:12px;background:#fff5e5}.edit-result h3{margin-top:0}.edit-result li{margin:7px 0;overflow-wrap:anywhere}
+.course-editor [hidden]{display:none!important}.course-editor textarea{resize:vertical}

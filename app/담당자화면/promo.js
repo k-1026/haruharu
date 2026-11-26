@@ -93,7 +93,8 @@ async function 결과화면(홍보id,ctx){
   if(진행.상태==='진행중'){진행화면(r,ctx);poll=setInterval(async()=>{try{const n=await get('/api/promo/result?id='+encodeURIComponent(홍보id));
     if(n.진행.상태!=='진행중'){clearInterval(poll);결과화면(홍보id,ctx);}else 진행화면(n,ctx);}catch{clearInterval(poll);}},3000);return;}
   if(!r.홍보){main.innerHTML=`<section class="card">${guide(4)}<button class="btn link" id="backCourse">← 코스로 돌아가기</button><h2>홍보물을 만들지 못했어요</h2><p class="err">${esc(진행.안내)}</p><button class="btn primary" id="retry">다시 만들기</button></section>`;
-    $('backCourse').onclick=()=>ctx.돌아가기();$('retry').onclick=()=>확인화면(ctx);return;}
+    $('backCourse').onclick=()=>ctx.돌아가기();$('retry').onclick=()=>확인화면({...ctx,id:진행.시험id,
+      rec:{...ctx.rec,안id:진행.안id,버전:r.현재코스버전}});return;}
   홍보화면(홍보id,r,ctx);
 }
 function 진행화면(r,ctx){
@@ -126,6 +127,7 @@ function 홍보화면(홍보id,r,ctx){
   const 필터=h.표현필터||[];const 산=r.산출물;
   const render=lang=>(h.문구목록||[]).map(c=>{const k=(c.안||'공통')+'|'+c.장면ID;return 장면카드(c,시안[k],칸[k],(h.번역목록||[]).filter(t=>(t.안||'공통')+'|'+t.장면ID===k),lang,톤);}).join('');
   $('main').innerHTML=`<section class="card promo-result">${guide(산?5:4)}<button class="btn link" id="backCourse">← 코스로 돌아가기</button>
+    ${r.다시확인필요?`<p class="warn" role="alert">${esc(r.진행.재확인안내)}</p>`:''}
     <div class="aihead"><span class="aibadge">홍보 초안</span><h2>${esc(card.코스이름&&card.코스이름!=='미정'?card.코스이름:(확인.코스이름||'코스 이름 미정'))}</h2><span class="draft-badge">번역 AI 초안 · 검토 전</span></div>
     <div class="course-card t-${esc(톤.replace('+',''))}"><p class="who">${esc(text(card.대상문장))}</p><p class="flow">${esc(text(card.한눈에))}</p><p><b>식사</b> ${esc(text(card.식사안내))}</p>${(()=>{const w=Array.isArray(card.남은경고)?card.남은경고:card.남은경고&&card.남은경고!=='없음'?[card.남은경고]:[];
       return w.length?`<details class="card-warn"><summary><b>남은 경고 ${w.length}건</b> · 홍보물·산출물에 모두 따라가요 (펼쳐 보기)</summary><ul>${w.map(x=>`<li>${esc(text(x))}</li>`).join('')}</ul></details>`:'<p><b>남은 경고</b> 없음</p>';})()}</div>
@@ -142,9 +144,10 @@ function 홍보화면(홍보id,r,ctx){
       ${필터.length?`<div class="sec">표현 필터에 걸린 표현 (E5)</div><table class="tbl"><thead><tr><th>장면</th><th>표현</th><th>종류</th><th>처리</th></tr></thead><tbody>${필터.map((f,i)=>`<tr><td>${esc(f.장면ID)}</td><td>${esc(f.표현)}</td><td>${esc(f.종류)}</td><td><select data-key="${esc(r.필터키[i])}" aria-label="${esc(f.표현)} 처리"><option value="미처리">미처리</option><option value="그대로둠">그대로 둠</option><option value="고침필요">고침 필요</option></select></td></tr>`).join('')}</tbody></table><p class="note">'고침 필요'가 있으면 홍보물을 다시 만들어야 해요. '그대로 둠'·'미처리'는 산출물 남은 경고에 따라가요.</p>`:'<p class="note">표현 필터에 걸린 표현이 없어요.</p>'}
       <div class="q"><span>제안서 받는 쪽<small>3단계 운영 주체 후보</small></span><select name="받는쪽"><option value="">[담당자 기입]으로 비워 두기</option>${(r.받는쪽후보||[]).map(x=>`<option>${esc(x)}</option>`).join('')}</select></div>
       <label class="agree check"><input type="checkbox" name="홍보확인"> 홍보 문구·번역 초안과 남은 문제를 확인했어요. 번역은 AI 초안 상태로 표시돼요.</label>
-      <div class="go"><span class="err" id="deliverErr"></span><button class="btn link" type="button" id="remake">홍보물 다시 만들기</button><button class="btn primary big" id="deliverGo" type="submit">${산?'산출물 다시 만들기':'결재 파일 · 제안서 · 홍보물 묶음 만들기'}</button></div>
+      <div class="go"><span class="err" id="deliverErr"></span><button class="btn link" type="button" id="remake">홍보물 다시 만들기</button><button class="btn primary big" id="deliverGo" type="submit" ${r.다시확인필요?'disabled':''}>${r.다시확인필요?'최신 코스로 홍보물 재작성 필요':산?'산출물 다시 만들기':'결재 파일 · 제안서 · 홍보물 묶음 만들기'}</button></div>
     </form></section>`;
-  $('backCourse').onclick=()=>ctx.돌아가기();$('remake').onclick=()=>확인화면(ctx);
+  $('backCourse').onclick=()=>ctx.돌아가기();$('remake').onclick=()=>확인화면({...ctx,id:r.진행.시험id,
+    rec:{...ctx.rec,안id:r.진행.안id,버전:r.현재코스버전}});
   document.querySelectorAll('.lang-tabs .pill').forEach(b=>b.onclick=()=>{document.querySelectorAll('.lang-tabs .pill').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('scenes').innerHTML=render(b.dataset.lang);});
   const f=$('deliverForm');
   f.onsubmit=async e=>{e.preventDefault();$('deliverErr').textContent='';$('deliverGo').disabled=true;
