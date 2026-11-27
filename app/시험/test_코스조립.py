@@ -424,6 +424,24 @@ class 전체조립시험(unittest.TestCase):
         self.assertIn('체크리스트', b)
         self.assertNotIn('_장소번호', 코스); self.assertNotIn('_장소번호', b)
 
+    def test_일차가_다른_같은_칸ID는_일차를_붙여_보정한다(self):
+        주문 = 정상주문()
+        for r in 주문['A']['칸']:
+            if r.get('일차') == 2:
+                r['칸ID'] = '낮-1'
+        코스, 문제 = self.조립(주문)
+        self.assertEqual(문제, [])
+        ids = [r['칸ID'] for r in 코스['칸목록']]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertIn('1일차-낮-1', ids)
+        self.assertIn('2일차-낮-1', ids)
+
+    def test_같은_일차의_중복ID는_보정하지_않고_문제로_남긴다(self):
+        주문 = 정상주문(); 주문['A']['칸'].append(copy.deepcopy(주문['A']['칸'][0]))
+        코스, 문제 = self.조립(주문)
+        self.assertIsNone(코스)
+        self.assertTrue(any('칸ID 중복' in p for p in 문제))
+
     def test_B안은_시각을_다시_계산한다(self):
         이동행 = 시험이동() + [이동('서문시장', '봉산문화거리', '20', '9')]
         입력 = 시험입력(); 표 = 후보(입력, 이동행=이동행)
