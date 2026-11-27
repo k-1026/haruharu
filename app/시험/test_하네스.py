@@ -61,9 +61,8 @@ class 채점시험(unittest.TestCase):
         A = 기본A + [_칸('저녁-1', '저녁', '대구광역시 중구 A치킨')]
         d, 입력 = _폴더(_코스(A, 기본A[:2]), 치킨선택='선택')
         r = _결과(채점(d, 입력))
-        self.assertEqual(r['치킨 선택 시 A안 저녁에 치킨 1번'], '통과')
-        d, 입력 = _폴더(_코스(기본A, 기본A[:2]), 치킨선택='선택')
-        self.assertEqual(_결과(채점(d, 입력))['치킨 선택 시 A안 저녁에 치킨 1번'], '실패')
+        self.assertEqual(r['치킨 선택 시 저녁 후보에 치킨 보임'], '통과')
+        self.assertEqual(r['치킨(담당자 선택 시 저녁 1번까지)'], '통과')
 
     def test_낮_치킨은_실패(self):
         A = 기본A + [_칸('점심-2', '점심', '대구광역시 중구 A치킨 (치킨 옵션)', 2)]
@@ -107,3 +106,58 @@ class 돌리기시험(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+예전답 = (Path(__file__).resolve().parents[1] / '하네스/시험상황/고정입력/일본인커플_중구_가을_1박2일_4단계/예전_AI결과_20261126.md')
+홍보상황 = '일본인커플_중구_가을_1박2일_홍보'
+
+
+class 홍보하네스시험(unittest.TestCase):
+    def _돌리기(self, 답):
+        with tempfile.TemporaryDirectory() as d:
+            return _결과(하네스.돌리기(홍보상황, 실행함수=lambda 에이전트, 요청: 답, 결과위치=d)['회차'][0])
+
+    def test_예전_실제답은_통과(self):
+        r = self._돌리기(예전답.read_text(encoding='utf-8'))
+        self.assertTrue(all(v == '통과' for v in r.values()), r)
+
+    def test_금지표현과_내부표시는_실패(self):
+        답 = 예전답.read_text(encoding='utf-8').replace('골목을 천천히 걸으며', '대구 최고의 골목 R53을 걸으며', 1)
+        r = self._돌리기(답)
+        self.assertEqual(r['금지 표현 없음'], '실패')
+        self.assertEqual(r['공개 문구에 내부 표시 없음'], '실패')
+
+    def test_엉뚱한_답은_두번_부르고_실패(self):
+        with tempfile.TemporaryDirectory() as d:
+            회 = 하네스.돌리기(홍보상황, 실행함수=lambda a, b: '답 없음', 결과위치=d)['회차'][0]
+        self.assertEqual(_결과(회)['형식·참조 검사(제품 홍보_검사)'], '실패')
+        self.assertIn('2회', _결과(회) and next(h['메모'] for h in 회['항목'] if h['항목'].startswith('시간')))
+
+    def test_시간초과는_실패로_기록(self):
+        def 느림(a, b):
+            raise TimeoutError('응답 없음')
+        with tempfile.TemporaryDirectory() as d:
+            회 = 하네스.돌리기(홍보상황, 실행함수=느림, 결과위치=d)['회차'][0]
+        self.assertEqual(회['상태'], '실패')
+        self.assertEqual(_결과(회)['시간(호출마다 420초 이하)'], '실패')
+
+
+class 수요산출물하네스시험(unittest.TestCase):
+    def test_2단계_근거_밖_숫자는_실패(self):
+        with tempfile.TemporaryDirectory() as d:
+            회 = 하네스.돌리기('일본인커플_중구_가을_1박2일_수요', 결과위치=d,
+                         실행함수=lambda a, b: '```json\n{"요약": "일본인 방문객이 987654명으로 늘었다."}\n```')['회차'][0]
+        r = _결과(회)
+        self.assertEqual(r['요약에 근거 밖 숫자 없음'], '실패')
+        self.assertEqual(r['기관 자료 반영(가상설문 행 적용)'], '통과')
+        self.assertEqual(r['시간(요약 30초 이하)'], '통과')
+
+    def test_2단계_엉뚱한_답은_형식_실패(self):
+        with tempfile.TemporaryDirectory() as d:
+            회 = 하네스.돌리기('일본인커플_중구_가을_1박2일_수요', 결과위치=d, 실행함수=lambda a, b: '답 없음')['회차'][0]
+        self.assertEqual(_결과(회)['형식(요약 읽힘 · 3단계 전달 검사 통과)'], '실패')
+
+    def test_5단계_고정_결과는_통과(self):
+        with tempfile.TemporaryDirectory() as d:
+            회 = 하네스.돌리기('일본인커플_중구_가을_1박2일_산출물', 결과위치=d)['회차'][0]
+        self.assertTrue(회['전체통과'], 회['항목'])
