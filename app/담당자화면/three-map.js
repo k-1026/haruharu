@@ -234,9 +234,9 @@ export async function mount(host,stops,options={}){
       <button type="button" data-close>후보 닫기</button>`;
     detail.querySelector('[data-close]').onclick=()=>select(null);
     detail.querySelectorAll('[data-candidate]').forEach(b=>b.onclick=()=>candidatePreview(area,Number(b.dataset.candidate)));
-    for(const [i,c] of area.candidates.entries())if(c.좌표){
-      const pos=project(c.좌표);
-      candidateLabels.push(label(c.이름+' (후보)',pos.clone().setY(2),()=>candidatePreview(area,i),'candidate'));
+    for(const [i,c] of area.candidates.entries())if(c.좌표&&c.분류!=='불가'&&(!(area.저장후보||[]).length||area.저장후보.includes(c.장소명))){
+      const pos=project(c.좌표),kind=c.구역형?' zone':c.치킨?' chicken':'';
+      candidateLabels.push(label((c.치킨&&!c.구역형?'치킨 · ':'')+c.이름+(c.구역형?' (구역)':' (후보)'),pos.clone().setY(2),()=>candidatePreview(area,i),'candidate'+kind));
     }
     if(area.point){target.copy(project(area.point));distance=Math.min(homeDistance,360);}
   }

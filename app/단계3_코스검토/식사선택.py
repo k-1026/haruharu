@@ -11,6 +11,7 @@ from app.단계3_코스검토.장소정보 import 장소목록, 장소찾기, �
 from app.단계3_코스검토.도로경로 import 키, 거리
 from app.단계3_코스검토.운영검토 import 휴무요일
 
+시장안내='구체 식당 미수집: 현장 선택'
 경로파일=Path(__file__).resolve().parents[1]/'담당자화면/road-routes.json'
 추가경로={}
 
@@ -134,6 +135,8 @@ def 비교(course,id,name,conditions):
     basis={'시각':row.get('시각'),'종료시각':row.get('종료시각'),'일차':row.get('일차'),'방문시작일':visit,
            '영업시간':hours,'휴무':candidate.get('정기휴무'),'후보좌표':list(cp) if cp else None,'권역반경m':radius,
            '인접일정':[{k:r.get(k) for k in ['장소명','시각','종료시각']} if r else None for r in [prev,nxt]]}
+    market=candidate.get('장소유형')=='시장'
+    if market:warnings.append(시장안내)
     savedreports=(meal.get('후보묶음') or {}).get('검토',[])+[meal.get('선택검토') or {}]
     stored=next((r for r in savedreports if r.get('장소명')==name and r.get('비교기준')==basis),{})
     def savedleg(a,b):
@@ -167,13 +170,35 @@ def 비교(course,id,name,conditions):
             '기존이동':before,'후보이동':after,'권역거리m':meters,'권역반경m':radius,
             '권역':meal.get('권역') or anchor,'운영시간':hours,'휴무':candidate.get('정기휴무',''),
             '운영출처':candidate.get('출처URL',''),'자료확인일':candidate.get('확인일',''),
-            '경로선택됨':selected,'비교기준':basis,
+            '경로선택됨':selected,'비교기준':basis,'구역형':market,
+            '분류':'불가' if errors else '확인후' if warnings else '바로',
             '상태':('비교 시 이동 조회' if all('앞뒤 이동시간 자료' in e for e in errors) else '선택 불가') if errors else '확인 후 선택' if warnings else '선택 가능'}
 
 
 def 후보목록(course,row,conditions):
     rows=[비교(course,row['칸ID'],p['장소명'],conditions) for p in _등록후보(course,row,conditions)]
     return sorted(rows,key=lambda x:(not x['반영가능'],not x['경로선택됨'],x['치킨'],x['권역거리m'] if x['권역거리m'] is not None else float('inf')))
+
+
+def 제안(course,id,conditions,도보분=20,최대=6,rows=None):
+    """직원이 고칠 수 있는 후보 세트 초안. 불가·먼 후보는 빼고 저녁은 치킨을 먼저 둔다. 저장하지 않는다."""
+    row,meal,prev,_=_행(course,id)
+    anchor=meal.get('식사기준장소') or row.get('장소명','')
+    market=next((p['장소명'] for p in 장소목록() if p.get('장소유형')=='시장' and _이름(p['장소명'])==_이름(anchor)),None)
+    keep=[];found=False
+    for r in (후보목록(course,row,conditions) if rows is None else rows):
+        if r.get('분류')=='불가':continue
+        if market and _이름(r['장소명'])==_이름(market):
+            found=True;continue
+        leg=구간(prev.get('장소명',''),r['장소명']) if prev else None
+        minutes=leg['분'] if leg else None
+        # 치킨은 저녁 세트의 필수 요소라 멀어도 제외하지 않는다(가까운 순 정렬로 앞쪽에 둔다).
+        if minutes is not None and minutes>도보분 and not (r.get('치킨') and not r.get('구역형')):continue
+        distance=r.get('권역거리m')
+        keep.append(((not (r.get('치킨') and not r.get('구역형'))),minutes if minutes is not None else float('inf'),
+                     distance if distance is not None else float('inf'),r['장소명']))
+    names=[k[3] for k in sorted(keep)]
+    return ([market] if found else [])+names[:max(최대-(1 if found else 0),0)]
 
 
 def 반영(course,id,name,conditions,미확인동의=False):
@@ -214,13 +239,16 @@ def 반영(course,id,name,conditions,미확인동의=False):
 def 묶음반영(course,id,names,conditions,미확인동의=False):
     """직원은 후보만 구성한다. 공통 방문 행·시각·기준점은 변경하지 않는다."""
     row,meal,_,_=_행(course,id)
-    if row['시간칸']!='점심':raise ValueError('점심 일정을 선택하세요.')
-    if not isinstance(names,list) or not 2<=len(names)<=12 or any(not isinstance(n,str) for n in names):
-        raise ValueError('점심 후보를 2개 이상 12개 이하로 선택하세요.')
+    slot=row['시간칸']
+    least=1 if slot=='점심' else 2
+    if not isinstance(names,list) or not least<=len(names)<=12 or any(not isinstance(n,str) for n in names):
+        raise ValueError(f'{slot} 후보를 {least}개 이상 12개 이하로 선택하세요.')
     if len(set(names))!=len(names):raise ValueError('같은 후보를 중복 선택할 수 없습니다.')
     reports=[비교(course,id,n,conditions) for n in names]
     errors=[e for r in reports for e in r['오류']]
     if errors:raise ValueError(' / '.join(dict.fromkeys(errors)))
+    if slot=='저녁' and not any(r['치킨'] and not r['구역형'] for r in reports):
+        raise ValueError('저녁 후보 세트에는 치킨 후보가 1곳 이상 필요합니다.')
     if any(r['확인필요'] for r in reports) and 미확인동의 is not True:
         raise ValueError('자료 보완이 남은 초안 후보 묶음임을 확인하세요. 관광객 공개 준비 완료가 아닙니다.')
     if (meal.get('후보묶음') or {}).get('후보')==names:raise ValueError('이미 같은 후보 묶음입니다.')
@@ -233,7 +261,7 @@ def 묶음반영(course,id,names,conditions,미확인동의=False):
                     '추천후보':names[:],'후보묶음':{'선택주체':'관광객','후보':names[:],'검토':reports}})
     for key in ['경로선택후보','선택검토']:newmeal.pop(key,None)
     result['식사후보묶음기록']={'칸ID':id,'후보':names[:],'선택주체':'관광객',
-        '안내':'직원이 점심 후보 묶음을 저장했습니다. 공통 일정은 유지하며 관광객이 개인 지도에서 선택합니다.'}
+        '안내':f'직원이 {slot} 후보 묶음을 저장했습니다. 공통 일정은 유지하며 관광객이 개인 지도에서 선택합니다.'}
     return result
 
 
@@ -248,11 +276,19 @@ def 관광객묶음(course,conditions):
             try:report=비교(course,meal['칸ID'],name,conditions)
             except ValueError:
                 report={'장소명':name,'이름':_이름(name),'반영가능':False,'오류':['등록·권역 조건이 달라져 직원 재검토 필요'],
-                        '확인필요':[],'좌표':None,'후보이동':[]}
-            ready=report['반영가능'] and not report['확인필요'] and all(l.get('경로') for l in report['후보이동'])
+                        '확인필요':[],'좌표':None,'후보이동':[],'치킨':False,'구역형':False,'분류':'불가'}
+            # 시장의 '구체 식당 미수집' 안내는 선택을 막는 확인 사항이 아니다.
+            other=[w for w in report['확인필요'] if w!=시장안내]
+            ready=report['반영가능'] and not other and all(l.get('경로') for l in report['후보이동'])
             candidates.append({**report,'선택가능':bool(ready)})
-        result.append({'칸ID':meal['칸ID'],'선택주체':'관광객','후보':candidates,
-                       '공개준비':len(candidates)>=2 and all(c['선택가능'] for c in candidates)})
+        try:slot=_행(course,meal['칸ID'])[0]['시간칸']
+        except ValueError:slot=''
+        usable=[c for c in candidates if c['선택가능']]
+        if slot=='저녁':
+            public=len(usable)>=2 and any(c['치킨'] and not c['구역형'] for c in usable)
+        else:public=True  # 점심은 선택 사항: 후보가 없어도 '자유롭게 해결'로 공개한다.
+        result.append({'칸ID':meal['칸ID'],'시간칸':slot,'선택주체':'관광객','자유해결허용':slot=='점심',
+                       '후보':candidates,'공개준비':public})
     return result
 
 

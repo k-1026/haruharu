@@ -23,8 +23,21 @@ class 식사후보시험(unittest.TestCase):
         self.assertEqual(result['식사목록'][0]['후보묶음']['선택주체'],'관광객')
         self.assertEqual(result['식사목록'][0]['후보묶음']['후보'],['식당A','식당B'])
         self.assertNotIn('경로선택후보',result['식사목록'][0])
-        with self.assertRaisesRegex(ValueError,'2개'):self.m.묶음반영(self.c,'m',['식당A'],{},True)
         with self.assertRaises(ValueError):self.m.묶음반영(self.c,'m',['식당A','식당A'],{},True)
+        with self.assertRaises(ValueError):self.m.묶음반영(self.c,'m',[],{},True)
+
+    def test_저녁_묶음은_치킨_1곳_이상이_필수이고_점심은_1곳도_가능(self):
+        cond={'지역':['중구']}
+        saved=self.m.묶음반영(self.c,'m',['식당A','치킨C (치킨 옵션)'],cond,True)
+        self.assertEqual(saved['식사목록'][0]['후보묶음']['후보'],['식당A','치킨C (치킨 옵션)'])
+        with self.assertRaisesRegex(ValueError,'치킨 후보가 1곳 이상'):self.m.묶음반영(self.c,'m',['식당A','식당B'],cond,True)
+        self.places.append({**self.places[0],'장소명':'서문시장','장소유형':'시장','코스칸':'점심·저녁'})
+        with self.assertRaisesRegex(ValueError,'치킨 후보가 1곳 이상'):self.m.묶음반영(self.c,'m',['식당A','서문시장'],cond,True)
+        with self.assertRaisesRegex(ValueError,'2개'):self.m.묶음반영(self.c,'m',['치킨C (치킨 옵션)'],cond,True)
+        with self.assertRaises(ValueError):self.m.묶음반영(self.c,'m',['치킨C (치킨 옵션)','치킨D (치킨 옵션)'],cond,True)
+        self.c['칸목록'][1]['시간칸']='점심'
+        one=self.m.묶음반영(self.c,'m',['식당A'],cond,True)
+        self.assertEqual(one['식사목록'][0]['후보묶음']['후보'],['식당A'])
 
     def test_점심은_직원의_단일식당반영을_막고_확인안된_묶음은_공개준비중(self):
         self.c['칸목록'][1]['시간칸']='점심'
@@ -32,7 +45,7 @@ class 식사후보시험(unittest.TestCase):
         result=self.m.묶음반영(self.c,'m',['식당A','식당B'],{},True)
         pack=self.m.관광객묶음(result,{})[0]
         self.assertEqual(pack['선택주체'],'관광객')
-        self.assertFalse(pack['공개준비'])
+        self.assertTrue(pack['공개준비'])  # 점심은 선택 사항이라 후보가 미확인이어도 공개한다.
         self.assertTrue(all(not c['선택가능'] for c in pack['후보']))
         for p in self.places:p['마지막입장']='21:00'
         ready=self.m.관광객묶음(result,{'방문시작일':'2026-11-26'})[0]
@@ -58,12 +71,29 @@ class 식사후보시험(unittest.TestCase):
         for p in self.places:p['마지막입장']='21:00'
         saved=self.m.묶음반영(self.c,'m',['식당A','식당B'],{},True)
         conditions={'방문시작일':'2026-11-26'}
-        self.assertTrue(self.m.관광객묶음(saved,conditions)[0]['공개준비'])
+        self.assertTrue(all(c['선택가능'] for c in self.m.관광객묶음(saved,conditions)[0]['후보']))
         self.places[0]['정기휴무']=''
-        self.assertFalse(self.m.관광객묶음(saved,conditions)[0]['공개준비'])
+        self.assertFalse(self.m.관광객묶음(saved,conditions)[0]['후보'][0]['선택가능'])
         self.places[0]['정기휴무']='연중무휴'
         saved['칸목록'][0]['종료시각']['값']=''
-        self.assertFalse(self.m.관광객묶음(saved,conditions)[0]['공개준비'])
+        self.assertFalse(any(c['선택가능'] for c in self.m.관광객묶음(saved,conditions)[0]['후보']))
+
+    def test_관광객묶음_저녁은_치킨이_선택가능해야_공개준비_시장은_선택가능으로_보이되_세지않음(self):
+        for p in self.places:p['마지막입장']='21:00'
+        cond={'지역':['중구'],'방문시작일':'2026-11-26'}
+        saved=self.m.묶음반영(self.c,'m',['식당A','치킨C (치킨 옵션)'],cond,True)
+        pack=self.m.관광객묶음(saved,cond)[0]
+        self.assertEqual((pack['시간칸'],pack['자유해결허용'],pack['공개준비']),('저녁',False,True))
+        self.assertEqual({k for k in ['분류','구역형','치킨'] if k in pack['후보'][0]},{'분류','구역형','치킨'})
+        self.places[2]['정기휴무']=''
+        self.assertFalse(self.m.관광객묶음(saved,cond)[0]['공개준비'])
+        self.places[2]['정기휴무']='연중무휴'
+        self.places.append({**self.places[0],'장소명':'서문시장','장소유형':'시장','코스칸':'점심·저녁','마지막입장':'21:00'})
+        with_market=self.m.묶음반영(self.c,'m',['서문시장','치킨C (치킨 옵션)'],cond,True)
+        market=self.m.관광객묶음(with_market,cond)[0]['후보'][0]
+        self.assertTrue(market['구역형'] and market['선택가능'])
+        self.places[2]['정기휴무']=''
+        self.assertFalse(self.m.관광객묶음(with_market,cond)[0]['공개준비'])  # 시장만으로는 치킨 조건을 채우지 못한다.
 
     def setUp(self):
         from app.단계3_코스검토 import 식사선택
@@ -112,6 +142,45 @@ class 식사후보시험(unittest.TestCase):
         self.c['칸목록'][1]['시각']['값']=''
         self.assertNotIn('영업시간 상세 확인 필요',self.m.비교(self.c,'m','식당B',{'지역':['중구']})['확인필요'])
         with self.assertRaisesRegex(ValueError,'확인'):self.m.묶음반영(self.c,'m',['식당A','식당B'],{'지역':['중구']})
+
+    def test_후보분류와_구역형(self):
+        cond={'지역':['중구'],'방문시작일':'2026-11-26'}
+        self.assertEqual(self.m.비교(self.c,'m','치킨D (치킨 옵션)',cond)['분류'],'불가')
+        a=self.m.비교(self.c,'m','식당A',cond)
+        self.assertEqual(a['분류'],'확인후');self.assertFalse(a['구역형'])
+        for p in self.places:p['마지막입장']='21:00'
+        self.assertEqual(self.m.비교(self.c,'m','식당A',cond)['분류'],'바로')
+        self.places.append({**self.places[0],'장소명':'서문시장','장소유형':'시장','코스칸':'점심·저녁'})
+        market=self.m.비교(self.c,'m','서문시장',cond)
+        self.assertTrue(market['구역형'])
+        self.assertEqual(market['분류'],'확인후')
+        self.assertTrue(any('구체 식당 미수집' in w for w in market['확인필요']))
+
+    def test_세트제안은_치킨을_먼저_두고_멀거나_불가한_후보는_뺀다(self):
+        cond={'지역':['중구']}
+        names=self.m.제안(self.c,'m',cond)
+        self.assertEqual(names[0],'치킨C (치킨 옵션)')
+        self.assertNotIn('치킨D (치킨 옵션)',names)
+        self.assertEqual(set(names),{'치킨C (치킨 옵션)','식당A','식당B'})
+        self.assertEqual(len(self.m.제안(self.c,'m',cond,최대=2)),2)
+        def leg(a,b):return {'출발':a,'도착':b,'분':25 if b=='식당B' else 10,'경로':[[35.87,128.59],[35.871,128.591]]}
+        self.c['칸목록'][0]['종료시각']['값']='16:00'
+        def far(a,b):return {'출발':a,'도착':b,'분':25 if 'C' in b else 10,'경로':[[35.87,128.59],[35.871,128.591]]}
+        with patch.object(self.m,'구간',side_effect=far):
+            self.assertEqual(self.m.제안(self.c,'m',cond)[0],'치킨C (치킨 옵션)')  # 치킨은 멀어도 남긴다.
+        with patch.object(self.m,'구간',side_effect=leg):
+            self.assertNotIn('식당B',self.m.제안(self.c,'m',cond))
+            self.assertIn('식당B',self.m.제안(self.c,'m',cond,도보분=30))
+
+    def test_점심_제안은_치킨이_없고_시장_기준이면_시장을_먼저_두며_중복이_없다(self):
+        cond={'지역':['중구']}
+        self.c['칸목록'][1]['시간칸']='점심'
+        self.assertFalse(any('치킨' in n for n in self.m.제안(self.c,'m',cond)))
+        self.places.append({**self.places[0],'장소명':'서문시장','장소유형':'시장','코스칸':'점심'})
+        self.c['식사목록'][0]['식사기준장소']='서문시장'
+        names=self.m.제안(self.c,'m',cond)
+        self.assertEqual(names[0],'서문시장')
+        self.assertEqual(names.count('서문시장'),1)
 
     def test_서비스_후보묶음_저장과_QR조회는_개인선택으로_공통기록을_쓰지않는다(self):
         from app.공통.기획실행 import 기획실행

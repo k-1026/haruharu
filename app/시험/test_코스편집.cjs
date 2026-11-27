@@ -50,11 +50,44 @@ test('직원 점심 패널은 후보 묶음을 구성하며 단일식당 반영�
  const preview=display.식사비교({시간칸:'점심',반영가능:true,확인필요:['방문일 미정']});
  assert.doesNotMatch(preview,/이 후보로 반영|mealAcknowledge/);
 });
-test('식사 비교는 앞뒤 시간·차이·불가 사유와 명시 반영을 표시한다',()=>{
- const value={장소명:'식당<img>',반영가능:true,확인필요:['방문일 미정'],오류:[],기존이동:[{출발:'앞',도착:'옛 식당',분:8},{출발:'옛 식당',도착:'뒤',분:12}],후보이동:[{출발:'앞',도착:'새 식당',분:10},{출발:'새 식당',도착:'뒤',분:9}]};
- const html=display.식사비교(value);for(const t of ['기존','후보','8분','10분','12분','9분','이 후보로 반영','mealAcknowledge'])assert.ok(html.includes(t),t);
+test('식사 비교는 앞뒤 시간·차이·불가 사유를 표시하고 단일 식당 반영 버튼을 만들지 않는다',()=>{
+ const value={장소명:'식당<img>',시간칸:'저녁',반영가능:true,확인필요:['방문일 미정'],오류:[],기존이동:[{출발:'앞',도착:'옛 식당',분:8},{출발:'옛 식당',도착:'뒤',분:12}],후보이동:[{출발:'앞',도착:'새 식당',분:10},{출발:'새 식당',도착:'뒤',분:9}]};
+ const html=display.식사비교(value);for(const t of ['기존','후보','8분','10분','12분','9분','방문일 미정'])assert.ok(html.includes(t),t);
+ assert.doesNotMatch(html,/이 후보로 반영|mealApply|mealAcknowledge/);
  assert.ok(!html.includes('<img>'));assert.ok(html.includes('&lt;img&gt;'));
- assert.match(display.식사비교({...value,반영가능:false,오류:['다음 일정 이동시간 부족']}),/disabled/);
+ assert.match(display.식사비교({...value,반영가능:false,오류:['다음 일정 이동시간 부족']}),/다음 일정 이동시간 부족/);
+});
+test('저녁 패널은 치킨 필수 그룹·제안 체크·불가 후보 비활성·시연용 미리보기 분리를 보여 준다',()=>{
+ const cand=[{장소명:'치킨C',이름:'치킨C',치킨:true,분류:'확인후',상태:'확인 후 선택'},
+  {장소명:'식당A',이름:'식당A',분류:'바로',상태:'선택 가능'},
+  {장소명:'식당X',이름:'식당X',분류:'불가',오류:['앞뒤 이동시간 자료 필요'],상태:'선택 불가'},
+  {장소명:'서문시장',이름:'서문시장',구역형:true,분류:'확인후'}];
+ const html=display.장소패널({일차:1,시간칸:'저녁',식사권역:true,제안후보:['치킨C','식당A'],식당후보:cand});
+ assert.match(html,/치킨 후보 \(필수 · 1곳 이상\)/);assert.match(html,/구체 식당은 현장에서 선택/);
+ assert.match(html,/지금은 담을 수 없는 후보 \(1\)/);assert.match(html,/앞뒤 이동시간 자료 필요/);
+ assert.equal((html.match(/data-meal-option="/g)||[]).length,3);
+ assert.ok(!html.includes('data-meal-option="2"'));
+ assert.match(html,/data-meal-option="0" data-chicken="1" checked/);
+ assert.match(html,/시연용 · QR 연결 전/);assert.doesNotMatch(html,/이 후보로 반영/);
+ const none=display.장소패널({일차:1,시간칸:'저녁',식사권역:true,식당후보:[cand[1],cand[2]]});
+ assert.match(none,/치킨 후보가 없어/);assert.match(none,/id="mealBundleSave" disabled/);
+});
+test('점심 패널은 선택 사항이며 치킨 필수·최소 2개 규칙을 안내하지 않는다',()=>{
+ const html=display.장소패널({일차:1,시간칸:'점심',식사권역:true,식당후보:[{장소명:'식당A',이름:'식당A',분류:'바로'}]});
+ assert.match(html,/선택 사항/);assert.match(html,/자유롭게 해결/);assert.doesNotMatch(html,/필수 · 1곳 이상/);
+ assert.match(html,/id="mealBundleSave"(?! disabled)/);
+});
+test('점심은 시간 블록이며 후보는 접힌 선택 영역에 두고 시장 자신은 후보에서 뺀다',()=>{
+ const html=display.장소패널({일차:1,시간칸:'점심',장소명:'대구광역시 중구 서문시장',식사권역:true,식당후보:[{장소명:'서문시장',이름:'서문시장',구역형:true,분류:'확인후'},{장소명:'식당A',이름:'식당A',분류:'바로'}],제안후보:['식당A']});
+ assert.match(html,/점심 시간 블록/);assert.match(html,/<details class="meal-optional" >/);
+ assert.ok(!html.includes('data-meal-option="0"'));assert.ok(html.includes('data-meal-option="1"'));
+ assert.doesNotMatch(html,/data-meal-option="1"[^>]*checked/);
+});
+test('임시 선택·저장 후보가 있으면 제안보다 우선하고 목록에 저장 수를 보여 준다',()=>{
+ const c=[{장소명:'치킨C',이름:'치킨C',치킨:true,분류:'바로'},{장소명:'식당A',이름:'식당A',분류:'바로'}];
+ const draft=display.장소패널({일차:1,시간칸:'저녁',식사권역:true,제안후보:['식당A'],임시선택:['치킨C'],식당후보:c});
+ assert.match(draft,/data-meal-option="0"[^>]*checked/);assert.doesNotMatch(draft,/data-meal-option="1"[^>]*checked/);
+ assert.match(display.장소패널({일차:1,시간칸:'저녁',식사권역:true,저장후보:['식당A'],식당후보:c}),/저장된 후보 1곳: 식당A/);
 });
 test('식사 후보 경로 미리보기는 원본과 다른 일정·시각을 보존한다',()=>{
  const stops=[{순번:1,일차:1,장소명:'앞',좌표:[35.87,128.58]},{순번:2,일차:1,칸ID:'m',장소명:'원래 식당',식사권역:true,권역표시:{중심:[35.87,128.59]},시각:'12:00'},{순번:3,일차:1,장소명:'뒤',좌표:[35.87,128.61]}];

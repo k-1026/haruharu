@@ -424,8 +424,8 @@ class 기획실행:
             조건={**기록모듈.적용조건(기록,안id)['조건'],**기록['조건'].get('코스작성조건',{})}
             if 묶음:
                 names=값.get('후보')
-                if not isinstance(names,list) or not 2<=len(names)<=12 or any(not isinstance(n,str) for n in names):
-                    raise ValueError('점심 후보를 2개 이상 12개 이하로 선택하세요.')
+                if not isinstance(names,list) or not 1<=len(names)<=12 or any(not isinstance(n,str) for n in names):
+                    raise ValueError('식사 후보를 12개 이하로 선택하세요.')
                 for name in names:경로보완(안['코스'],값.get('칸ID'),name,조건)
                 새코스=묶음반영(안['코스'],값.get('칸ID'),names,조건,값.get('미확인동의') is True)
             else:
@@ -433,7 +433,7 @@ class 기획실행:
             버전=안.get('버전',1)+1
             recordkey='식사후보묶음기록' if 묶음 else '식사선택기록'
             새코스[recordkey]['버전']=버전
-            기록모듈.추가(기록,'코스안',{'안id':안id,'버전':버전,'코스':새코스},'사람:담당자','점심 후보 묶음 구성' if 묶음 else '식사 후보 비교 후 경로 기준 선택')
+            기록모듈.추가(기록,'코스안',{'안id':안id,'버전':버전,'코스':새코스},'사람:담당자','식사 후보 묶음 구성' if 묶음 else '식사 후보 비교 후 경로 기준 선택')
             기록도구.코스_점검(기록,안id)
             기록모듈.실행_기록(기록,'코드:식사선택','식사 후보 반영',f'{안id}안 {버전}버전','식사 시간·권역·다른 일정 보존','성공',AI호출=0)
             기록모듈.저장(기록,self.runs)
