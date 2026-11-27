@@ -1,8 +1,9 @@
-"""하네스 실행: 시험 상황 하나로 3단계를 실제 AI로 N번 돌리고 점수표(JSON + md)를 남긴다.
+"""하네스 실행: 시험 상황 하나로 3단계 또는 4단계를 실제 AI로 N번 돌리고 점수표(JSON + md)를 남긴다.
 
 사용:  python -m app.하네스.돌리기            (기본 1회)
        python -m app.하네스.돌리기 --반복 3
-제품 동작은 바꾸지 않는다. /plan/ 화면과 같은 3단계 경로(관리자실행.코스시험 저장→시작)를 부르기만 한다.
+제품 동작은 바꾸지 않는다. 3단계는 /plan/ 화면과 같은 경로(관리자실행.코스시험 저장→시작),
+4단계는 담당자 화면 '홍보물 만들기'와 같은 홍보실행._실행(부르기→검사→한 번 다시 쓰기)을 부르기만 한다.
 """
 import argparse
 import json
@@ -49,6 +50,63 @@ def 한번(상황, 작업루트, 실행함수=None):
     폴더 = 시험._시험(상태['시험id'])
     입력 = json.loads((폴더 / '3단계_입력.json').read_text(encoding='utf-8'))
     점수 = 채점(폴더, 입력)
+    점수['시험폴더'] = str(폴더)
+    return 점수
+
+
+def 한번_4단계(상황, 작업루트, 실행함수=None):
+    """고정 확정 코스로 4단계(홍보)만 한 번 돌려 채점한다. 호출마다 시간·글자 수를 하네스 파일에 따로 적는다."""
+    import asyncio
+    import inspect
+    import time
+    from app.공통.stages import STAGES
+    from app.단계4_홍보검토 import 홍보실행 as 모듈
+    고정 = 상황폴더 / 상황['고정입력']
+    확정 = json.loads((고정 / '3단계_확정.json').read_text(encoding='utf-8'))
+    확인 = json.loads((고정 / '확인.json').read_text(encoding='utf-8'))
+    입력2 = json.loads((고정 / '3단계_입력_요약.json').read_text(encoding='utf-8'))
+    폴더 = Path(작업루트) / ('홍보_' + datetime.now().strftime('%Y%m%d_%H%M%S'))
+    폴더.mkdir(parents=True, exist_ok=False)
+    기본 = 실행함수 or 모듈._기본단계함수
+    호출 = []
+
+    def _적기():
+        (폴더 / '하네스_크기.json').write_text(json.dumps({'호출': 호출}, ensure_ascii=False, indent=2), encoding='utf-8')
+
+    def 잰함수(에이전트, 요청):
+        # 제품의 부르기 함수를 그대로 쓰고, 앞뒤로 시간만 잰다
+        from app.공통.run_stage import 에이전트_읽기
+        기록 = {'받은글자': len(에이전트_읽기(에이전트)[0]) + len(요청), '쓴글자': 0}
+        시작 = time.monotonic()
+        try:
+            결과 = 기본(에이전트, 요청)
+            if inspect.isawaitable(결과):
+                결과 = asyncio.run(결과)
+            기록['쓴글자'] = len(결과) if isinstance(결과, str) else 0
+            return 결과
+        except Exception as e:
+            기록['오류'] = type(e).__name__
+            raise
+        finally:
+            기록['경과초'] = round(time.monotonic() - 시작, 1)
+            호출.append(기록)
+            _적기()
+
+    실행 = 모듈.홍보실행(None, 잰함수)
+    진행 = {'홍보id': '하네스', '상태': '진행중', '시작시각': 모듈._지금(), '시도': 0,
+          '단계': [{**d, '상태': '완료' if i == 0 else '대기'} for i, d in enumerate(모듈.단계안내)]}
+    _적기()
+    # 11/27 제품 변경(확정 코스 홍보 직결): 홍보 화면은 일정을 다시 묻지 않고 확정 코스를 그대로 넘긴다.
+    # 홍보실행.시작()이 하는 것처럼 시작·종료·오전은 코스에서 가져오고, 담당자는 톤·홍보물만 고른다.
+    확정 = 모듈.홍보실행._확정코스(확정, 확인)
+    시작종료 = 확정.get('코스시작종료') or {}
+    확인 = {'코스이름': 확인.get('코스이름', ''), '목표': 확인.get('목표', ''),
+          '톤앤매너': 확인['톤앤매너'], '홍보물': 확인['홍보물'],
+          **{k: 시작종료.get(k, '') for k in ['시작지점', '시작시각', '종료지점', '종료시각']},
+          '2일차오전구성': 확정.get('2일차오전구성', ''), '겹침처리': '코스의 기존 결정 기록 참조'}
+    실행._실행(폴더, 진행, 확정, 입력2, 확인)
+    from app.하네스.채점_4단계 import 채점 as 채점4
+    점수 = 채점4(폴더, {'조건': 입력2['조건'], '확정': 확정})
     점수['시험폴더'] = str(폴더)
     return 점수
 
@@ -111,8 +169,10 @@ def 돌리기(상황이름=기본상황, 반복=1, 실행함수=None, 결과위�
     작업루트 = 결과폴더 / '작업' / 시각.strftime('%Y%m%d_%H%M%S')
     회차들 = []
     for i in range(반복):
-        print(f'[{i + 1}/{반복}] 3단계 실행 중... (최대 약 1분)', flush=True)
-        r = 한번(상황, 작업루트 / f'{i + 1:02d}', 실행함수)
+        print(f"[{i + 1}/{반복}] {상황.get('단계', 3)}단계 실행 중... " + {2: '(최대 약 30초)', 4: '(홍보는 몇 분 걸릴 수 있음)', 5: '(AI 없음, 몇 초)'}.get(상황.get('단계'), '(최대 약 1분)'), flush=True)
+        from app.하네스.단계2_5 import 한번_2단계, 한번_5단계
+        부를것 = {2: 한번_2단계, 4: 한번_4단계, 5: 한번_5단계}.get(상황.get('단계'), 한번)
+        r = 부를것(상황, 작업루트 / f'{i + 1:02d}', 실행함수)
         print(f"   → 상태 {r['상태']}, {r['경과초']}초, {'모두 통과' if r['전체통과'] else '실패 있음'}", flush=True)
         회차들.append(r)
     점수표 = {'기록시각': 시각.astimezone().isoformat(), '커밋': _커밋(), '조건': 상황['설명'], '상황': 상황이름,
@@ -126,7 +186,7 @@ def 돌리기(상황이름=기본상황, 반복=1, 실행함수=None, 결과위�
 
 
 if __name__ == '__main__':
-    p = argparse.ArgumentParser(description='3단계 하네스 (실제 AI)')
+    p = argparse.ArgumentParser(description='2~5단계 하네스 (2·3·4단계는 실제 AI)')
     p.add_argument('--반복', type=int, default=1)
     p.add_argument('--상황', default=기본상황)
     a = p.parse_args()
