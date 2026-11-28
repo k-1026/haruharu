@@ -714,8 +714,64 @@ def _완성(안, 후보표, 입력, 고정=None):
     return 코스
 
 
+def _일차ID(id, 일차):
+    return f'{일차}일차-{id}'
+
+
+def 칸ID_보정(주문서):
+    """칸ID는 이름표일 뿐이다. 1일차·2일차에 같은 ID(낮-1…)를 쓴 주문서는 '1일차-낮-1'처럼 일차를 붙여 고친다.
+    일차가 1·2로 분명한 중복만 고치고, 그 밖의 중복은 건드리지 않아 검사가 문제로 돌려준다."""
+    if not isinstance(주문서, dict):
+        return 주문서
+    from copy import deepcopy
+    새 = deepcopy(주문서)
+
+    def 칸목록(안):
+        return [r for r in (안.get('칸') or []) if isinstance(r, dict)] if isinstance(안, dict) and isinstance(안.get('칸'), list) else []
+
+    def 보정(칸들, 식사들):
+        개수 = {}
+        for r in 칸들:
+            개수[r.get('칸ID')] = 개수.get(r.get('칸ID'), 0) + 1
+        중복 = {k for k, n in 개수.items() if k and n > 1}
+        # 같은 ID가 같은 일차에 또 나오면 일차를 붙여도 못 고친다: 그대로 둔다
+        if not 중복 or any(sum(1 for r in 칸들 if r.get('칸ID') == k and r.get('일차') == d) > 1 for k in 중복 for d in (1, 2)) \
+                or any(r.get('일차') not in (1, 2) for r in 칸들 if r.get('칸ID') in 중복):
+            return set()
+        차례 = {}
+        for r in 칸들:
+            if r['칸ID'] in 중복:
+                차례.setdefault(r['칸ID'], []).append(r['일차'])
+        쓴 = {}
+        for m in 식사들:   # 식사 항목은 같은 ID 칸과 나온 순서대로 짝짓는다
+            id = m.get('칸ID')
+            if id in 중복:
+                k = 쓴.get(id, 0)
+                if k < len(차례[id]):
+                    m['칸ID'] = _일차ID(id, 차례[id][k])
+                쓴[id] = k + 1
+        for r in 칸들:
+            if r['칸ID'] in 중복:
+                r['칸ID'] = _일차ID(r['칸ID'], r['일차'])
+        return 중복
+
+    for 키 in ('A', '안'):
+        if isinstance(새.get(키), dict):
+            안 = 새[키]
+            보정(칸목록(안), [m for m in (안.get('식사') or []) if isinstance(m, dict)])
+    b = 새.get('B')
+    if isinstance(b, dict) and isinstance(새.get('A'), dict):
+        a원본 = [r.get('칸ID') for r in 칸목록(주문서['A'])]
+        a중복 = {k for k in a원본 if k and a원본.count(k) > 1}
+        for r in b.get('바꾼칸') or []:   # 바꾼 칸은 일차가 적혀 있어 어느 칸인지 알 수 있다
+            if isinstance(r, dict) and r.get('칸ID') in a중복 and r.get('일차') in (1, 2):
+                r['칸ID'] = _일차ID(r['칸ID'], r['일차'])
+    return 새
+
+
 def 조립(주문서, 후보표, 입력, 이전코스=None, 유지시간칸=None):
     """주문서 → (완성 코스, 문제목록). 문제가 있으면 (None, 문제): 추측해서 고치지 않는다."""
+    주문서 = 칸ID_보정(주문서)
     if '바꿀칸ID' in (입력.get('부분수정') or {}) and isinstance(주문서, dict):
         응답 = 주문서.get('안')
         if isinstance(응답, dict) and isinstance(응답.get('수정불가이유'), str) and 응답['수정불가이유'].strip():

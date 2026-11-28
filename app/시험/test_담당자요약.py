@@ -27,6 +27,14 @@ class 담당자요약시험(unittest.TestCase):
         self.assertTrue(any(x.get('장소명')=='등록식당' for x in rows))
         self.assertTrue(any(x.get('이름')=='가게A' for x in rows))
 
+    def test_식사칸에만_제안후보를_넣고_불가후보는_뺀다(self):
+        ok={'이름':'등록식당','장소명':'등록식당','좌표':None,'반영가능':True,'분류':'바로','치킨':False,'구역형':False,'권역거리m':100}
+        no={**ok,'이름':'불가식당','장소명':'불가식당','반영가능':False,'분류':'불가'}
+        with mock.patch('app.단계3_코스검토.식사선택.후보목록',return_value=[ok,no]):
+            일정=담당자요약.코스요약(course(),{})['일정']
+        self.assertEqual(일정[1]['제안후보'],['등록식당'])
+        self.assertNotIn('제안후보',일정[0])
+
     def test_전체주소형_옛후보와_새후보의_중복표시를_막는다(self):
         c=course();c['식사목록'][0]['추천후보']=['대구광역시 중구 가게A']
         known={'이름':'가게A','장소명':'가게A','좌표':None,'반영가능':False}

@@ -698,3 +698,10 @@ body>header .app-actions #historyBtn{display:inline-flex;align-items:center;gap:
 .personal-meal-result h4{margin:0 0 10px}
 .personal-meal-result strong{font-size:1.08em}
 .candidate-choice[aria-pressed="true"]{border:2px solid #28796e;background:#eef8f3}
+.meal-bundle h4{margin:14px 0 4px;font-size:.95em}
+.meal-zone label em{font-style:normal;font-size:.8em;color:#946e3e;background:#f5e6ce;border-radius:4px;padding:0 4px}
+.meal-blocked{margin:12px 0;color:var(--muted,#666)}
+.meal-tourist-preview{margin-top:18px;padding-top:10px;border-top:1px dashed #c9b99c}
+.meal-tourist-preview h3 small{font-weight:400;color:#946e3e}
+.pin.candidate.chicken path{fill:#ffe2c2;stroke:#c2551f}.pin.candidate.chicken .lbl{fill:#8a3a12}
+.candidate.chicken{border-color:#c2551f}
